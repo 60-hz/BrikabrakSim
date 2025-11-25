@@ -422,11 +422,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.9927717681623932
+                    "value": -0.9111244658119658
                 },
                 {
                     "name": "y",
-                    "value": 0.7199255776066351
+                    "value": 0.8031046356635072
                 },
                 {
                     "name": "click right",
@@ -449,11 +449,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -114
+                    "value": -49
                 },
                 {
                     "name": "Movement Y",
-                    "value": 19
+                    "value": -1
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -4392,7 +4392,7 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": 1.069640040397644
+                    "value": 0.3114300072193146
                 },
                 {
                     "name": "World Position Y",
@@ -7364,11 +7364,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": 1.06964
+                    "value": 0.31143
                 },
                 {
                     "name": "Default",
-                    "value": 1.06964
+                    "value": 0.31143
                 }
             ],
             "portsOut": [
@@ -7461,7 +7461,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.03964
+                    "value": -0.32982
                 },
                 {
                     "name": "Default",
@@ -7517,7 +7517,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": 1.00964
+                    "value": 1.19643
                 },
                 {
                     "name": "Default",
@@ -9670,8 +9670,8 @@
         }
     ],
     "export": {
-        "time": "2025-11-25 21:33",
+        "time": "2025-11-25 21:37",
         "service": "html",
-        "exportNumber": 6
+        "exportNumber": 7
     }
 }
