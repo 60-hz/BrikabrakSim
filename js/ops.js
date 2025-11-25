@@ -10782,6 +10782,424 @@ CABLES.OPS["4dd3cc55-eebc-4187-9d4e-2e053a956fab"]={f:Ops.Math.Compare.Equals,ob
 
 // **************************************************************
 // 
+// Ops.Array.StringToArray_v2
+// 
+// **************************************************************
+
+Ops.Array.StringToArray_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const text = op.inStringEditor("text", "1,2,3"),
+    separator = op.inString("separator", ","),
+    toNumber = op.inValueBool("Numbers", true),
+    trim = op.inValueBool("Trim", true),
+    splitNewLines = op.inBool("Split Lines", false),
+    arr = op.outArray("array"),
+    parsed = op.outTrigger("Parsed"),
+    len = op.outNumber("length");
+
+text.setUiAttribs({ "ignoreBigPort": true });
+
+text.onChange = separator.onChange = toNumber.onChange = trim.onChange = parse;
+
+splitNewLines.onChange = () =>
+{
+    separator.setUiAttribs({ "greyout": splitNewLines.get() });
+    parse();
+};
+
+parse();
+
+function parse()
+{
+    if (!text.get())
+    {
+        arr.set(null);
+        arr.set([]);
+        len.set(0);
+        return;
+    }
+
+    let textInput = text.get();
+    if (trim.get() && textInput)
+    {
+        textInput = textInput.replace(/^\s+|\s+$/g, "");
+        textInput = textInput.trim();
+    }
+
+    let r;
+    let sep = separator.get();
+    if (separator.get() === "\\n") sep = "\n";
+    if (splitNewLines.get()) r = textInput.split("\n");
+    else r = textInput.split(sep);
+
+    if (r[r.length - 1] === "") r.length -= 1;
+
+    len.set(r.length);
+
+    if (trim.get())
+    {
+        for (let i = 0; i < r.length; i++)
+        {
+            r[i] = r[i].replace(/^\s+|\s+$/g, "");
+            r[i] = r[i].trim();
+        }
+    }
+
+    op.setUiError("notnum", null);
+    if (toNumber.get())
+    {
+        let hasStrings = false;
+        for (let i = 0; i < r.length; i++)
+        {
+            r[i] = Number(r[i]);
+            if (!CABLES.isNumeric(r[i]))
+            {
+                hasStrings = true;
+            }
+        }
+        if (hasStrings)
+        {
+            op.setUiError("notnum", "Parse Error / Not all values numerical!", 1);
+        }
+    }
+
+    arr.setRef(r);
+    parsed.trigger();
+}
+
+}
+};
+
+CABLES.OPS["c974de41-4ce4-4432-b94d-724741109c71"]={f:Ops.Array.StringToArray_v2,objName:"Ops.Array.StringToArray_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Trigger.TriggerSend
+// 
+// **************************************************************
+
+Ops.Trigger.TriggerSend= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    trigger = op.inTriggerButton("Trigger"),
+    next = op.outTrigger("Next");
+
+op.varName = op.inValueSelect("Named Trigger", [], "", true);
+
+op.varName.onChange = updateName;
+
+trigger.onTriggered = doTrigger;
+
+op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
+
+updateVarNamesDropdown();
+
+op.varName.setUiAttribs({ "_triggerSelect": true });
+
+function updateVarNamesDropdown()
+{
+    if (CABLES.UI)
+    {
+        let varnames = [];
+        const vars = op.patch.namedTriggers;
+        varnames.push("+ create new one");
+        for (const i in vars) varnames.push(i);
+        varnames = varnames.sort();
+        op.varName.uiAttribs.values = varnames;
+    }
+}
+
+function updateName()
+{
+    if (CABLES.UI)
+    {
+        if (op.varName.get() == "+ create new one")
+        {
+            new CABLES.UI.ModalDialog({
+                "prompt": true,
+                "title": "New Trigger",
+                "text": "Enter a name for the new trigger",
+                "promptValue": "",
+                "promptOk": (str) =>
+                {
+                    op.varName.set(str);
+                    op.patch.namedTriggers[str] = op.patch.namedTriggers[str] || [];
+                    updateVarNamesDropdown();
+                }
+            });
+            return;
+        }
+
+        op.refreshParams();
+    }
+
+    if (!op.patch.namedTriggers[op.varName.get()])
+    {
+        op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
+        op.patch.emitEvent("namedTriggersChanged");
+    }
+
+    op.setTitle(">" + op.varName.get());
+
+    op.refreshParams();
+    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
+}
+
+function doTrigger()
+{
+    const arr = op.patch.namedTriggers[op.varName.get()];
+    // fire an event even if noone is receiving this trigger
+    // this way TriggerReceiveFilter can still handle it
+    op.patch.emitEvent("namedTriggerSent", op.varName.get());
+
+    if (!arr)
+    {
+        op.setUiError("unknowntrigger", "unknown trigger");
+        return;
+    }
+    else op.setUiError("unknowntrigger", null);
+
+    for (let i = 0; i < arr.length; i++)
+    {
+        arr[i]();
+    }
+
+    next.trigger();
+}
+
+}
+};
+
+CABLES.OPS["ce1eaf2b-943b-4dc0-ab5e-ee11b63c9ed0"]={f:Ops.Trigger.TriggerSend,objName:"Ops.Trigger.TriggerSend"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.SideBarSwitch
+// 
+// **************************************************************
+
+Ops.Sidebar.SideBarSwitch= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const parentPort = op.inObject("link"),
+    inArr = op.inArray("Names"),
+    inStyle = op.inSwitch("Style", ["Tabs", "Switch"], "Switch"),
+    labelPort = op.inString("Text", "Switch"),
+
+    inInput = op.inInt("Input", 0),
+
+    setDefaultValueButtonPort = op.inTriggerButton("Set Default"),
+    inGreyOut = op.inBool("Grey Out", false),
+    inDefault = op.inValue("Default", 0),
+
+    siblingsPort = op.outObject("childs"),
+    outIndex = op.outNumber("Index", -1),
+    outStr = op.outString("String");
+
+let elTabActive = null;
+const el = document.createElement("div");
+el.classList.add("sidebar__item");
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+inDefault.setUiAttribs({ "greyout": true });
+
+const label = document.createElement("div");
+label.classList.add("sidebar__item-label");
+const labelText = document.createTextNode(labelPort.get());
+label.appendChild(labelText);
+el.appendChild(label);
+
+const switchGroup = document.createElement("div");
+el.appendChild(switchGroup);
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+el.appendChild(greyOut);
+greyOut.style.display = "none";
+
+parentPort.onChange = onParentChanged;
+op.onDelete = onDelete;
+
+op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
+op.setPortGroup("Default Item", [inDefault, setDefaultValueButtonPort]);
+const tabEles = [];
+
+inArr.onChange = rebuildHtml;
+inStyle.onChange = updateStyle;
+updateStyle();
+
+labelPort.onChange = () =>
+{
+    label.innerHTML = labelPort.get();
+};
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+function rebuildHtml()
+{
+    tabEles.length = 0;
+    switchGroup.innerHTML = "";
+    elTabActive = null;
+
+    const arr = inArr.get();
+    if (!arr) return;
+
+    for (let i = 0; i < arr.length; i++)
+    {
+        const el = addTab(String(arr[i]));
+        if (i == inDefault.get())setActiveTab(el);
+    }
+}
+
+setDefaultValueButtonPort.onTriggered = () =>
+{
+    inDefault.set(outIndex.get());
+    op.refreshParams();
+};
+
+function updateStyle()
+{
+    if (inStyle.get() == "Tabs")
+    {
+        el.classList.add("sidebar_tabs");
+        switchGroup.classList.remove("sidebar_switchs");
+        label.style.display = "none";
+    }
+    else
+    {
+        el.classList.remove("sidebar_tabs");
+        switchGroup.classList.add("sidebar_switchs");
+        label.style.display = "inline-block";
+    }
+
+    labelPort.setUiAttribs({ "greyout": inStyle.get() == "Tabs" });
+
+    rebuildHtml();
+}
+
+function addTab(title)
+{
+    const tabEle = document.createElement("div");
+
+    if (inStyle.get() == "Tabs") tabEle.classList.add("sidebar_tab");
+    else tabEle.classList.add("sidebar_switch");
+
+    tabEle.id = "tabEle" + tabEles.length;
+    tabEle.innerHTML = title;
+    tabEle.dataset.index = tabEles.length;
+    tabEle.dataset.txt = title;
+
+    tabEle.addEventListener("click", tabClicked);
+
+    switchGroup.appendChild(tabEle);
+
+    tabEles.push(tabEle);
+
+    return tabEle;
+}
+
+inInput.onChange = () =>
+{
+    if (tabEles.length > inInput.get())
+        tabClicked({ "target": tabEles[inInput.get()] });
+    // setActiveTab(tabEles[inInput.get()]);
+};
+
+function setActiveTab(el)
+{
+    if (el)
+    {
+        elTabActive = el;
+        outIndex.set(parseInt(el.dataset.index));
+        outStr.set(el.dataset.txt);
+
+        if (inStyle.get() == "Tabs") el.classList.add("sidebar_tab_active");
+        else el.classList.add("sidebar_switch_active");
+    }
+}
+
+function tabClicked(e)
+{
+    if (elTabActive)
+        if (inStyle.get() == "Tabs") elTabActive.classList.remove("sidebar_tab_active");
+        else elTabActive.classList.remove("sidebar_switch_active");
+    setActiveTab(e.target);
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    const parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else
+    {
+        if (el.parentElement)
+            el.parentElement.removeChild(el);
+    }
+}
+
+function showElement(el)
+{
+    if (!el) return;
+    el.style.display = "block";
+}
+
+function hideElement(el)
+{
+    if (!el) return;
+    el.style.display = "none";
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["ebc8c92c-5fa6-4598-a9c6-b8e12f22f7c2"]={f:Ops.Sidebar.SideBarSwitch,objName:"Ops.Sidebar.SideBarSwitch"};
+
+
+
+
+// **************************************************************
+// 
 // Ops.Sidebar.Sidebar
 // 
 // **************************************************************
@@ -11119,424 +11537,6 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["5a681c35-78ce-4cb3-9858-bc79c34c6819"]={f:Ops.Sidebar.Sidebar,objName:"Ops.Sidebar.Sidebar"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.SideBarSwitch
-// 
-// **************************************************************
-
-Ops.Sidebar.SideBarSwitch= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const parentPort = op.inObject("link"),
-    inArr = op.inArray("Names"),
-    inStyle = op.inSwitch("Style", ["Tabs", "Switch"], "Switch"),
-    labelPort = op.inString("Text", "Switch"),
-
-    inInput = op.inInt("Input", 0),
-
-    setDefaultValueButtonPort = op.inTriggerButton("Set Default"),
-    inGreyOut = op.inBool("Grey Out", false),
-    inDefault = op.inValue("Default", 0),
-
-    siblingsPort = op.outObject("childs"),
-    outIndex = op.outNumber("Index", -1),
-    outStr = op.outString("String");
-
-let elTabActive = null;
-const el = document.createElement("div");
-el.classList.add("sidebar__item");
-el.dataset.op = op.id;
-el.classList.add("cablesEle");
-inDefault.setUiAttribs({ "greyout": true });
-
-const label = document.createElement("div");
-label.classList.add("sidebar__item-label");
-const labelText = document.createTextNode(labelPort.get());
-label.appendChild(labelText);
-el.appendChild(label);
-
-const switchGroup = document.createElement("div");
-el.appendChild(switchGroup);
-
-const greyOut = document.createElement("div");
-greyOut.classList.add("sidebar__greyout");
-el.appendChild(greyOut);
-greyOut.style.display = "none";
-
-parentPort.onChange = onParentChanged;
-op.onDelete = onDelete;
-
-op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
-op.setPortGroup("Default Item", [inDefault, setDefaultValueButtonPort]);
-const tabEles = [];
-
-inArr.onChange = rebuildHtml;
-inStyle.onChange = updateStyle;
-updateStyle();
-
-labelPort.onChange = () =>
-{
-    label.innerHTML = labelPort.get();
-};
-
-inGreyOut.onChange = function ()
-{
-    greyOut.style.display = inGreyOut.get() ? "block" : "none";
-};
-
-function rebuildHtml()
-{
-    tabEles.length = 0;
-    switchGroup.innerHTML = "";
-    elTabActive = null;
-
-    const arr = inArr.get();
-    if (!arr) return;
-
-    for (let i = 0; i < arr.length; i++)
-    {
-        const el = addTab(String(arr[i]));
-        if (i == inDefault.get())setActiveTab(el);
-    }
-}
-
-setDefaultValueButtonPort.onTriggered = () =>
-{
-    inDefault.set(outIndex.get());
-    op.refreshParams();
-};
-
-function updateStyle()
-{
-    if (inStyle.get() == "Tabs")
-    {
-        el.classList.add("sidebar_tabs");
-        switchGroup.classList.remove("sidebar_switchs");
-        label.style.display = "none";
-    }
-    else
-    {
-        el.classList.remove("sidebar_tabs");
-        switchGroup.classList.add("sidebar_switchs");
-        label.style.display = "inline-block";
-    }
-
-    labelPort.setUiAttribs({ "greyout": inStyle.get() == "Tabs" });
-
-    rebuildHtml();
-}
-
-function addTab(title)
-{
-    const tabEle = document.createElement("div");
-
-    if (inStyle.get() == "Tabs") tabEle.classList.add("sidebar_tab");
-    else tabEle.classList.add("sidebar_switch");
-
-    tabEle.id = "tabEle" + tabEles.length;
-    tabEle.innerHTML = title;
-    tabEle.dataset.index = tabEles.length;
-    tabEle.dataset.txt = title;
-
-    tabEle.addEventListener("click", tabClicked);
-
-    switchGroup.appendChild(tabEle);
-
-    tabEles.push(tabEle);
-
-    return tabEle;
-}
-
-inInput.onChange = () =>
-{
-    if (tabEles.length > inInput.get())
-        tabClicked({ "target": tabEles[inInput.get()] });
-    // setActiveTab(tabEles[inInput.get()]);
-};
-
-function setActiveTab(el)
-{
-    if (el)
-    {
-        elTabActive = el;
-        outIndex.set(parseInt(el.dataset.index));
-        outStr.set(el.dataset.txt);
-
-        if (inStyle.get() == "Tabs") el.classList.add("sidebar_tab_active");
-        else el.classList.add("sidebar_switch_active");
-    }
-}
-
-function tabClicked(e)
-{
-    if (elTabActive)
-        if (inStyle.get() == "Tabs") elTabActive.classList.remove("sidebar_tab_active");
-        else elTabActive.classList.remove("sidebar_switch_active");
-    setActiveTab(e.target);
-}
-
-function onParentChanged()
-{
-    siblingsPort.set(null);
-    const parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        siblingsPort.set(parent);
-    }
-    else
-    {
-        if (el.parentElement)
-            el.parentElement.removeChild(el);
-    }
-}
-
-function showElement(el)
-{
-    if (!el) return;
-    el.style.display = "block";
-}
-
-function hideElement(el)
-{
-    if (!el) return;
-    el.style.display = "none";
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["ebc8c92c-5fa6-4598-a9c6-b8e12f22f7c2"]={f:Ops.Sidebar.SideBarSwitch,objName:"Ops.Sidebar.SideBarSwitch"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Array.StringToArray_v2
-// 
-// **************************************************************
-
-Ops.Array.StringToArray_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const text = op.inStringEditor("text", "1,2,3"),
-    separator = op.inString("separator", ","),
-    toNumber = op.inValueBool("Numbers", true),
-    trim = op.inValueBool("Trim", true),
-    splitNewLines = op.inBool("Split Lines", false),
-    arr = op.outArray("array"),
-    parsed = op.outTrigger("Parsed"),
-    len = op.outNumber("length");
-
-text.setUiAttribs({ "ignoreBigPort": true });
-
-text.onChange = separator.onChange = toNumber.onChange = trim.onChange = parse;
-
-splitNewLines.onChange = () =>
-{
-    separator.setUiAttribs({ "greyout": splitNewLines.get() });
-    parse();
-};
-
-parse();
-
-function parse()
-{
-    if (!text.get())
-    {
-        arr.set(null);
-        arr.set([]);
-        len.set(0);
-        return;
-    }
-
-    let textInput = text.get();
-    if (trim.get() && textInput)
-    {
-        textInput = textInput.replace(/^\s+|\s+$/g, "");
-        textInput = textInput.trim();
-    }
-
-    let r;
-    let sep = separator.get();
-    if (separator.get() === "\\n") sep = "\n";
-    if (splitNewLines.get()) r = textInput.split("\n");
-    else r = textInput.split(sep);
-
-    if (r[r.length - 1] === "") r.length -= 1;
-
-    len.set(r.length);
-
-    if (trim.get())
-    {
-        for (let i = 0; i < r.length; i++)
-        {
-            r[i] = r[i].replace(/^\s+|\s+$/g, "");
-            r[i] = r[i].trim();
-        }
-    }
-
-    op.setUiError("notnum", null);
-    if (toNumber.get())
-    {
-        let hasStrings = false;
-        for (let i = 0; i < r.length; i++)
-        {
-            r[i] = Number(r[i]);
-            if (!CABLES.isNumeric(r[i]))
-            {
-                hasStrings = true;
-            }
-        }
-        if (hasStrings)
-        {
-            op.setUiError("notnum", "Parse Error / Not all values numerical!", 1);
-        }
-    }
-
-    arr.setRef(r);
-    parsed.trigger();
-}
-
-}
-};
-
-CABLES.OPS["c974de41-4ce4-4432-b94d-724741109c71"]={f:Ops.Array.StringToArray_v2,objName:"Ops.Array.StringToArray_v2"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Trigger.TriggerSend
-// 
-// **************************************************************
-
-Ops.Trigger.TriggerSend= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    trigger = op.inTriggerButton("Trigger"),
-    next = op.outTrigger("Next");
-
-op.varName = op.inValueSelect("Named Trigger", [], "", true);
-
-op.varName.onChange = updateName;
-
-trigger.onTriggered = doTrigger;
-
-op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
-
-updateVarNamesDropdown();
-
-op.varName.setUiAttribs({ "_triggerSelect": true });
-
-function updateVarNamesDropdown()
-{
-    if (CABLES.UI)
-    {
-        let varnames = [];
-        const vars = op.patch.namedTriggers;
-        varnames.push("+ create new one");
-        for (const i in vars) varnames.push(i);
-        varnames = varnames.sort();
-        op.varName.uiAttribs.values = varnames;
-    }
-}
-
-function updateName()
-{
-    if (CABLES.UI)
-    {
-        if (op.varName.get() == "+ create new one")
-        {
-            new CABLES.UI.ModalDialog({
-                "prompt": true,
-                "title": "New Trigger",
-                "text": "Enter a name for the new trigger",
-                "promptValue": "",
-                "promptOk": (str) =>
-                {
-                    op.varName.set(str);
-                    op.patch.namedTriggers[str] = op.patch.namedTriggers[str] || [];
-                    updateVarNamesDropdown();
-                }
-            });
-            return;
-        }
-
-        op.refreshParams();
-    }
-
-    if (!op.patch.namedTriggers[op.varName.get()])
-    {
-        op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
-        op.patch.emitEvent("namedTriggersChanged");
-    }
-
-    op.setTitle(">" + op.varName.get());
-
-    op.refreshParams();
-    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
-}
-
-function doTrigger()
-{
-    const arr = op.patch.namedTriggers[op.varName.get()];
-    // fire an event even if noone is receiving this trigger
-    // this way TriggerReceiveFilter can still handle it
-    op.patch.emitEvent("namedTriggerSent", op.varName.get());
-
-    if (!arr)
-    {
-        op.setUiError("unknowntrigger", "unknown trigger");
-        return;
-    }
-    else op.setUiError("unknowntrigger", null);
-
-    for (let i = 0; i < arr.length; i++)
-    {
-        arr[i]();
-    }
-
-    next.trigger();
-}
-
-}
-};
-
-CABLES.OPS["ce1eaf2b-943b-4dc0-ab5e-ee11b63c9ed0"]={f:Ops.Trigger.TriggerSend,objName:"Ops.Trigger.TriggerSend"};
 
 
 

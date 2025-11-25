@@ -365,7 +365,7 @@
                 },
                 {
                     "name": "Rot X",
-                    "value": 90
+                    "value": 89.99999999999993
                 },
                 {
                     "name": "Rot Y",
@@ -422,11 +422,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.9406216613247863
+                    "value": -0.9927717681623932
                 },
                 {
                     "name": "y",
-                    "value": -0.7197959863744076
+                    "value": 0.7199255776066351
                 },
                 {
                     "name": "click right",
@@ -449,11 +449,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -95
+                    "value": -114
                 },
                 {
                     "name": "Movement Y",
-                    "value": -40
+                    "value": 19
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -5857,15 +5857,15 @@
                 },
                 {
                     "name": "Input Red",
-                    "value": 1
+                    "value": 0.5647058823529412
                 },
                 {
                     "name": "Input Green",
-                    "value": 1
+                    "value": 0.5568627450980392
                 },
                 {
                     "name": "Input Blue",
-                    "value": 1
+                    "value": 0.5568627450980392
                 },
                 {
                     "name": "Input Opacity",
@@ -5873,7 +5873,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": "#ffffff"
+                    "value": "#908e8e"
                 },
                 {
                     "name": "Show Opacity",
@@ -5920,7 +5920,7 @@
                 },
                 {
                     "name": "Hex",
-                    "value": "#ffffff"
+                    "value": "#908e8e"
                 }
             ],
             "objName": "Ops.Sidebar.ColorPicker_v3"
@@ -6422,145 +6422,6 @@
             "objName": "Ops.Math.Compare.Equals"
         },
         {
-            "id": "q8x65jc6b",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "Visible",
-                    "value": 1
-                },
-                {
-                    "name": "Opacity",
-                    "value": 0.8
-                },
-                {
-                    "name": "Default Minimized",
-                    "value": 0
-                },
-                {
-                    "name": "Minimized Opacity",
-                    "value": 0.5
-                },
-                {
-                    "name": "Show undo button",
-                    "value": 0
-                },
-                {
-                    "name": "Show Minimize",
-                    "value": 0
-                },
-                {
-                    "name": "Title",
-                    "value": "Lumières"
-                },
-                {
-                    "name": "Side",
-                    "value": 0
-                },
-                {
-                    "name": "Default CSS",
-                    "value": 1
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "childs",
-                    "title": "Children",
-                    "links": [
-                        {
-                            "portIn": "link",
-                            "portOut": "childs",
-                            "objIn": "t0a3g8nli",
-                            "objOut": "q8x65jc6b"
-                        }
-                    ]
-                },
-                {
-                    "name": "Opfened",
-                    "value": true,
-                    "title": "Opened"
-                }
-            ],
-            "objName": "Ops.Sidebar.Sidebar"
-        },
-        {
-            "id": "t0a3g8nli",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "Style index",
-                    "value": 0
-                },
-                {
-                    "name": "Style",
-                    "value": "Tabs"
-                },
-                {
-                    "name": "Text",
-                    "value": "Switch"
-                },
-                {
-                    "name": "Input",
-                    "value": 0
-                },
-                {
-                    "name": "Grey Out",
-                    "value": 0
-                },
-                {
-                    "name": "Default",
-                    "value": 0
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "childs",
-                    "links": [
-                        {
-                            "portIn": "link",
-                            "portOut": "childs",
-                            "objIn": "wsveh3wuw",
-                            "objOut": "t0a3g8nli"
-                        },
-                        {
-                            "portIn": "link",
-                            "portOut": "childs",
-                            "objIn": "vzkg21zbu",
-                            "objOut": "t0a3g8nli"
-                        }
-                    ]
-                },
-                {
-                    "name": "Index",
-                    "links": [
-                        {
-                            "portIn": "number1",
-                            "portOut": "Index",
-                            "objIn": "k242ku34n",
-                            "objOut": "t0a3g8nli"
-                        },
-                        {
-                            "portIn": "number1",
-                            "portOut": "Index",
-                            "objIn": "s4b1cpcdd",
-                            "objOut": "t0a3g8nli"
-                        },
-                        {
-                            "portIn": "number1",
-                            "portOut": "Index",
-                            "objIn": "n6lqqs8ae",
-                            "objOut": "t0a3g8nli"
-                        }
-                    ]
-                },
-                {
-                    "name": "String",
-                    "value": "1"
-                }
-            ],
-            "objName": "Ops.Sidebar.SideBarSwitch"
-        },
-        {
             "id": "cfl5998dm",
             "uiAttribs": {},
             "portsIn": [
@@ -6825,6 +6686,17 @@
                 }
             ],
             "portsOut": [
+                {
+                    "name": "childs",
+                    "links": [
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "5hpbp2se3",
+                            "objOut": "upfryoj06"
+                        }
+                    ]
+                },
                 {
                     "name": "Pressed Trigger",
                     "links": [
@@ -9607,11 +9479,199 @@
                 }
             ],
             "objName": "Ops.Gl.Texture_v2"
+        },
+        {
+            "id": "5hpbp2se3",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Text",
+                    "value": "Slider"
+                },
+                {
+                    "name": "Min",
+                    "value": 0
+                },
+                {
+                    "name": "Max",
+                    "value": 1
+                },
+                {
+                    "name": "Step",
+                    "value": 0.00001
+                },
+                {
+                    "name": "Suffix",
+                    "value": ""
+                },
+                {
+                    "name": "Grey Out",
+                    "value": 0
+                },
+                {
+                    "name": "Visible",
+                    "value": 1
+                },
+                {
+                    "name": "Input",
+                    "value": 0.5
+                },
+                {
+                    "name": "Default",
+                    "value": 0.5
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Result",
+                    "value": 0.5
+                }
+            ],
+            "objName": "Ops.Sidebar.Slider_v3"
+        },
+        {
+            "id": "q8x65jc6b",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Visible",
+                    "value": 1
+                },
+                {
+                    "name": "Opacity",
+                    "value": 0.8
+                },
+                {
+                    "name": "Default Minimized",
+                    "value": 0
+                },
+                {
+                    "name": "Minimized Opacity",
+                    "value": 0.5
+                },
+                {
+                    "name": "Show undo button",
+                    "value": 0
+                },
+                {
+                    "name": "Show Minimize",
+                    "value": 0
+                },
+                {
+                    "name": "Title",
+                    "value": "Lumières"
+                },
+                {
+                    "name": "Side",
+                    "value": 0
+                },
+                {
+                    "name": "Default CSS",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "childs",
+                    "title": "Children",
+                    "links": [
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "t0a3g8nli",
+                            "objOut": "q8x65jc6b"
+                        }
+                    ]
+                },
+                {
+                    "name": "Opfened",
+                    "value": true,
+                    "title": "Opened"
+                }
+            ],
+            "objName": "Ops.Sidebar.Sidebar"
+        },
+        {
+            "id": "t0a3g8nli",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Style index",
+                    "value": 0
+                },
+                {
+                    "name": "Style",
+                    "value": "Tabs"
+                },
+                {
+                    "name": "Text",
+                    "value": "Switch"
+                },
+                {
+                    "name": "Input",
+                    "value": 0
+                },
+                {
+                    "name": "Grey Out",
+                    "value": 0
+                },
+                {
+                    "name": "Default",
+                    "value": 0
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "childs",
+                    "links": [
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "wsveh3wuw",
+                            "objOut": "t0a3g8nli"
+                        },
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "vzkg21zbu",
+                            "objOut": "t0a3g8nli"
+                        }
+                    ]
+                },
+                {
+                    "name": "Index",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Index",
+                            "objIn": "k242ku34n",
+                            "objOut": "t0a3g8nli"
+                        },
+                        {
+                            "portIn": "number1",
+                            "portOut": "Index",
+                            "objIn": "s4b1cpcdd",
+                            "objOut": "t0a3g8nli"
+                        },
+                        {
+                            "portIn": "number1",
+                            "portOut": "Index",
+                            "objIn": "n6lqqs8ae",
+                            "objOut": "t0a3g8nli"
+                        }
+                    ]
+                },
+                {
+                    "name": "String",
+                    "value": "Globale"
+                }
+            ],
+            "objName": "Ops.Sidebar.SideBarSwitch"
         }
     ],
     "export": {
-        "time": "2025-11-25 20:53",
+        "time": "2025-11-25 21:33",
         "service": "html",
-        "exportNumber": 5
+        "exportNumber": 6
     }
 }
