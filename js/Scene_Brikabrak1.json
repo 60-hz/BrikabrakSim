@@ -13,7 +13,7 @@
             "portsOut": [
                 {
                     "name": "Count",
-                    "value": 1017
+                    "value": 5617
                 }
             ],
             "objName": "Ops.Ui.VizTrigger"
@@ -61,11 +61,11 @@
                 },
                 {
                     "name": "width",
-                    "value": 1087
+                    "value": 1404
                 },
                 {
                     "name": "height",
-                    "value": 536
+                    "value": 844
                 },
                 {
                     "name": "Pixel Density",
@@ -365,11 +365,11 @@
                 },
                 {
                     "name": "Rot X",
-                    "value": 90.00000000000006
+                    "value": 90
                 },
                 {
                     "name": "Rot Y",
-                    "value": 90.04359375000001
+                    "value": 90
                 }
             ],
             "objName": "Ops.Graphics.OrbitControls_v3"
@@ -422,11 +422,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.8399407773689053
+                    "value": -0.9406216613247863
                 },
                 {
                     "name": "y",
-                    "value": 0.013613572761194126
+                    "value": -0.7197959863744076
                 },
                 {
                     "name": "click right",
@@ -449,11 +449,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -145
+                    "value": -95
                 },
                 {
                     "name": "Movement Y",
-                    "value": 18
+                    "value": -40
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -1040,11 +1040,11 @@
                 },
                 {
                     "name": "Size Width",
-                    "value": 1087
+                    "value": 1404
                 },
                 {
                     "name": "Size Height",
-                    "value": 536
+                    "value": 844
                 }
             ],
             "objName": "Ops.Gl.PixelProjection_v3"
@@ -1874,7 +1874,7 @@
             "portsOut": [
                 {
                     "name": "Output",
-                    "multiPortNum": 7
+                    "multiPortNum": 8
                 },
                 {
                     "name": "Output_0",
@@ -1957,6 +1957,7 @@
                 },
                 {
                     "name": "Output_7",
+                    "title": "add port",
                     "links": [
                         {
                             "portIn": "render",
@@ -1975,15 +1976,36 @@
             "portsOut": [
                 {
                     "name": "OutR",
-                    "value": 0
+                    "links": [
+                        {
+                            "portIn": "R",
+                            "portOut": "OutR",
+                            "objIn": "qfjmyoszt",
+                            "objOut": "epep5zebp"
+                        }
+                    ]
                 },
                 {
                     "name": "OutG",
-                    "value": 0
+                    "links": [
+                        {
+                            "portIn": "G",
+                            "portOut": "OutG",
+                            "objIn": "qfjmyoszt",
+                            "objOut": "epep5zebp"
+                        }
+                    ]
                 },
                 {
                     "name": "OutB",
-                    "value": 0
+                    "links": [
+                        {
+                            "portIn": "B",
+                            "portOut": "OutB",
+                            "objIn": "qfjmyoszt",
+                            "objOut": "epep5zebp"
+                        }
+                    ]
                 }
             ],
             "objName": "Ops.Local.RGBWtoRGB"
@@ -3140,221 +3162,6 @@
             "objName": "Ops.Graphics.Transform"
         },
         {
-            "id": "6vvc5twfs",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "File",
-                    "value": "assets/pal2_BaseColor.jpg",
-                    "display": "file"
-                },
-                {
-                    "name": "Filter index",
-                    "value": 2
-                },
-                {
-                    "name": "Filter",
-                    "value": "mipmap"
-                },
-                {
-                    "name": "Wrap index",
-                    "value": 0
-                },
-                {
-                    "name": "Wrap",
-                    "value": "repeat"
-                },
-                {
-                    "name": "Anisotropic index",
-                    "value": 0
-                },
-                {
-                    "name": "Anisotropic",
-                    "value": "0"
-                },
-                {
-                    "name": "Data Format index",
-                    "value": 3
-                },
-                {
-                    "name": "Data Format",
-                    "value": "RGBA"
-                },
-                {
-                    "name": "Flip",
-                    "value": 0
-                },
-                {
-                    "name": "Pre Multiplied Alpha",
-                    "value": 0
-                },
-                {
-                    "name": "Active",
-                    "value": 1
-                },
-                {
-                    "name": "Save Memory",
-                    "value": 1
-                },
-                {
-                    "name": "Add Cachebuster",
-                    "value": 0
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "Texture",
-                    "links": [
-                        {
-                            "portIn": "Albedo",
-                            "portOut": "Texture",
-                            "objIn": "tdxswy2tn",
-                            "objOut": "6vvc5twfs"
-                        }
-                    ]
-                },
-                {
-                    "name": "Width",
-                    "value": 4096
-                },
-                {
-                    "name": "Height",
-                    "value": 4096
-                },
-                {
-                    "name": "Aspect Ratio",
-                    "value": 1
-                },
-                {
-                    "name": "Loaded",
-                    "value": 1
-                },
-                {
-                    "name": "Loading",
-                    "value": 0
-                }
-            ],
-            "objName": "Ops.Gl.Texture_v2"
-        },
-        {
-            "id": "tr9ktw1u1",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "data",
-                    "value": ""
-                },
-                {
-                    "name": "glb File",
-                    "value": "assets/flowerred pal 2.glb",
-                    "display": "file"
-                },
-                {
-                    "name": "Draw",
-                    "value": 1
-                },
-                {
-                    "name": "Camera index",
-                    "value": 0
-                },
-                {
-                    "name": "Camera",
-                    "value": "None"
-                },
-                {
-                    "name": "Animation",
-                    "value": ""
-                },
-                {
-                    "name": "Center index",
-                    "value": 1
-                },
-                {
-                    "name": "Center",
-                    "value": "XYZ"
-                },
-                {
-                    "name": "Rescale",
-                    "value": 1
-                },
-                {
-                    "name": "Rescale Size",
-                    "value": 2.5
-                },
-                {
-                    "name": "Time",
-                    "value": 0
-                },
-                {
-                    "name": "Sync to timeline",
-                    "value": 0
-                },
-                {
-                    "name": "Loop",
-                    "value": 1
-                },
-                {
-                    "name": "Normals Format index",
-                    "value": 0
-                },
-                {
-                    "name": "Normals Format",
-                    "value": "XYZ"
-                },
-                {
-                    "name": "Vertices Format index",
-                    "value": 0
-                },
-                {
-                    "name": "Vertices Format",
-                    "value": "XYZ"
-                },
-                {
-                    "name": "Calc Normals index",
-                    "value": 0
-                },
-                {
-                    "name": "Calc Normals",
-                    "value": "Auto"
-                },
-                {
-                    "name": "Hide Nodes",
-                    "value": 0
-                },
-                {
-                    "name": "Use Material Properties",
-                    "value": 0
-                },
-                {
-                    "name": "Active",
-                    "value": 1
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "Generator",
-                    "value": "Khronos glTF Blender I/O v5.0.21"
-                },
-                {
-                    "name": "GLTF Version",
-                    "value": 2
-                },
-                {
-                    "name": "Anim Length",
-                    "value": -1
-                },
-                {
-                    "name": "Anim Time",
-                    "value": 0
-                },
-                {
-                    "name": "Loading",
-                    "value": false
-                }
-            ],
-            "objName": "Ops.Gl.GLTF.GltfScene_v4"
-        },
-        {
             "id": "h59u7fss5",
             "uiAttribs": {},
             "portsIn": [
@@ -3833,7 +3640,7 @@
                 },
                 {
                     "name": "posY",
-                    "value": 0.61
+                    "value": 0.56
                 },
                 {
                     "name": "posZ",
@@ -4464,7 +4271,7 @@
                 },
                 {
                     "name": "Y",
-                    "value": 1
+                    "value": 1.21
                 },
                 {
                     "name": "Z",
@@ -4585,11 +4392,11 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": 1.1310700178146362
+                    "value": 1.069640040397644
                 },
                 {
                     "name": "World Position Y",
-                    "value": 1
+                    "value": 1.2100000381469727
                 },
                 {
                     "name": "World Position Z",
@@ -4677,7 +4484,7 @@
                 },
                 {
                     "name": "Y",
-                    "value": 1
+                    "value": 1.21
                 },
                 {
                     "name": "Z",
@@ -4798,11 +4605,11 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": -1.1360700130462646
+                    "value": -0.9485700130462646
                 },
                 {
                     "name": "World Position Y",
-                    "value": 1
+                    "value": 1.2100000381469727
                 },
                 {
                     "name": "World Position Z",
@@ -5100,7 +4907,7 @@
             "portsIn": [
                 {
                     "name": "File",
-                    "value": "assets/pal3_BaseColor.jpg",
+                    "value": "assets/pal2_BaseColor.jpg",
                     "display": "file"
                 },
                 {
@@ -5201,7 +5008,7 @@
                 },
                 {
                     "name": "glb File",
-                    "value": "assets/flowered pal 3.glb",
+                    "value": "assets/flowerred pal 2.glb",
                     "display": "file"
                 },
                 {
@@ -6050,15 +5857,15 @@
                 },
                 {
                     "name": "Input Red",
-                    "value": 0.5529411764705883
+                    "value": 1
                 },
                 {
                     "name": "Input Green",
-                    "value": 0.5529411764705883
+                    "value": 1
                 },
                 {
                     "name": "Input Blue",
-                    "value": 0.5529411764705883
+                    "value": 1
                 },
                 {
                     "name": "Input Opacity",
@@ -6066,7 +5873,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": "#8d8d8d"
+                    "value": "#ffffff"
                 },
                 {
                     "name": "Show Opacity",
@@ -6113,7 +5920,7 @@
                 },
                 {
                     "name": "Hex",
-                    "value": "#8d8d8d"
+                    "value": "#ffffff"
                 }
             ],
             "objName": "Ops.Sidebar.ColorPicker_v3"
@@ -6310,7 +6117,7 @@
                 },
                 {
                     "name": "Width",
-                    "value": 3.077218191964286
+                    "value": 2.8785923549107144
                 },
                 {
                     "name": "Font Available",
@@ -6702,7 +6509,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": 2
+                    "value": 0
                 }
             ],
             "portsOut": [
@@ -6899,7 +6706,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Couelur spot 1"
+                    "value": "Couleur spot 1"
                 },
                 {
                     "name": "Input Red",
@@ -7339,11 +7146,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -1.13607
+                    "value": -0.94857
                 },
                 {
                     "name": "Default",
-                    "value": -1.13607
+                    "value": -0.94857
                 }
             ],
             "portsOut": [
@@ -7618,11 +7425,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.03964
+                    "value": 0.01286
                 },
                 {
                     "name": "Default",
-                    "value": -0.03964
+                    "value": 0.01286
                 }
             ],
             "portsOut": [
@@ -7685,11 +7492,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": 1.13107
+                    "value": 1.06964
                 },
                 {
                     "name": "Default",
-                    "value": 1.00964
+                    "value": 1.06964
                 }
             ],
             "portsOut": [
@@ -8065,7 +7872,7 @@
                 },
                 {
                     "name": "Title",
-                    "value": "Placement"
+                    "value": "Placement elements"
                 },
                 {
                     "name": "Side",
@@ -9585,11 +9392,226 @@
                 }
             ],
             "objName": "Ops.Trigger.TriggerReceive"
+        },
+        {
+            "id": "tr9ktw1u1",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "data",
+                    "value": ""
+                },
+                {
+                    "name": "glb File",
+                    "value": "assets/flowerred pal 2.glb",
+                    "display": "file"
+                },
+                {
+                    "name": "Draw",
+                    "value": 1
+                },
+                {
+                    "name": "Camera index",
+                    "value": 0
+                },
+                {
+                    "name": "Camera",
+                    "value": "None"
+                },
+                {
+                    "name": "Animation",
+                    "value": ""
+                },
+                {
+                    "name": "Center index",
+                    "value": 1
+                },
+                {
+                    "name": "Center",
+                    "value": "XYZ"
+                },
+                {
+                    "name": "Rescale",
+                    "value": 1
+                },
+                {
+                    "name": "Rescale Size",
+                    "value": 2.5
+                },
+                {
+                    "name": "Time",
+                    "value": 0
+                },
+                {
+                    "name": "Sync to timeline",
+                    "value": 0
+                },
+                {
+                    "name": "Loop",
+                    "value": 1
+                },
+                {
+                    "name": "Normals Format index",
+                    "value": 0
+                },
+                {
+                    "name": "Normals Format",
+                    "value": "XYZ"
+                },
+                {
+                    "name": "Vertices Format index",
+                    "value": 0
+                },
+                {
+                    "name": "Vertices Format",
+                    "value": "XYZ"
+                },
+                {
+                    "name": "Calc Normals index",
+                    "value": 0
+                },
+                {
+                    "name": "Calc Normals",
+                    "value": "Auto"
+                },
+                {
+                    "name": "Hide Nodes",
+                    "value": 0
+                },
+                {
+                    "name": "Use Material Properties",
+                    "value": 0
+                },
+                {
+                    "name": "Active",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Generator",
+                    "value": "Khronos glTF Blender I/O v5.0.21"
+                },
+                {
+                    "name": "GLTF Version",
+                    "value": 2
+                },
+                {
+                    "name": "Anim Length",
+                    "value": -1
+                },
+                {
+                    "name": "Anim Time",
+                    "value": 0
+                },
+                {
+                    "name": "Loading",
+                    "value": false
+                }
+            ],
+            "objName": "Ops.Gl.GLTF.GltfScene_v4"
+        },
+        {
+            "id": "6vvc5twfs",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "File",
+                    "value": "assets/pal2_BaseColor.jpg",
+                    "display": "file"
+                },
+                {
+                    "name": "Filter index",
+                    "value": 2
+                },
+                {
+                    "name": "Filter",
+                    "value": "mipmap"
+                },
+                {
+                    "name": "Wrap index",
+                    "value": 0
+                },
+                {
+                    "name": "Wrap",
+                    "value": "repeat"
+                },
+                {
+                    "name": "Anisotropic index",
+                    "value": 0
+                },
+                {
+                    "name": "Anisotropic",
+                    "value": "0"
+                },
+                {
+                    "name": "Data Format index",
+                    "value": 3
+                },
+                {
+                    "name": "Data Format",
+                    "value": "RGBA"
+                },
+                {
+                    "name": "Flip",
+                    "value": 0
+                },
+                {
+                    "name": "Pre Multiplied Alpha",
+                    "value": 0
+                },
+                {
+                    "name": "Active",
+                    "value": 1
+                },
+                {
+                    "name": "Save Memory",
+                    "value": 1
+                },
+                {
+                    "name": "Add Cachebuster",
+                    "value": 0
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Texture",
+                    "links": [
+                        {
+                            "portIn": "Albedo",
+                            "portOut": "Texture",
+                            "objIn": "tdxswy2tn",
+                            "objOut": "6vvc5twfs"
+                        }
+                    ]
+                },
+                {
+                    "name": "Width",
+                    "value": 2048
+                },
+                {
+                    "name": "Height",
+                    "value": 2048
+                },
+                {
+                    "name": "Aspect Ratio",
+                    "value": 1
+                },
+                {
+                    "name": "Loaded",
+                    "value": 1
+                },
+                {
+                    "name": "Loading",
+                    "value": 0
+                }
+            ],
+            "objName": "Ops.Gl.Texture_v2"
         }
     ],
     "export": {
-        "time": "2025-11-25 19:06",
+        "time": "2025-11-25 20:53",
         "service": "html",
-        "exportNumber": 4
+        "exportNumber": 5
     }
 }
