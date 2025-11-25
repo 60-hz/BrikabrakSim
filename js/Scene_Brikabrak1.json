@@ -365,7 +365,7 @@
                 },
                 {
                     "name": "Rot X",
-                    "value": 89.99999999999993
+                    "value": 90
                 },
                 {
                     "name": "Rot Y",
@@ -422,11 +422,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.9111244658119658
+                    "value": 0
                 },
                 {
                     "name": "y",
-                    "value": 0.8031046356635072
+                    "value": 0
                 },
                 {
                     "name": "click right",
@@ -449,11 +449,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -49
+                    "value": -37
                 },
                 {
                     "name": "Movement Y",
-                    "value": -1
+                    "value": 20
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -1132,10 +1132,6 @@
                 {
                     "name": "Cast Light",
                     "value": 1
-                },
-                {
-                    "name": "Intensity",
-                    "value": 0.8
                 },
                 {
                     "name": "Radius",
@@ -3522,7 +3518,7 @@
                 },
                 {
                     "name": "glb File",
-                    "value": "assets/MachineTop0.glb",
+                    "value": "assets/machineTop1.glb",
                     "display": "file"
                 },
                 {
@@ -4392,7 +4388,7 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": 0.3114300072193146
+                    "value": 1.1532100439071655
                 },
                 {
                     "name": "World Position Y",
@@ -5853,19 +5849,19 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Lumière Globale"
+                    "value": "Couleur Globale"
                 },
                 {
                     "name": "Input Red",
-                    "value": 0.5647058823529412
+                    "value": 0.592156862745098
                 },
                 {
                     "name": "Input Green",
-                    "value": 0.5568627450980392
+                    "value": 0.592156862745098
                 },
                 {
                     "name": "Input Blue",
-                    "value": 0.5568627450980392
+                    "value": 0.592156862745098
                 },
                 {
                     "name": "Input Opacity",
@@ -5873,7 +5869,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": "#908e8e"
+                    "value": "#979797"
                 },
                 {
                     "name": "Show Opacity",
@@ -5920,7 +5916,7 @@
                 },
                 {
                     "name": "Hex",
-                    "value": "#908e8e"
+                    "value": "#979797"
                 }
             ],
             "objName": "Ops.Sidebar.ColorPicker_v3"
@@ -7364,11 +7360,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": 0.31143
+                    "value": 1.15321
                 },
                 {
                     "name": "Default",
-                    "value": 0.31143
+                    "value": 1.15321
                 }
             ],
             "portsOut": [
@@ -7461,7 +7457,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.32982
+                    "value": -0.03964
                 },
                 {
                     "name": "Default",
@@ -7517,7 +7513,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": 1.19643
+                    "value": 1.00964
                 },
                 {
                     "name": "Default",
@@ -9486,7 +9482,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Slider"
+                    "value": "Lumière globale"
                 },
                 {
                     "name": "Min",
@@ -9524,7 +9520,14 @@
             "portsOut": [
                 {
                     "name": "Result",
-                    "value": 0.5
+                    "links": [
+                        {
+                            "portIn": "Value",
+                            "portOut": "Result",
+                            "objIn": "we6q9h4n0",
+                            "objOut": "5hpbp2se3"
+                        }
+                    ]
                 }
             ],
             "objName": "Ops.Sidebar.Slider_v3"
@@ -9663,14 +9666,49 @@
                 },
                 {
                     "name": "String",
-                    "value": "Globale"
+                    "value": "1"
                 }
             ],
             "objName": "Ops.Sidebar.SideBarSwitch"
+        },
+        {
+            "id": "we6q9h4n0",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "GlobalIntensity"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "ru3qg579a",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "GlobalIntensity"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "Intensity",
+                            "portOut": "Value",
+                            "objIn": "qfjmyoszt",
+                            "objOut": "ru3qg579a"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
         }
     ],
     "export": {
-        "time": "2025-11-25 21:37",
+        "time": "2025-11-25 22:21",
         "service": "html",
         "exportNumber": 7
     }
