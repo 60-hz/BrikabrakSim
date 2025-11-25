@@ -7,10 +7,14 @@ var Ops=Ops || {};
 Ops.Gl=Ops.Gl || {};
 Ops.Ui=Ops.Ui || {};
 Ops.Math=Ops.Math || {};
+Ops.Vars=Ops.Vars || {};
 Ops.Array=Ops.Array || {};
 Ops.Local=Ops.Local || {};
+Ops.Cables=Ops.Cables || {};
 Ops.Gl.Pbr=Ops.Gl.Pbr || {};
 Ops.Number=Ops.Number || {};
+Ops.String=Ops.String || {};
+Ops.Boolean=Ops.Boolean || {};
 Ops.Devices=Ops.Devices || {};
 Ops.Gl.GLTF=Ops.Gl.GLTF || {};
 Ops.Sidebar=Ops.Sidebar || {};
@@ -19,6 +23,7 @@ Ops.Gl.Phong=Ops.Gl.Phong || {};
 Ops.Graphics=Ops.Graphics || {};
 Ops.Extension=Ops.Extension || {};
 Ops.Gl.Matrix=Ops.Gl.Matrix || {};
+Ops.Gl.Meshes=Ops.Gl.Meshes || {};
 Ops.Gl.Shader=Ops.Gl.Shader || {};
 Ops.Math.Compare=Ops.Math.Compare || {};
 Ops.Devices.Mouse=Ops.Devices.Mouse || {};
@@ -8629,6 +8634,112 @@ CABLES.OPS["76418c17-abd5-401b-82e2-688db6f966ee"]={f:Ops.Gl.Phong.SpotLight_v5,
 
 // **************************************************************
 // 
+// Ops.Math.Sum
+// 
+// **************************************************************
+
+Ops.Math.Sum= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValueFloat("number1", 0),
+    number2 = op.inValueFloat("number2", 0),
+    result = op.outNumber("result");
+
+op.setUiAttribs({ "mathTitle": true });
+
+number1.onChange =
+number2.onChange = exec;
+exec();
+
+function exec()
+{
+    const v = number1.get() + number2.get();
+    if (!isNaN(v))
+        result.set(v);
+}
+
+}
+};
+
+CABLES.OPS["c8fb181e-0b03-4b41-9e55-06b6267bc634"]={f:Ops.Math.Sum,objName:"Ops.Math.Sum"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.MathExpression
+// 
+// **************************************************************
+
+Ops.Math.MathExpression= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const inA = op.inFloat("A", 0);
+const inB = op.inFloat("B", 1);
+const inC = op.inFloat("C", 2);
+const inD = op.inFloat("D", 3);
+op.setPortGroup("Parameters", [inA, inB, inC, inD]);
+const inExpression = op.inString("Expression", "a*(b+c+d)");
+op.setPortGroup("Expression", [inExpression]);
+const outResult = op.outNumber("Result");
+const outExpressionIsValid = op.outBool("Expression Valid");
+
+let currentFunction = inExpression.get();
+let functionValid = false;
+
+const createFunction = () =>
+{
+    try
+    {
+        currentFunction = new Function("m", "a", "b", "c", "d", `with(m) { return ${inExpression.get()} }`);
+        functionValid = true;
+        evaluateFunction();
+        outExpressionIsValid.set(functionValid);
+    }
+    catch (e)
+    {
+        functionValid = false;
+        outExpressionIsValid.set(functionValid);
+        if (e instanceof ReferenceError || e instanceof SyntaxError) return;
+    }
+};
+
+const evaluateFunction = () =>
+{
+    if (functionValid)
+    {
+        outResult.set(currentFunction(Math, inA.get(), inB.get(), inC.get(), inD.get()));
+        if (!inExpression.get()) outResult.set(0);
+    }
+
+    outExpressionIsValid.set(functionValid);
+};
+
+
+inA.onChange = inB.onChange = inC.onChange = inD.onChange = evaluateFunction;
+inExpression.onChange = createFunction;
+createFunction();
+
+}
+};
+
+CABLES.OPS["d2343a1e-64ea-45b2-99ed-46e167bbdcd3"]={f:Ops.Math.MathExpression,objName:"Ops.Math.MathExpression"};
+
+
+
+
+// **************************************************************
+// 
 // Ops.Sidebar.Slider_v3
 // 
 // **************************************************************
@@ -9032,1191 +9143,6 @@ function updateError()
 };
 
 CABLES.OPS["0816c999-f2db-466b-9777-2814573574c5"]={f:Ops.Trigger.TriggerReceive,objName:"Ops.Trigger.TriggerReceive"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.Group
-// 
-// **************************************************************
-
-Ops.Sidebar.Group= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-// inputs
-let parentPort = op.inObject("link");
-let labelPort = op.inString("Text", "Group");
-const inShowTitle = op.inBool("Show Title", true);
-let defaultMinimizedPort = op.inValueBool("Default Minimized");
-const inVisible = op.inBool("Visible", true);
-
-// outputs
-let nextPort = op.outObject("next");
-let childrenPort = op.outObject("childs");
-
-inVisible.onChange = function ()
-{
-    el.style.display = inVisible.get() ? "block" : "none";
-};
-
-// vars
-let el = document.createElement("div");
-el.dataset.op = op.id;
-el.classList.add("sidebar__group");
-onDefaultMinimizedPortChanged();
-let header = document.createElement("div");
-header.classList.add("sidebar__group-header");
-header.classList.add("cablesEle");
-el.appendChild(header);
-header.addEventListener("click", onClick);
-let headerTitle = document.createElement("div");
-headerTitle.classList.add("sidebar__group-header-title");
-// headerTitle.textContent = labelPort.get();
-header.appendChild(headerTitle);
-let headerTitleText = document.createElement("span");
-headerTitleText.textContent = labelPort.get();
-headerTitleText.classList.add("sidebar__group-header-title-text");
-headerTitle.appendChild(headerTitleText);
-let icon = document.createElement("span");
-icon.classList.add("sidebar__group-header-icon");
-icon.classList.add("iconsidebar-chevron-up");
-headerTitle.appendChild(icon);
-let groupItems = document.createElement("div");
-groupItems.classList.add("sidebar__group-items");
-el.appendChild(groupItems);
-op.toWorkPortsNeedToBeLinked(parentPort);
-
-// events
-parentPort.onChange = onParentChanged;
-labelPort.onChange = onLabelTextChanged;
-defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
-op.onDelete = onDelete;
-
-// functions
-
-inShowTitle.onChange = () =>
-{
-    if (inShowTitle.get())header.style.display = "block";
-    else header.style.display = "none";
-};
-
-function onDefaultMinimizedPortChanged()
-{
-    if (defaultMinimizedPort.get())
-    {
-        el.classList.add("sidebar__group--closed");
-    }
-    else
-    {
-        el.classList.remove("sidebar__group--closed");
-    }
-}
-
-function onClick(ev)
-{
-    ev.stopPropagation();
-    el.classList.toggle("sidebar__group--closed");
-}
-
-function onLabelTextChanged()
-{
-    let labelText = labelPort.get();
-    headerTitleText.textContent = labelText;
-    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
-}
-
-function onParentChanged()
-{
-    childrenPort.set(null);
-    let parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        childrenPort.set({
-            "parentElement": groupItems,
-            "parentOp": op,
-        });
-        nextPort.set(parent);
-    }
-    else
-    { // detach
-        if (el.parentElement)
-        {
-            el.parentElement.removeChild(el);
-        }
-    }
-}
-
-function showElement(el)
-{
-    if (el)
-    {
-        el.style.display = "block";
-    }
-}
-
-function hideElement(el)
-{
-    if (el)
-    {
-        el.style.display = "none";
-    }
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["86ea2333-b51c-48ed-94c2-8b7b6e9ff34c"]={f:Ops.Sidebar.Group,objName:"Ops.Sidebar.Group"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Math.Compare.Equals
-// 
-// **************************************************************
-
-Ops.Math.Compare.Equals= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    number1 = op.inValue("number1", 1),
-    number2 = op.inValue("number2", 1),
-    result = op.outBoolNum("result");
-
-number1.onChange =
-    number2.onChange = exec;
-exec();
-
-function exec()
-{
-    result.set(number1.get() == number2.get());
-}
-
-}
-};
-
-CABLES.OPS["4dd3cc55-eebc-4187-9d4e-2e053a956fab"]={f:Ops.Math.Compare.Equals,objName:"Ops.Math.Compare.Equals"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Math.Sum
-// 
-// **************************************************************
-
-Ops.Math.Sum= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    number1 = op.inValueFloat("number1", 0),
-    number2 = op.inValueFloat("number2", 0),
-    result = op.outNumber("result");
-
-op.setUiAttribs({ "mathTitle": true });
-
-number1.onChange =
-number2.onChange = exec;
-exec();
-
-function exec()
-{
-    const v = number1.get() + number2.get();
-    if (!isNaN(v))
-        result.set(v);
-}
-
-}
-};
-
-CABLES.OPS["c8fb181e-0b03-4b41-9e55-06b6267bc634"]={f:Ops.Math.Sum,objName:"Ops.Math.Sum"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Math.MathExpression
-// 
-// **************************************************************
-
-Ops.Math.MathExpression= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const inA = op.inFloat("A", 0);
-const inB = op.inFloat("B", 1);
-const inC = op.inFloat("C", 2);
-const inD = op.inFloat("D", 3);
-op.setPortGroup("Parameters", [inA, inB, inC, inD]);
-const inExpression = op.inString("Expression", "a*(b+c+d)");
-op.setPortGroup("Expression", [inExpression]);
-const outResult = op.outNumber("Result");
-const outExpressionIsValid = op.outBool("Expression Valid");
-
-let currentFunction = inExpression.get();
-let functionValid = false;
-
-const createFunction = () =>
-{
-    try
-    {
-        currentFunction = new Function("m", "a", "b", "c", "d", `with(m) { return ${inExpression.get()} }`);
-        functionValid = true;
-        evaluateFunction();
-        outExpressionIsValid.set(functionValid);
-    }
-    catch (e)
-    {
-        functionValid = false;
-        outExpressionIsValid.set(functionValid);
-        if (e instanceof ReferenceError || e instanceof SyntaxError) return;
-    }
-};
-
-const evaluateFunction = () =>
-{
-    if (functionValid)
-    {
-        outResult.set(currentFunction(Math, inA.get(), inB.get(), inC.get(), inD.get()));
-        if (!inExpression.get()) outResult.set(0);
-    }
-
-    outExpressionIsValid.set(functionValid);
-};
-
-
-inA.onChange = inB.onChange = inC.onChange = inD.onChange = evaluateFunction;
-inExpression.onChange = createFunction;
-createFunction();
-
-}
-};
-
-CABLES.OPS["d2343a1e-64ea-45b2-99ed-46e167bbdcd3"]={f:Ops.Math.MathExpression,objName:"Ops.Math.MathExpression"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Array.StringToArray_v2
-// 
-// **************************************************************
-
-Ops.Array.StringToArray_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const text = op.inStringEditor("text", "1,2,3"),
-    separator = op.inString("separator", ","),
-    toNumber = op.inValueBool("Numbers", true),
-    trim = op.inValueBool("Trim", true),
-    splitNewLines = op.inBool("Split Lines", false),
-    arr = op.outArray("array"),
-    parsed = op.outTrigger("Parsed"),
-    len = op.outNumber("length");
-
-text.setUiAttribs({ "ignoreBigPort": true });
-
-text.onChange = separator.onChange = toNumber.onChange = trim.onChange = parse;
-
-splitNewLines.onChange = () =>
-{
-    separator.setUiAttribs({ "greyout": splitNewLines.get() });
-    parse();
-};
-
-parse();
-
-function parse()
-{
-    if (!text.get())
-    {
-        arr.set(null);
-        arr.set([]);
-        len.set(0);
-        return;
-    }
-
-    let textInput = text.get();
-    if (trim.get() && textInput)
-    {
-        textInput = textInput.replace(/^\s+|\s+$/g, "");
-        textInput = textInput.trim();
-    }
-
-    let r;
-    let sep = separator.get();
-    if (separator.get() === "\\n") sep = "\n";
-    if (splitNewLines.get()) r = textInput.split("\n");
-    else r = textInput.split(sep);
-
-    if (r[r.length - 1] === "") r.length -= 1;
-
-    len.set(r.length);
-
-    if (trim.get())
-    {
-        for (let i = 0; i < r.length; i++)
-        {
-            r[i] = r[i].replace(/^\s+|\s+$/g, "");
-            r[i] = r[i].trim();
-        }
-    }
-
-    op.setUiError("notnum", null);
-    if (toNumber.get())
-    {
-        let hasStrings = false;
-        for (let i = 0; i < r.length; i++)
-        {
-            r[i] = Number(r[i]);
-            if (!CABLES.isNumeric(r[i]))
-            {
-                hasStrings = true;
-            }
-        }
-        if (hasStrings)
-        {
-            op.setUiError("notnum", "Parse Error / Not all values numerical!", 1);
-        }
-    }
-
-    arr.setRef(r);
-    parsed.trigger();
-}
-
-}
-};
-
-CABLES.OPS["c974de41-4ce4-4432-b94d-724741109c71"]={f:Ops.Array.StringToArray_v2,objName:"Ops.Array.StringToArray_v2"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.SideBarSwitch
-// 
-// **************************************************************
-
-Ops.Sidebar.SideBarSwitch= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const parentPort = op.inObject("link"),
-    inArr = op.inArray("Names"),
-    inStyle = op.inSwitch("Style", ["Tabs", "Switch"], "Switch"),
-    labelPort = op.inString("Text", "Switch"),
-
-    inInput = op.inInt("Input", 0),
-
-    setDefaultValueButtonPort = op.inTriggerButton("Set Default"),
-    inGreyOut = op.inBool("Grey Out", false),
-    inDefault = op.inValue("Default", 0),
-
-    siblingsPort = op.outObject("childs"),
-    outIndex = op.outNumber("Index", -1),
-    outStr = op.outString("String");
-
-let elTabActive = null;
-const el = document.createElement("div");
-el.classList.add("sidebar__item");
-el.dataset.op = op.id;
-el.classList.add("cablesEle");
-inDefault.setUiAttribs({ "greyout": true });
-
-const label = document.createElement("div");
-label.classList.add("sidebar__item-label");
-const labelText = document.createTextNode(labelPort.get());
-label.appendChild(labelText);
-el.appendChild(label);
-
-const switchGroup = document.createElement("div");
-el.appendChild(switchGroup);
-
-const greyOut = document.createElement("div");
-greyOut.classList.add("sidebar__greyout");
-el.appendChild(greyOut);
-greyOut.style.display = "none";
-
-parentPort.onChange = onParentChanged;
-op.onDelete = onDelete;
-
-op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
-op.setPortGroup("Default Item", [inDefault, setDefaultValueButtonPort]);
-const tabEles = [];
-
-inArr.onChange = rebuildHtml;
-inStyle.onChange = updateStyle;
-updateStyle();
-
-labelPort.onChange = () =>
-{
-    label.innerHTML = labelPort.get();
-};
-
-inGreyOut.onChange = function ()
-{
-    greyOut.style.display = inGreyOut.get() ? "block" : "none";
-};
-
-function rebuildHtml()
-{
-    tabEles.length = 0;
-    switchGroup.innerHTML = "";
-    elTabActive = null;
-
-    const arr = inArr.get();
-    if (!arr) return;
-
-    for (let i = 0; i < arr.length; i++)
-    {
-        const el = addTab(String(arr[i]));
-        if (i == inDefault.get())setActiveTab(el);
-    }
-}
-
-setDefaultValueButtonPort.onTriggered = () =>
-{
-    inDefault.set(outIndex.get());
-    op.refreshParams();
-};
-
-function updateStyle()
-{
-    if (inStyle.get() == "Tabs")
-    {
-        el.classList.add("sidebar_tabs");
-        switchGroup.classList.remove("sidebar_switchs");
-        label.style.display = "none";
-    }
-    else
-    {
-        el.classList.remove("sidebar_tabs");
-        switchGroup.classList.add("sidebar_switchs");
-        label.style.display = "inline-block";
-    }
-
-    labelPort.setUiAttribs({ "greyout": inStyle.get() == "Tabs" });
-
-    rebuildHtml();
-}
-
-function addTab(title)
-{
-    const tabEle = document.createElement("div");
-
-    if (inStyle.get() == "Tabs") tabEle.classList.add("sidebar_tab");
-    else tabEle.classList.add("sidebar_switch");
-
-    tabEle.id = "tabEle" + tabEles.length;
-    tabEle.innerHTML = title;
-    tabEle.dataset.index = tabEles.length;
-    tabEle.dataset.txt = title;
-
-    tabEle.addEventListener("click", tabClicked);
-
-    switchGroup.appendChild(tabEle);
-
-    tabEles.push(tabEle);
-
-    return tabEle;
-}
-
-inInput.onChange = () =>
-{
-    if (tabEles.length > inInput.get())
-        tabClicked({ "target": tabEles[inInput.get()] });
-    // setActiveTab(tabEles[inInput.get()]);
-};
-
-function setActiveTab(el)
-{
-    if (el)
-    {
-        elTabActive = el;
-        outIndex.set(parseInt(el.dataset.index));
-        outStr.set(el.dataset.txt);
-
-        if (inStyle.get() == "Tabs") el.classList.add("sidebar_tab_active");
-        else el.classList.add("sidebar_switch_active");
-    }
-}
-
-function tabClicked(e)
-{
-    if (elTabActive)
-        if (inStyle.get() == "Tabs") elTabActive.classList.remove("sidebar_tab_active");
-        else elTabActive.classList.remove("sidebar_switch_active");
-    setActiveTab(e.target);
-}
-
-function onParentChanged()
-{
-    siblingsPort.set(null);
-    const parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        siblingsPort.set(parent);
-    }
-    else
-    {
-        if (el.parentElement)
-            el.parentElement.removeChild(el);
-    }
-}
-
-function showElement(el)
-{
-    if (!el) return;
-    el.style.display = "block";
-}
-
-function hideElement(el)
-{
-    if (!el) return;
-    el.style.display = "none";
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["ebc8c92c-5fa6-4598-a9c6-b8e12f22f7c2"]={f:Ops.Sidebar.SideBarSwitch,objName:"Ops.Sidebar.SideBarSwitch"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.Sidebar
-// 
-// **************************************************************
-
-Ops.Sidebar.Sidebar= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={"style_css":" /*\n * SIDEBAR\n  http://danielstern.ca/range.css/#/\n  https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-value\n */\n\n.sidebar-icon-undo\n{\n    width:10px;\n    height:10px;\n    background-image: url(\"data:image/svg+xml;charset=utf8, %3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='grey' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7v6h6'/%3E%3Cpath d='M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13'/%3E%3C/svg%3E\");\n    background-size: 19px;\n    background-repeat: no-repeat;\n    top: -19px;\n    margin-top: -7px;\n}\n\n.icon-chevron-down {\n    top: 2px;\n    right: 9px;\n}\n\n.iconsidebar-chevron-up,.sidebar__close-button {\n\tbackground-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tdXAiPjxwb2x5bGluZSBwb2ludHM9IjE4IDE1IDEyIDkgNiAxNSI+PC9wb2x5bGluZT48L3N2Zz4=);\n}\n\n.iconsidebar-minimizebutton {\n    background-position: 98% center;\n    background-repeat: no-repeat;\n}\n\n.sidebar-cables-right\n{\n    right: 15px;\n    left: initial !important;\n}\n\n.sidebar-cables *\n{\n    color: #BBBBBB !important;\n    font-family: Arial;\n}\n\n.sidebar-cables {\n    --sidebar-color: #07f78c;\n    --sidebar-width: 220px;\n    --sidebar-border-radius: 10px;\n    --sidebar-monospace-font-stack: \"SFMono-Regular\", Consolas, \"Liberation Mono\", Menlo, Courier, monospace;\n    --sidebar-hover-transition-time: .2s;\n\n    position: absolute;\n    top: 15px;\n    left: 15px;\n    border-radius: var(--sidebar-border-radius);\n    z-index: 100000;\n    width: var(--sidebar-width);\n    max-height: 100%;\n    box-sizing: border-box;\n    overflow-y: auto;\n    overflow-x: hidden;\n    font-size: 13px;\n    line-height: 1em; /* prevent emojis from breaking height of the title */\n}\n\n.sidebar-cables::selection {\n    background-color: var(--sidebar-color);\n    color: #EEEEEE;\n}\n\n.sidebar-cables::-webkit-scrollbar {\n    background-color: transparent;\n    --cables-scrollbar-width: 8px;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables::-webkit-scrollbar-track {\n    background-color: transparent;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables::-webkit-scrollbar-thumb {\n    background-color: #333333;\n    border-radius: 4px;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables--closed {\n    width: auto;\n}\n\n.sidebar__close-button {\n    background-color: #222;\n    /*-webkit-user-select: none;  */\n    /*-moz-user-select: none;     */\n    /*-ms-user-select: none;      */\n    /*user-select: none;          */\n    /*transition: background-color var(--sidebar-hover-transition-time);*/\n    /*color: #CCCCCC;*/\n    height: 2px;\n    /*border-bottom:20px solid #222;*/\n\n    /*box-sizing: border-box;*/\n    /*padding-top: 2px;*/\n    /*text-align: center;*/\n    /*cursor: pointer;*/\n    /*border-radius: 0 0 var(--sidebar-border-radius) var(--sidebar-border-radius);*/\n    /*opacity: 1.0;*/\n    /*transition: opacity 0.3s;*/\n    /*overflow: hidden;*/\n}\n\n.sidebar__close-button-icon {\n    display: inline-block;\n    /*opacity: 0;*/\n    width: 20px;\n    height: 20px;\n    /*position: relative;*/\n    /*top: -1px;*/\n\n\n}\n\n.sidebar--closed {\n    width: auto;\n    margin-right: 20px;\n}\n\n.sidebar--closed .sidebar__close-button {\n    margin-top: 8px;\n    margin-left: 8px;\n    padding:10px;\n\n    height: 25px;\n    width:25px;\n    border-radius: 50%;\n    cursor: pointer;\n    opacity: 0.3;\n    background-repeat: no-repeat;\n    background-position: center center;\n    transform:rotate(180deg);\n}\n\n.sidebar--closed .sidebar__group\n{\n    display:none;\n\n}\n.sidebar--closed .sidebar__close-button-icon {\n    background-position: 0px 0px;\n}\n\n.sidebar__close-button:hover {\n    background-color: #111111;\n    opacity: 1.0 !important;\n}\n\n/*\n * SIDEBAR ITEMS\n */\n\n.sidebar__items {\n    /* max-height: 1000px; */\n    /* transition: max-height 0.5;*/\n    background-color: #222;\n    padding-bottom: 20px;\n}\n\n.sidebar--closed .sidebar__items {\n    /* max-height: 0; */\n    height: 0;\n    display: none;\n    pointer-interactions: none;\n}\n\n.sidebar__item__right {\n    float: right;\n}\n\n/*\n * SIDEBAR GROUP\n */\n\n.sidebar__group {\n    /*background-color: #1A1A1A;*/\n    overflow: hidden;\n    box-sizing: border-box;\n    animate: height;\n    /*background-color: #151515;*/\n    /* max-height: 1000px; */\n    /* transition: max-height 0.5s; */\n--sidebar-group-header-height: 33px;\n}\n\n.sidebar__group-items\n{\n    padding-top: 15px;\n    padding-bottom: 15px;\n}\n\n.sidebar__group--closed {\n    /* max-height: 13px; */\n    height: var(--sidebar-group-header-height);\n}\n\n.sidebar__group-header {\n    box-sizing: border-box;\n    color: #EEEEEE;\n    background-color: #151515;\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n\n    /*height: 100%;//var(--sidebar-group-header-height);*/\n\n    padding-top: 7px;\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    cursor: pointer;\n    /*transition: background-color var(--sidebar-hover-transition-time);*/\n    position: relative;\n}\n\n.sidebar__group-header:hover {\n  background-color: #111111;\n}\n\n.sidebar__group-header-title {\n  /*float: left;*/\n  overflow: hidden;\n  padding: 0 15px;\n  padding-top:5px;\n  padding-bottom:10px;\n  font-weight:bold;\n}\n\n.sidebar__group-header-undo {\n    float: right;\n    overflow: hidden;\n    padding-right: 15px;\n    padding-top:5px;\n    font-weight:bold;\n  }\n\n.sidebar__group-header-icon {\n    width: 17px;\n    height: 14px;\n    background-repeat: no-repeat;\n    display: inline-block;\n    position: absolute;\n    background-size: cover;\n\n    /* icon open */\n    /* feather icon: chevron up */\n    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tdXAiPjxwb2x5bGluZSBwb2ludHM9IjE4IDE1IDEyIDkgNiAxNSI+PC9wb2x5bGluZT48L3N2Zz4=);\n    top: 4px;\n    right: 5px;\n    opacity: 0.0;\n    transition: opacity 0.3;\n}\n\n.sidebar__group-header:hover .sidebar__group-header-icon {\n    opacity: 1.0;\n}\n\n/* icon closed */\n.sidebar__group--closed .sidebar__group-header-icon {\n    /* feather icon: chevron down */\n    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tZG93biI+PHBvbHlsaW5lIHBvaW50cz0iNiA5IDEyIDE1IDE4IDkiPjwvcG9seWxpbmU+PC9zdmc+);\n    top: 4px;\n    right: 5px;\n}\n\n/*\n * SIDEBAR ITEM\n */\n\n.sidebar__item\n{\n    box-sizing: border-box;\n    padding: 7px;\n    padding-left:15px;\n    padding-right:15px;\n\n    overflow: hidden;\n    position: relative;\n}\n\n.sidebar__item-label {\n    display: inline-block;\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    width: calc(50% - 7px);\n    margin-right: 7px;\n    margin-top: 2px;\n    text-overflow: ellipsis;\n    /* overflow: hidden; */\n}\n\n.sidebar__item-value-label {\n    font-family: var(--sidebar-monospace-font-stack);\n    display: inline-block;\n    text-overflow: ellipsis;\n    overflow: hidden;\n    white-space: nowrap;\n    max-width: 60%;\n}\n\n.sidebar__item-value-label::selection {\n    background-color: var(--sidebar-color);\n    color: #EEEEEE;\n}\n\n.sidebar__item + .sidebar__item,\n.sidebar__item + .sidebar__group,\n.sidebar__group + .sidebar__item,\n.sidebar__group + .sidebar__group {\n    /*border-top: 1px solid #272727;*/\n}\n\n/*\n * SIDEBAR ITEM TOGGLE\n */\n\n/*.sidebar__toggle */\n.icon_toggle{\n    cursor: pointer;\n}\n\n.sidebar__toggle-input {\n    --sidebar-toggle-input-color: #CCCCCC;\n    --sidebar-toggle-input-color-hover: #EEEEEE;\n    --sidebar-toggle-input-border-size: 2px;\n    display: inline;\n    float: right;\n    box-sizing: border-box;\n    border-radius: 50%;\n    /*outline-style: solid;*/\n    /*outline-color:red;*/\n    cursor: pointer;\n    --toggle-size: 11px;\n    margin-top: 2px;\n    background-color: transparent !important;\n    border: var(--sidebar-toggle-input-border-size) solid var(--sidebar-toggle-input-color);\n    width: var(--toggle-size);\n    height: var(--toggle-size);\n    transition: background-color var(--sidebar-hover-transition-time);\n    transition: border-color var(--sidebar-hover-transition-time);\n}\n.sidebar__toggle:hover .sidebar__toggle-input {\n    border-color: var(--sidebar-toggle-input-color-hover);\n}\n\n.sidebar__toggle .sidebar__item-value-label {\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    max-width: calc(50% - 12px);\n}\n.sidebar__toggle-input::after { clear: both; }\n\n.sidebar__toggle--active .icon_toggle\n{\n\n    background-image: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE1cHgiIHdpZHRoPSIzMHB4IiBmaWxsPSIjMDZmNzhiIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwIDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iIzA2Zjc4YiIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCBjMTIuNjUsMCwyMy0xMC4zNSwyMy0yM2wwLDBjMC0xMi42NS0xMC4zNS0yMy0yMy0yM0gzMHogTTcwLDY3Yy05LjM4OSwwLTE3LTcuNjEtMTctMTdzNy42MTEtMTcsMTctMTdzMTcsNy42MSwxNywxNyAgICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PC9nPjwvZz48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMweiBNNzAsNjdjLTkuMzg5LDAtMTctNy42MS0xNy0xN3M3LjYxMS0xNywxNy0xN3MxNyw3LjYxLDE3LDE3ICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48cGF0aCBmaWxsPSIjMDZmNzhiIiBzdHJva2U9IiMwNmY3OGIiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNyw1MGMwLDEyLjY1LDEwLjM1LDIzLDIzLDIzaDQwICAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMwQzE3LjM1LDI3LDcsMzcuMzUsNyw1MEw3LDUweiI+PC9wYXRoPjwvZz48Y2lyY2xlIGRpc3BsYXk9ImlubGluZSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiMwNmY3OGIiIHN0cm9rZT0iIzA2Zjc4YiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI3MCIgY3k9IjUwIiByPSIxNyI+PC9jaXJjbGU+PC9nPjxnIGRpc3BsYXk9Im5vbmUiPjxwYXRoIGRpc3BsYXk9ImlubGluZSIgZD0iTTcwLDI1SDMwQzE2LjIxNSwyNSw1LDM2LjIxNSw1LDUwczExLjIxNSwyNSwyNSwyNWg0MGMxMy43ODUsMCwyNS0xMS4yMTUsMjUtMjVTODMuNzg1LDI1LDcwLDI1eiBNNzAsNzEgICBIMzBDMTguNDIxLDcxLDksNjEuNTc5LDksNTBzOS40MjEtMjEsMjEtMjFoNDBjMTEuNTc5LDAsMjEsOS40MjEsMjEsMjFTODEuNTc5LDcxLDcwLDcxeiBNNzAsMzFjLTEwLjQ3NywwLTE5LDguNTIzLTE5LDE5ICAgczguNTIzLDE5LDE5LDE5czE5LTguNTIzLDE5LTE5UzgwLjQ3NywzMSw3MCwzMXogTTcwLDY1Yy04LjI3MSwwLTE1LTYuNzI5LTE1LTE1czYuNzI5LTE1LDE1LTE1czE1LDYuNzI5LDE1LDE1Uzc4LjI3MSw2NSw3MCw2NXoiPjwvcGF0aD48L2c+PC9zdmc+);\n    opacity: 1;\n    transform: rotate(0deg);\n    background-position: -4px -9px;\n}\n\n\n.icon_toggle\n{\n    float: right;\n    width:40px;\n    height:18px;\n    background-image: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE1cHgiIHdpZHRoPSIzMHB4IiBmaWxsPSIjYWFhYWFhIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwIDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2FhYWFhYSIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCBjMTIuNjUsMCwyMy0xMC4zNSwyMy0yM2wwLDBjMC0xMi42NS0xMC4zNS0yMy0yMy0yM0gzMHogTTcwLDY3Yy05LjM4OSwwLTE3LTcuNjEtMTctMTdzNy42MTEtMTcsMTctMTdzMTcsNy42MSwxNywxNyAgICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PC9nPjwvZz48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMweiBNNzAsNjdjLTkuMzg5LDAtMTctNy42MS0xNy0xN3M3LjYxMS0xNywxNy0xN3MxNyw3LjYxLDE3LDE3ICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48cGF0aCBmaWxsPSIjYWFhYWFhIiBzdHJva2U9IiNhYWFhYWEiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNyw1MGMwLDEyLjY1LDEwLjM1LDIzLDIzLDIzaDQwICAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMwQzE3LjM1LDI3LDcsMzcuMzUsNyw1MEw3LDUweiI+PC9wYXRoPjwvZz48Y2lyY2xlIGRpc3BsYXk9ImlubGluZSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhYWFhYWEiIHN0cm9rZT0iI2FhYWFhYSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI3MCIgY3k9IjUwIiByPSIxNyI+PC9jaXJjbGU+PC9nPjxnIGRpc3BsYXk9Im5vbmUiPjxwYXRoIGRpc3BsYXk9ImlubGluZSIgZD0iTTcwLDI1SDMwQzE2LjIxNSwyNSw1LDM2LjIxNSw1LDUwczExLjIxNSwyNSwyNSwyNWg0MGMxMy43ODUsMCwyNS0xMS4yMTUsMjUtMjVTODMuNzg1LDI1LDcwLDI1eiBNNzAsNzEgICBIMzBDMTguNDIxLDcxLDksNjEuNTc5LDksNTBzOS40MjEtMjEsMjEtMjFoNDBjMTEuNTc5LDAsMjEsOS40MjEsMjEsMjFTODEuNTc5LDcxLDcwLDcxeiBNNzAsMzFjLTEwLjQ3NywwLTE5LDguNTIzLTE5LDE5ICAgczguNTIzLDE5LDE5LDE5czE5LTguNTIzLDE5LTE5UzgwLjQ3NywzMSw3MCwzMXogTTcwLDY1Yy04LjI3MSwwLTE1LTYuNzI5LTE1LTE1czYuNzI5LTE1LDE1LTE1czE1LDYuNzI5LDE1LDE1Uzc4LjI3MSw2NSw3MCw2NXoiPjwvcGF0aD48L2c+PC9zdmc+);\n    background-size: 50px 37px;\n    background-position: -6px -10px;\n    transform: rotate(180deg);\n    opacity: 0.4;\n}\n\n\n\n/*.sidebar__toggle--active .sidebar__toggle-input {*/\n/*    transition: background-color var(--sidebar-hover-transition-time);*/\n/*    background-color: var(--sidebar-toggle-input-color);*/\n/*}*/\n/*.sidebar__toggle--active .sidebar__toggle-input:hover*/\n/*{*/\n/*    background-color: var(--sidebar-toggle-input-color-hover);*/\n/*    border-color: var(--sidebar-toggle-input-color-hover);*/\n/*    transition: background-color var(--sidebar-hover-transition-time);*/\n/*    transition: border-color var(--sidebar-hover-transition-time);*/\n/*}*/\n\n/*\n * SIDEBAR ITEM BUTTON\n */\n\n.sidebar__button {}\n\n.sidebar__button-input:active\n{\n    background-color: #555 !important;\n}\n\n.sidebar__button-input {\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    min-height: 24px;\n    background-color: transparent;\n    color: #CCCCCC;\n    box-sizing: border-box;\n    padding-top: 3px;\n    text-align: center;\n    border-radius: 125px;\n    border:2px solid #555;\n    cursor: pointer;\n    padding-bottom: 3px;\n    display:block;\n}\n\n.sidebar__button-input.plus, .sidebar__button-input.minus {\n    display: inline-block;\n    min-width: 20px;\n}\n\n.sidebar__button-input:hover {\n  background-color: #333;\n  border:2px solid var(--sidebar-color);\n}\n\n/*\n * VALUE DISPLAY (shows a value)\n */\n\n.sidebar__value-display {}\n\n/*\n * SLIDER\n */\n\n.sidebar__slider {\n    --sidebar-slider-input-height: 3px;\n}\n\n.sidebar__slider-input-wrapper {\n    width: 100%;\n\n    margin-top: 8px;\n    position: relative;\n}\n\n.sidebar__slider-input {\n    -webkit-appearance: none;\n    appearance: none;\n    margin: 0;\n    width: 100%;\n    height: var(--sidebar-slider-input-height);\n    background: #555;\n    cursor: pointer;\n    /*outline: 0;*/\n\n    -webkit-transition: .2s;\n    transition: background-color .2s;\n    border: none;\n}\n\n.sidebar__slider-input:focus, .sidebar__slider-input:hover {\n    border: none;\n}\n\n.sidebar__slider-input-active-track {\n    user-select: none;\n    position: absolute;\n    z-index: 11;\n    top: 0;\n    left: 0;\n    background-color: var(--sidebar-color);\n    pointer-events: none;\n    height: var(--sidebar-slider-input-height);\n    max-width: 100%;\n}\n\n/* Mouse-over effects */\n.sidebar__slider-input:hover {\n    /*background-color: #444444;*/\n}\n\n/*.sidebar__slider-input::-webkit-progress-value {*/\n/*    background-color: green;*/\n/*    color:green;*/\n\n/*    }*/\n\n/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */\n\n.sidebar__slider-input::-moz-range-thumb\n{\n    position: absolute;\n    height: 15px;\n    width: 15px;\n    z-index: 900 !important;\n    border-radius: 20px !important;\n    cursor: pointer;\n    background: var(--sidebar-color) !important;\n    user-select: none;\n\n}\n\n.sidebar__slider-input::-webkit-slider-thumb\n{\n    position: relative;\n    appearance: none;\n    -webkit-appearance: none;\n    user-select: none;\n    height: 15px;\n    width: 15px;\n    display: block;\n    z-index: 900 !important;\n    border: 0;\n    border-radius: 20px !important;\n    cursor: pointer;\n    background: #777 !important;\n}\n\n.sidebar__slider-input:hover ::-webkit-slider-thumb {\n    background-color: #EEEEEE !important;\n}\n\n/*.sidebar__slider-input::-moz-range-thumb {*/\n\n/*    width: 0 !important;*/\n/*    height: var(--sidebar-slider-input-height);*/\n/*    background: #EEEEEE;*/\n/*    cursor: pointer;*/\n/*    border-radius: 0 !important;*/\n/*    border: none;*/\n/*    outline: 0;*/\n/*    z-index: 100 !important;*/\n/*}*/\n\n.sidebar__slider-input::-moz-range-track {\n    background-color: transparent;\n    z-index: 11;\n}\n\n.sidebar__slider input[type=text],\n.sidebar__slider input[type=paddword]\n{\n    box-sizing: border-box;\n    /*background-color: #333333;*/\n    text-align: right;\n    color: #BBBBBB;\n    display: inline-block;\n    background-color: transparent !important;\n\n    width: 40%;\n    height: 18px;\n    /*outline: none;*/\n    border: none;\n    border-radius: 0;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n}\n\n.sidebar__slider input[type=text]:active,\n.sidebar__slider input[type=text]:focus,\n.sidebar__slider input[type=text]:hover,\n.sidebar__slider input[type=password]:active,\n.sidebar__slider input[type=password]:focus,\n.sidebar__slider input[type=password]:hover\n{\n\n    color: #EEEEEE;\n}\n\n/*\n * TEXT / DESCRIPTION\n */\n\n.sidebar__text .sidebar__item-label {\n    width: auto;\n    display: block;\n    max-height: none;\n    margin-right: 0;\n    line-height: 1.1em;\n}\n\n/*\n * SIDEBAR INPUT\n */\n.sidebar__text-input textarea,\n.sidebar__text-input input[type=date],\n.sidebar__text-input input[type=datetime-local],\n.sidebar__text-input input[type=text],\n.sidebar__text-input input[type=search],\n.sidebar__text-input input[type=password] {\n    box-sizing: border-box;\n    background-color: #333333;\n    color: #BBBBBB;\n    display: inline-block;\n    width: 50%;\n    height: 18px;\n\n\n    border: none;\n    border-radius: 0;\n    border:1px solid #666;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n    color-scheme: dark;\n}\n\n.sidebar__text-input textarea:focus::placeholder {\n  color: transparent;\n}\n\n\n\n\n\n.sidebar__color-picker .sidebar__item-label\n{\n    width:45%;\n}\n\n.sidebar__text-input textarea,\n.sidebar__text-input input[type=text]:active,\n.sidebar__text-input input[type=text]:focus,\n.sidebar__text-input input[type=text]:hover,\n.sidebar__text-input input[type=search]:active,\n.sidebar__text-input input[type=search]:focus,\n.sidebar__text-input input[type=search]:hover,\n.sidebar__text-input input[type=password]:active,\n.sidebar__text-input input[type=password]:focus,\n.sidebar__text-input input[type=password]:hover {\n    background-color: transparent;\n    color: #EEEEEE;\n\n}\n\n.sidebar__text-input textarea\n{\n    margin-top:10px;\n    height:60px;\n    width:100%;\n}\n\n/*\n * SIDEBAR SELECT\n */\n\n\n\n .sidebar__select {}\n .sidebar__select-select {\n    color: #BBBBBB;\n    /*-webkit-appearance: none;*/\n    /*-moz-appearance: none;*/\n    appearance: none;\n    /*box-sizing: border-box;*/\n    width: 50%;\n    /*height: 20px;*/\n    background-color: #333333;\n    /*background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tZG93biI+PHBvbHlsaW5lIHBvaW50cz0iNiA5IDEyIDE1IDE4IDkiPjwvcG9seWxpbmU+PC9zdmc+);*/\n    background-repeat: no-repeat;\n    background-position: right center;\n    background-size: 16px 16px;\n    margin: 0;\n    /*padding: 0 2 2 6px;*/\n    border-radius: 5px;\n    border: 1px solid #777;\n    background-color: #444;\n    cursor: pointer;\n    /*outline: none;*/\n    padding-left: 5px;\n\n }\n\n.sidebar__select-select:hover,\n.sidebar__select-select:active,\n.sidebar__select-select:inactive {\n    background-color: #444444;\n    color: #EEEEEE;\n}\n\n/*.sidebar__select-select option*/\n/*{*/\n/*    background-color: #444444;*/\n/*    color: #bbb;*/\n/*}*/\n\n.sidebar__select-select option:checked\n{\n    background-color: #000;\n    color: #FFF;\n}\n\n\n/*\n * COLOR PICKER\n */\n\n\n .sidebar__color-picker input[type=text] {\n    box-sizing: border-box;\n    background-color: #333333;\n    color: #BBBBBB;\n    display: inline-block;\n    width: calc(50% - 21px); /* 50% minus space of picker circle */\n    height: 18px;\n    /*outline: none;*/\n    border: none;\n    border-radius: 0;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n    margin-right: 7px;\n}\n\n.sidebar__color-picker input[type=text]:active,\n.sidebar__color-picker input[type=text]:focus,\n.sidebar__color-picker input[type=text]:hover {\n    background-color: #444444;\n    color: #EEEEEE;\n}\n\ndiv.sidebar__color-picker-color-input,\n.sidebar__color-picker input[type=color],\n.sidebar__palette-picker input[type=color] {\n    display: inline-block;\n    border-radius: 100%;\n    height: 14px;\n    width: 14px;\n\n    padding: 0;\n    border: none;\n    /*border:2px solid red;*/\n    border-color: transparent;\n    outline: none;\n    background: none;\n    appearance: none;\n    -moz-appearance: none;\n    -webkit-appearance: none;\n    cursor: pointer;\n    position: relative;\n    top: 3px;\n}\n.sidebar__color-picker input[type=color]:focus,\n.sidebar__palette-picker input[type=color]:focus {\n    outline: none;\n}\n.sidebar__color-picker input[type=color]::-moz-color-swatch,\n.sidebar__palette-picker input[type=color]::-moz-color-swatch {\n    border: none;\n}\n.sidebar__color-picker input[type=color]::-webkit-color-swatch-wrapper,\n.sidebar__palette-picker input[type=color]::-webkit-color-swatch-wrapper {\n    padding: 0;\n}\n.sidebar__color-picker input[type=color]::-webkit-color-swatch,\n.sidebar__palette-picker input[type=color]::-webkit-color-swatch {\n    border: none;\n    border-radius: 100%;\n}\n\n/*\n * Palette Picker\n */\n.sidebar__palette-picker .sidebar__palette-picker-color-input.first {\n    margin-left: 0;\n}\n.sidebar__palette-picker .sidebar__palette-picker-color-input.last {\n    margin-right: 0;\n}\n.sidebar__palette-picker .sidebar__palette-picker-color-input {\n    margin: 0 4px;\n}\n\n.sidebar__palette-picker .circlebutton {\n    width: 14px;\n    height: 14px;\n    border-radius: 1em;\n    display: inline-block;\n    top: 3px;\n    position: relative;\n}\n\n/*\n * Preset\n */\n.sidebar__item-presets-preset\n{\n    padding:4px;\n    cursor:pointer;\n    padding-left:8px;\n    padding-right:8px;\n    margin-right:4px;\n    background-color:#444;\n}\n\n.sidebar__item-presets-preset:hover\n{\n    background-color:#666;\n}\n\n.sidebar__greyout\n{\n    background: #222;\n    opacity: 0.8;\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    z-index: 1000;\n    right: 0;\n    top: 0;\n}\n\n.sidebar_tabs\n{\n    background-color: #151515;\n    padding-bottom: 0px;\n}\n\n.sidebar_switchs\n{\n    float: right;\n}\n\n.sidebar_tab\n{\n    float:left;\n    background-color: #151515;\n    border-bottom:1px solid transparent;\n    padding-right:7px;\n    padding-left:7px;\n    padding-bottom: 5px;\n    padding-top: 5px;\n    cursor:pointer;\n}\n\n.sidebar_tab_active\n{\n    background-color: #272727;\n    color:white;\n}\n\n.sidebar_tab:hover\n{\n    border-bottom:1px solid #777;\n    color:white;\n}\n\n\n.sidebar_switch\n{\n    float:left;\n    background-color: #444;\n    padding-right:7px;\n    padding-left:7px;\n    padding-bottom: 5px;\n    padding-top: 5px;\n    cursor:pointer;\n}\n\n.sidebar_switch:last-child\n{\n    border-top-right-radius: 7px;\n    border-bottom-right-radius: 7px;\n}\n\n.sidebar_switch:first-child\n{\n    border-top-left-radius: 7px;\n    border-bottom-left-radius: 7px;\n}\n\n\n.sidebar_switch_active\n{\n    background-color: #999;\n    color:white;\n}\n\n.sidebar_switch:hover\n{\n    color:white;\n}\n\n.sidebar__text-input-input::focus-visible,\n/*.sidebar__text-input-input:active,*/\n.sidebar__button-input:focus-visible,\n.sidebar__text-input:focus-visible\n/*.sidebar__text-input:active*/\n{\n    outline-style: solid;\n    outline-color:white;\n    outline-width: 1px;\n\n}\n\n",};
-// vars
-const CSS_ELEMENT_CLASS = "cables-sidebar-style"; /* class for the style element to be generated */
-const CSS_ELEMENT_DYNAMIC_CLASS = "cables-sidebar-dynamic-style"; /* things which can be set via op-port, but not attached to the elements themselves, e.g. minimized opacity */
-const SIDEBAR_CLASS = "sidebar-cables";
-const SIDEBAR_ID = "sidebar" + CABLES.uuid();
-const SIDEBAR_ITEMS_CLASS = "sidebar__items";
-const SIDEBAR_OPEN_CLOSE_BTN_CLASS = "sidebar__close-button";
-
-const BTN_TEXT_OPEN = ""; // 'Close';
-const BTN_TEXT_CLOSED = ""; // 'Show Controls';
-
-let openCloseBtn = null;
-let openCloseBtnIcon = null;
-let headerTitleText = null;
-
-// inputs
-const visiblePort = op.inValueBool("Visible", true);
-const opacityPort = op.inValueSlider("Opacity", 1);
-const defaultMinimizedPort = op.inValueBool("Default Minimized");
-const minimizedOpacityPort = op.inValueSlider("Minimized Opacity", 0.5);
-const undoButtonPort = op.inValueBool("Show undo button", false);
-const inMinimize = op.inValueBool("Show Minimize", false);
-
-const inTitle = op.inString("Title", "");
-const side = op.inValueBool("Side");
-const addCss = op.inValueBool("Default CSS", true);
-
-let doc = op.patch.cgl.canvas.ownerDocument;
-
-// outputs
-const childrenPort = op.outObject("childs");
-childrenPort.setUiAttribs({ "title": "Children" });
-
-const isOpenOut = op.outBool("Opfened");
-isOpenOut.setUiAttribs({ "title": "Opened" });
-
-let sidebarEl = doc.querySelector("." + SIDEBAR_ID);
-if (!sidebarEl) sidebarEl = initSidebarElement();
-
-const sidebarItemsEl = sidebarEl.querySelector("." + SIDEBAR_ITEMS_CLASS);
-childrenPort.set({
-    "parentElement": sidebarItemsEl,
-    "parentOp": op,
-});
-onDefaultMinimizedPortChanged();
-initSidebarCss();
-updateDynamicStyles();
-
-addCss.onChange = () =>
-{
-    initSidebarCss();
-    updateDynamicStyles();
-};
-visiblePort.onChange = onVisiblePortChange;
-opacityPort.onChange = onOpacityPortChange;
-defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
-minimizedOpacityPort.onChange = onMinimizedOpacityPortChanged;
-undoButtonPort.onChange = onUndoButtonChange;
-op.onDelete = onDelete;
-
-function onMinimizedOpacityPortChanged()
-{
-    updateDynamicStyles();
-}
-
-inMinimize.onChange = updateMinimize;
-
-function updateMinimize(header)
-{
-    if (!header || header.uiAttribs) header = doc.querySelector(".sidebar-cables .sidebar__group-header");
-    if (!header) return;
-
-    const undoButton = doc.querySelector(".sidebar-cables .sidebar__group-header .sidebar__group-header-undo");
-
-    if (inMinimize.get())
-    {
-        header.classList.add("iconsidebar-chevron-up");
-        header.classList.add("iconsidebar-minimizebutton");
-
-        if (undoButton)undoButton.style.marginRight = "20px";
-    }
-    else
-    {
-        header.classList.remove("iconsidebar-chevron-up");
-        header.classList.remove("iconsidebar-minimizebutton");
-
-        if (undoButton)undoButton.style.marginRight = "initial";
-    }
-}
-
-side.onChange = function ()
-{
-    if (!sidebarEl) return;
-    if (side.get()) sidebarEl.classList.add("sidebar-cables-right");
-    else sidebarEl.classList.remove("sidebar-cables-right");
-};
-
-function onUndoButtonChange()
-{
-    const header = doc.querySelector(".sidebar-cables .sidebar__group-header");
-    if (header)
-    {
-        initUndoButton(header);
-    }
-}
-
-function initUndoButton(header)
-{
-    if (header)
-    {
-        const undoButton = doc.querySelector(".sidebar-cables .sidebar__group-header .sidebar__group-header-undo");
-        if (undoButton)
-        {
-            if (!undoButtonPort.get())
-            {
-                // header.removeChild(undoButton);
-                undoButton.remove();
-            }
-        }
-        else
-        {
-            if (undoButtonPort.get())
-            {
-                const headerUndo = doc.createElement("span");
-                headerUndo.classList.add("sidebar__group-header-undo");
-                headerUndo.classList.add("sidebar-icon-undo");
-
-                headerUndo.addEventListener("click", function (event)
-                {
-                    event.stopPropagation();
-                    const reloadables = doc.querySelectorAll(".sidebar-cables .sidebar__reloadable");
-                    const doubleClickEvent = doc.createEvent("MouseEvents");
-                    doubleClickEvent.initEvent("dblclick", true, true);
-                    reloadables.forEach((reloadable) =>
-                    {
-                        reloadable.dispatchEvent(doubleClickEvent);
-                    });
-                });
-                header.appendChild(headerUndo);
-            }
-        }
-    }
-    updateMinimize(header);
-}
-
-function onDefaultMinimizedPortChanged()
-{
-    if (!openCloseBtn) { return; }
-    if (defaultMinimizedPort.get())
-    {
-        sidebarEl.classList.add("sidebar--closed");
-        if (visiblePort.get()) isOpenOut.set(false);
-    }
-    else
-    {
-        sidebarEl.classList.remove("sidebar--closed");
-        if (visiblePort.get()) isOpenOut.set(true);
-    }
-}
-
-function onOpacityPortChange()
-{
-    const opacity = opacityPort.get();
-    sidebarEl.style.opacity = opacity;
-}
-
-function onVisiblePortChange()
-{
-    if (!sidebarEl) return;
-    if (visiblePort.get())
-    {
-        sidebarEl.style.display = "block";
-        if (!sidebarEl.classList.contains("sidebar--closed")) isOpenOut.set(true);
-    }
-    else
-    {
-        sidebarEl.style.display = "none";
-        isOpenOut.set(false);
-    }
-}
-
-side.onChanged = function ()
-{
-
-};
-
-/**
- * Some styles cannot be set directly inline, so a dynamic stylesheet is needed.
- * Here hover states can be set later on e.g.
- */
-function updateDynamicStyles()
-{
-    const dynamicStyles = doc.querySelectorAll("." + CSS_ELEMENT_DYNAMIC_CLASS);
-    if (dynamicStyles)
-    {
-        dynamicStyles.forEach(function (e)
-        {
-            e.parentNode.removeChild(e);
-        });
-    }
-
-    if (!addCss.get()) return;
-
-    const newDynamicStyle = doc.createElement("style");
-    newDynamicStyle.classList.add("cablesEle");
-    newDynamicStyle.classList.add(CSS_ELEMENT_DYNAMIC_CLASS);
-    let cssText = ".sidebar--closed .sidebar__close-button { ";
-    cssText += "opacity: " + minimizedOpacityPort.get();
-    cssText += "}";
-    const cssTextEl = doc.createTextNode(cssText);
-    newDynamicStyle.appendChild(cssTextEl);
-    doc.body.appendChild(newDynamicStyle);
-}
-
-function initSidebarElement()
-{
-    const element = doc.createElement("div");
-    element.classList.add(SIDEBAR_CLASS);
-    element.classList.add(SIDEBAR_ID);
-    const canvasWrapper = op.patch.cgl.canvas.parentElement; /* maybe this is bad outside cables!? */
-
-    // header...
-    const headerGroup = doc.createElement("div");
-    headerGroup.classList.add("sidebar__group");
-
-    element.appendChild(headerGroup);
-    const header = doc.createElement("div");
-    header.classList.add("sidebar__group-header");
-
-    element.appendChild(header);
-    const headerTitle = doc.createElement("span");
-    headerTitle.classList.add("sidebar__group-header-title");
-    headerTitleText = doc.createElement("span");
-    headerTitleText.classList.add("sidebar__group-header-title-text");
-    headerTitleText.innerHTML = inTitle.get();
-    headerTitle.appendChild(headerTitleText);
-    header.appendChild(headerTitle);
-
-    initUndoButton(header);
-    updateMinimize(header);
-
-    headerGroup.appendChild(header);
-    element.appendChild(headerGroup);
-    headerGroup.addEventListener("click", onOpenCloseBtnClick);
-
-    if (!canvasWrapper)
-    {
-        op.warn("[sidebar] no canvas parentelement found...");
-        return;
-    }
-    canvasWrapper.appendChild(element);
-    const items = doc.createElement("div");
-    items.classList.add(SIDEBAR_ITEMS_CLASS);
-    element.appendChild(items);
-    openCloseBtn = doc.createElement("div");
-    openCloseBtn.classList.add(SIDEBAR_OPEN_CLOSE_BTN_CLASS);
-    openCloseBtn.addEventListener("click", onOpenCloseBtnClick);
-    element.appendChild(openCloseBtn);
-
-    return element;
-}
-
-inTitle.onChange = function ()
-{
-    if (headerTitleText)headerTitleText.innerHTML = inTitle.get();
-};
-
-function setClosed(b)
-{
-
-}
-
-function onOpenCloseBtnClick(ev)
-{
-    ev.stopPropagation();
-    if (!sidebarEl) { op.logError("Sidebar could not be closed..."); return; }
-    sidebarEl.classList.toggle("sidebar--closed");
-    const btn = ev.target;
-    let btnText = BTN_TEXT_OPEN;
-    if (sidebarEl.classList.contains("sidebar--closed"))
-    {
-        btnText = BTN_TEXT_CLOSED;
-        isOpenOut.set(false);
-    }
-    else
-    {
-        isOpenOut.set(true);
-    }
-}
-
-function initSidebarCss()
-{
-    const cssElements = doc.querySelectorAll("." + CSS_ELEMENT_CLASS);
-    // remove old script tag
-    if (cssElements)
-    {
-        cssElements.forEach((e) =>
-        {
-            e.parentNode.removeChild(e);
-        });
-    }
-
-    if (!addCss.get()) return;
-
-    const newStyle = doc.createElement("style");
-
-    newStyle.innerHTML = attachments.style_css;
-    newStyle.classList.add(CSS_ELEMENT_CLASS);
-    newStyle.classList.add("cablesEle");
-    doc.body.appendChild(newStyle);
-}
-
-function onDelete()
-{
-    removeElementFromDOM(sidebarEl);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
-}
-
-}
-};
-
-CABLES.OPS["5a681c35-78ce-4cb3-9858-bc79c34c6819"]={f:Ops.Sidebar.Sidebar,objName:"Ops.Sidebar.Sidebar"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.Button_v2
-// 
-// **************************************************************
-
-Ops.Sidebar.Button_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-// inputs
-const parentPort = op.inObject("link");
-const buttonTextPort = op.inString("Text", "Button");
-
-// outputs
-const siblingsPort = op.outObject("childs");
-const buttonPressedPort = op.outTrigger("Pressed Trigger");
-
-const inGreyOut = op.inBool("Grey Out", false);
-const inVisible = op.inBool("Visible", true);
-
-// vars
-const el = document.createElement("div");
-el.dataset.op = op.id;
-el.classList.add("cablesEle");
-el.classList.add("sidebar__item");
-el.classList.add("sidebar--button");
-const input = document.createElement("button");
-input.classList.add("sidebar__button-input");
-el.appendChild(input);
-input.addEventListener("click", onButtonClick);
-input.style.width = "100%";
-const inputText = document.createTextNode(buttonTextPort.get());
-input.appendChild(inputText);
-op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
-
-// events
-parentPort.onChange = onParentChanged;
-buttonTextPort.onChange = onButtonTextChanged;
-op.onDelete = onDelete;
-
-const greyOut = document.createElement("div");
-greyOut.classList.add("sidebar__greyout");
-el.appendChild(greyOut);
-greyOut.style.display = "none";
-
-inGreyOut.onChange = function ()
-{
-    greyOut.style.display = inGreyOut.get() ? "block" : "none";
-};
-
-inVisible.onChange = function ()
-{
-    el.style.display = inVisible.get() ? "block" : "none";
-};
-
-function onButtonClick()
-{
-    buttonPressedPort.trigger();
-}
-
-function onButtonTextChanged()
-{
-    const buttonText = buttonTextPort.get();
-    input.textContent = buttonText;
-
-    input.setAttribute("aria-label", "button " + buttonTextPort.get());
-
-    if (CABLES.UI) op.setUiAttrib({ "extendTitle": buttonText });
-}
-
-function onParentChanged()
-{
-    siblingsPort.set(null);
-    const parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        siblingsPort.set(parent);
-    }
-    else
-    { // detach
-        if (el.parentElement)
-        {
-            el.parentElement.removeChild(el);
-        }
-    }
-}
-
-function showElement(el)
-{
-    if (el)
-    {
-        el.style.display = "block";
-    }
-}
-
-function hideElement(el)
-{
-    if (el)
-    {
-        el.style.display = "none";
-    }
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["5e9c6933-0605-4bf7-8671-a016d917f327"]={f:Ops.Sidebar.Button_v2,objName:"Ops.Sidebar.Button_v2"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Trigger.TriggerSend
-// 
-// **************************************************************
-
-Ops.Trigger.TriggerSend= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    trigger = op.inTriggerButton("Trigger"),
-    next = op.outTrigger("Next");
-
-op.varName = op.inValueSelect("Named Trigger", [], "", true);
-
-op.varName.onChange = updateName;
-
-trigger.onTriggered = doTrigger;
-
-op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
-
-updateVarNamesDropdown();
-
-op.varName.setUiAttribs({ "_triggerSelect": true });
-
-function updateVarNamesDropdown()
-{
-    if (CABLES.UI)
-    {
-        let varnames = [];
-        const vars = op.patch.namedTriggers;
-        varnames.push("+ create new one");
-        for (const i in vars) varnames.push(i);
-        varnames = varnames.sort();
-        op.varName.uiAttribs.values = varnames;
-    }
-}
-
-function updateName()
-{
-    if (CABLES.UI)
-    {
-        if (op.varName.get() == "+ create new one")
-        {
-            new CABLES.UI.ModalDialog({
-                "prompt": true,
-                "title": "New Trigger",
-                "text": "Enter a name for the new trigger",
-                "promptValue": "",
-                "promptOk": (str) =>
-                {
-                    op.varName.set(str);
-                    op.patch.namedTriggers[str] = op.patch.namedTriggers[str] || [];
-                    updateVarNamesDropdown();
-                }
-            });
-            return;
-        }
-
-        op.refreshParams();
-    }
-
-    if (!op.patch.namedTriggers[op.varName.get()])
-    {
-        op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
-        op.patch.emitEvent("namedTriggersChanged");
-    }
-
-    op.setTitle(">" + op.varName.get());
-
-    op.refreshParams();
-    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
-}
-
-function doTrigger()
-{
-    const arr = op.patch.namedTriggers[op.varName.get()];
-    // fire an event even if noone is receiving this trigger
-    // this way TriggerReceiveFilter can still handle it
-    op.patch.emitEvent("namedTriggerSent", op.varName.get());
-
-    if (!arr)
-    {
-        op.setUiError("unknowntrigger", "unknown trigger");
-        return;
-    }
-    else op.setUiError("unknowntrigger", null);
-
-    for (let i = 0; i < arr.length; i++)
-    {
-        arr[i]();
-    }
-
-    next.trigger();
-}
-
-}
-};
-
-CABLES.OPS["ce1eaf2b-943b-4dc0-ab5e-ee11b63c9ed0"]={f:Ops.Trigger.TriggerSend,objName:"Ops.Trigger.TriggerSend"};
 
 
 
@@ -10633,6 +9559,1984 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["52dc1ef8-deb0-4664-a924-4c5548aa8a55"]={f:Ops.Sidebar.ColorPicker_v3,objName:"Ops.Sidebar.ColorPicker_v3"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Button_v2
+// 
+// **************************************************************
+
+Ops.Sidebar.Button_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+// inputs
+const parentPort = op.inObject("link");
+const buttonTextPort = op.inString("Text", "Button");
+
+// outputs
+const siblingsPort = op.outObject("childs");
+const buttonPressedPort = op.outTrigger("Pressed Trigger");
+
+const inGreyOut = op.inBool("Grey Out", false);
+const inVisible = op.inBool("Visible", true);
+
+// vars
+const el = document.createElement("div");
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+el.classList.add("sidebar__item");
+el.classList.add("sidebar--button");
+const input = document.createElement("button");
+input.classList.add("sidebar__button-input");
+el.appendChild(input);
+input.addEventListener("click", onButtonClick);
+input.style.width = "100%";
+const inputText = document.createTextNode(buttonTextPort.get());
+input.appendChild(inputText);
+op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
+
+// events
+parentPort.onChange = onParentChanged;
+buttonTextPort.onChange = onButtonTextChanged;
+op.onDelete = onDelete;
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+el.appendChild(greyOut);
+greyOut.style.display = "none";
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+function onButtonClick()
+{
+    buttonPressedPort.trigger();
+}
+
+function onButtonTextChanged()
+{
+    const buttonText = buttonTextPort.get();
+    input.textContent = buttonText;
+
+    input.setAttribute("aria-label", "button " + buttonTextPort.get());
+
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": buttonText });
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    const parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else
+    { // detach
+        if (el.parentElement)
+        {
+            el.parentElement.removeChild(el);
+        }
+    }
+}
+
+function showElement(el)
+{
+    if (el)
+    {
+        el.style.display = "block";
+    }
+}
+
+function hideElement(el)
+{
+    if (el)
+    {
+        el.style.display = "none";
+    }
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["5e9c6933-0605-4bf7-8671-a016d917f327"]={f:Ops.Sidebar.Button_v2,objName:"Ops.Sidebar.Button_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Cables.LoadingStatus_v2
+// 
+// **************************************************************
+
+Ops.Cables.LoadingStatus_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exe = op.inTrigger("exe"),
+    startTimeLine = op.inBool("Play Timeline", true),
+    next = op.outTrigger("Next"),
+    outInitialFinished = op.outBoolNum("Finished Initial Loading", false),
+    outLoading = op.outBoolNum("Loading"),
+    outProgress = op.outNumber("Progress"),
+    outList = op.outArray("Jobs"),
+    loadingFinished = op.outTrigger("Trigger Loading Finished ");
+op.toWorkPortsNeedToBeLinked(exe);
+const patch = op.patch;
+
+let finishedOnce = false;
+const preRenderTimes = [];
+let firstTime = true;
+let timeout = 0;
+
+document.body.classList.add("cables-loading");
+
+let loadingId = patch.loading.start("loadingStatusInit", "loadingStatusInit", op);
+
+op.patch.loading.on("finishedTask", updateStatus.bind(this));
+op.patch.loading.on("startTask", updateStatus.bind(this));
+
+function updateStatus()
+{
+    const jobs = op.patch.loading.getListJobs();
+    outProgress.set(patch.loading.getProgress());
+
+    let hasFinished = jobs.length === 0;
+    const notFinished = !hasFinished;
+
+    if (notFinished)
+    {
+        outList.set(op.patch.loading.getListJobs());
+    }
+
+    if (notFinished)
+    {
+        if (firstTime)
+        {
+            // if (preRenderOps.get()) op.patch.preRenderOps();
+
+            op.patch.timer.setTime(0);
+            if (startTimeLine.get())
+            {
+                op.patch.timer.play();
+            }
+            else
+            {
+                op.patch.timer.pause();
+            }
+        }
+        firstTime = false;
+
+        document.body.classList.remove("cables-loading");
+        document.body.classList.add("cables-loaded");
+    }
+    else
+    {
+        finishedOnce = true;
+        outList.set(op.patch.loading.getListJobs());
+        if (patch.loading.getProgress() < 1.0)
+        {
+            op.patch.timer.setTime(0);
+            op.patch.timer.pause();
+        }
+    }
+
+    outInitialFinished.set(finishedOnce);
+
+    if (outLoading.get() && hasFinished) loadingFinished.trigger();
+
+    outLoading.set(notFinished);
+    // clearTimeout(timeout);
+    // if (notFinished) outLoading.set(notFinished);
+    // else
+    //     timeout = setTimeout(() =>
+    //     {
+    //         outLoading.set(notFinished);
+    //     }, 100);
+
+    op.setUiAttribs({ "loading": notFinished });
+}
+
+exe.onTriggered = () =>
+{
+    updateStatus();
+
+    next.trigger();
+
+    if (loadingId)
+    {
+        patch.loading.finished(loadingId);
+        loadingId = null;
+    }
+};
+
+}
+};
+
+CABLES.OPS["e62f7f4c-7436-437e-8451-6bc3c28545f7"]={f:Ops.Cables.LoadingStatus_v2,objName:"Ops.Cables.LoadingStatus_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Boolean.IfTrueThen_v2
+// 
+// **************************************************************
+
+Ops.Boolean.IfTrueThen_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exe = op.inTrigger("exe"),
+    boolean = op.inValueBool("boolean", false),
+    triggerThen = op.outTrigger("then"),
+    triggerElse = op.outTrigger("else");
+
+exe.onTriggered = exec;
+
+// let b = false;
+
+// boolean.onChange = () =>
+// {
+//     b = boolean.get();
+// };
+
+function exec()
+{
+    if (boolean.get()) triggerThen.trigger();
+    else triggerElse.trigger();
+}
+
+}
+};
+
+CABLES.OPS["9549e2ed-a544-4d33-a672-05c7854ccf5d"]={f:Ops.Boolean.IfTrueThen_v2,objName:"Ops.Boolean.IfTrueThen_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Meshes.TextMesh_v2
+// 
+// **************************************************************
+
+Ops.Gl.Meshes.TextMesh_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"textmesh_frag":"{{MODULES_HEAD}}\n\n#define INSTANCING\n\nUNI sampler2D tex;\n#ifdef DO_MULTEX\n    UNI sampler2D texMul;\n#endif\n#ifdef DO_MULTEX_MASK\n    UNI sampler2D texMulMask;\n#endif\nIN vec2 texCoord;\nIN vec2 texPos;\nUNI float r;\nUNI float g;\nUNI float b;\nUNI float a;\n\nflat IN float frag_instIndex;\n\nvoid main()\n{\n    {{MODULE_BEGIN_FRAG}}\n\n    vec4 col=texture(tex,texCoord);\n    col.a=col.r;\n    col.r*=r;\n    col.g*=g;\n    col.b*=b;\n    col*=a;\n\n    if(col.a==0.0)discard;\n\n    #ifdef DO_MULTEX\n        col*=texture(texMul,texPos);\n    #endif\n\n    #ifdef DO_MULTEX_MASK\n        col*=texture(texMulMask,texPos).r;\n    #endif\n\n    {{MODULE_COLOR}}\n\n    outColor=col;\n}","textmesh_vert":"{{MODULES_HEAD}}\n\nUNI sampler2D tex;\nUNI mat4 projMatrix;\nUNI mat4 modelMatrix;\nUNI mat4 viewMatrix;\nUNI float scale;\nIN vec3 vPosition;\nIN vec2 attrTexCoord;\nIN mat4 instMat;\nIN vec2 attrTexOffsets;\nIN vec2 attrTexSize;\nIN vec2 attrTexPos;\nIN float attrVertIndex;\nIN float instanceIndex;\nflat OUT float frag_instIndex;\n\nOUT vec2 texPos;\n\nOUT vec2 texCoord;\nOUT vec4 modelPos;\n\nvoid main()\n{\n\n    texCoord=(attrTexCoord*(attrTexSize)) + attrTexOffsets;\n    mat4 instMVMat=instMat;\n    instMVMat[3][0]*=scale;\n\n    texPos=attrTexPos;\n\n    vec4 pos=vec4( vPosition.x*(attrTexSize.x/attrTexSize.y)*scale,vPosition.y*scale,vPosition.z*scale, 1. );\n\n    mat4 mvMatrix=viewMatrix * modelMatrix * instMVMat;\n    frag_instIndex=instanceIndex;\n\n    {{MODULE_VERTEX_POSITION}}\n\n    gl_Position = projMatrix * mvMatrix * pos;\n}\n\n",};
+const
+    render = op.inTrigger("Render"),
+    str = op.inString("Text", "cables"),
+    scaleText = op.inFloat("Scale Text", 1),
+    scale = op.inValueFloat("Scale", 1),
+    inFont = op.inString("Font", "Arial"),
+    align = op.inValueSelect("align", ["left", "center", "right"], "center"),
+    valign = op.inValueSelect("vertical align", ["Top", "Middle", "Bottom"], "Middle"),
+    lineHeight = op.inValueFloat("Line Height", 1),
+    letterSpace = op.inValueFloat("Letter Spacing"),
+
+    tfilter = op.inSwitch("filter", ["nearest", "linear", "mipmap"], "mipmap"),
+    aniso = op.inSwitch("Anisotropic", [0, 1, 2, 4, 8, 16], 0),
+
+    inMulTex = op.inTexture("Texture Color"),
+    inMulTexMask = op.inTexture("Texture Mask"),
+    next = op.outTrigger("Next"),
+    textureOut = op.outTexture("texture"),
+    outLines = op.outNumber("Total Lines", 0),
+    outWidth = op.outNumber("Width", 0),
+    loaded = op.outBoolNum("Font Available", 0);
+
+const cgl = op.patch.cgl;
+const vScale = vec3.create();
+
+vec3.set(vScale, 1, 1, 1);
+
+op.toWorkPortsNeedToBeLinked(render);
+
+op.setPortGroup("Masking", [inMulTex, inMulTexMask]);
+
+scale.setUiAttribs({ "title": "Line Scale" });
+
+textureOut.setUiAttribs({ "hidePort": true });
+
+const textureSize = 1024;
+let fontLoaded = false;
+let needUpdate = true;
+
+align.onChange =
+    str.onChange =
+    lineHeight.onChange = generateMeshLater;
+
+function generateMeshLater()
+{
+    needUpdate = true;
+}
+
+let canvasid = null;
+CABLES.OpTextureMeshCanvas = {};
+let valignMode = 0;
+
+const geom = null;
+let mesh = null;
+
+let createMesh = true;
+let createTexture = true;
+
+op.onDelete = function () { if (mesh)mesh.dispose(); };
+
+scaleText.onChange = () =>
+{
+    vec3.set(vScale, scaleText.get(), scaleText.get(), scaleText.get());
+};
+
+aniso.onChange =
+tfilter.onChange = () =>
+{
+    getFont().texture = null;
+    createTexture = true;
+};
+
+inMulTexMask.onChange =
+inMulTex.onChange = function ()
+{
+    shader.toggleDefine("DO_MULTEX", inMulTex.get());
+    shader.toggleDefine("DO_MULTEX_MASK", inMulTexMask.get());
+};
+
+textureOut.setRef(null);
+inFont.onChange = function ()
+{
+    createTexture = true;
+    createMesh = true;
+    checkFont();
+};
+
+op.patch.on("fontLoaded", (fontName) =>
+{
+    if (fontName == inFont.get())
+    {
+        createTexture = true;
+        createMesh = true;
+    }
+});
+
+function checkFont()
+{
+    const oldFontLoaded = fontLoaded;
+    try
+    {
+        fontLoaded = document.fonts.check("20px \"" + inFont.get() + "\"");
+    }
+    catch (ex)
+    {
+        op.logError(ex);
+    }
+
+    if (!oldFontLoaded && fontLoaded)
+    {
+        loaded.set(true);
+        createTexture = true;
+        createMesh = true;
+    }
+
+    if (!fontLoaded) setTimeout(checkFont, 250);
+}
+
+valign.onChange = function ()
+{
+    if (valign.get() == "Middle")valignMode = 0;
+    else if (valign.get() == "Top")valignMode = 1;
+    else if (valign.get() == "Bottom")valignMode = 2;
+};
+
+function getFont()
+{
+    canvasid = "" + inFont.get();
+    if (CABLES.OpTextureMeshCanvas.hasOwnProperty(canvasid))
+        return CABLES.OpTextureMeshCanvas[canvasid];
+
+    const fontImage = document.createElement("canvas");
+    fontImage.dataset.font = inFont.get();
+    fontImage.id = "texturetext_" + CABLES.generateUUID();
+    fontImage.style.display = "none";
+    const body = document.getElementsByTagName("body")[0];
+    body.appendChild(fontImage);
+    const _ctx = fontImage.getContext("2d");
+    CABLES.OpTextureMeshCanvas[canvasid] =
+        {
+            "ctx": _ctx,
+            "canvas": fontImage,
+            "chars": {},
+            "characters": "",
+            "fontSize": 320
+        };
+    return CABLES.OpTextureMeshCanvas[canvasid];
+}
+
+op.onDelete = function ()
+{
+    if (canvasid && CABLES.OpTextureMeshCanvas[canvasid])
+        CABLES.OpTextureMeshCanvas[canvasid].canvas.remove();
+};
+
+const shader = new CGL.Shader(cgl, "TextMesh", this);
+shader.setSource(attachments.textmesh_vert, attachments.textmesh_frag);
+const uniTex = new CGL.Uniform(shader, "t", "tex", 0);
+const uniTexMul = new CGL.Uniform(shader, "t", "texMul", 1);
+const uniTexMulMask = new CGL.Uniform(shader, "t", "texMulMask", 2);
+const uniScale = new CGL.Uniform(shader, "f", "scale", scale);
+
+const
+    r = op.inValueSlider("r", 1),
+    g = op.inValueSlider("g", 1),
+    b = op.inValueSlider("b", 1),
+    a = op.inValueSlider("a", 1),
+    runiform = new CGL.Uniform(shader, "f", "r", r),
+    guniform = new CGL.Uniform(shader, "f", "g", g),
+    buniform = new CGL.Uniform(shader, "f", "b", b),
+    auniform = new CGL.Uniform(shader, "f", "a", a);
+r.setUiAttribs({ "colorPick": true });
+
+op.setPortGroup("Display", [scale, inFont]);
+op.setPortGroup("Alignment", [align, valign]);
+op.setPortGroup("Color", [r, g, b, a]);
+
+let height = 0;
+const vec = vec3.create();
+let lastTextureChange = -1;
+let disabled = false;
+
+render.onTriggered = function ()
+{
+    if (needUpdate)
+    {
+        generateMesh();
+        needUpdate = false;
+    }
+    const font = getFont();
+    if (font.lastChange != lastTextureChange)
+    {
+        createMesh = true;
+        lastTextureChange = font.lastChange;
+    }
+
+    if (createTexture) generateTexture();
+    if (createMesh) generateMesh();
+
+    if (mesh && mesh.numInstances > 0)
+    {
+        cgl.pushBlendMode(CGL.BLEND_NORMAL, true);
+        cgl.pushShader(shader);
+        cgl.setTexture(0, textureOut.get().tex);
+
+        const mulTex = inMulTex.get();
+        if (mulTex)cgl.setTexture(1, mulTex.tex);
+
+        const mulTexMask = inMulTexMask.get();
+        if (mulTexMask)cgl.setTexture(2, mulTexMask.tex);
+
+        if (valignMode === 2) vec3.set(vec, 0, height, 0);
+        else if (valignMode === 1) vec3.set(vec, 0, 0, 0);
+        else if (valignMode === 0) vec3.set(vec, 0, height / 2, 0);
+
+        vec[1] -= lineHeight.get();
+        cgl.pushModelMatrix();
+        mat4.translate(cgl.mMatrix, cgl.mMatrix, vec);
+        mat4.scale(cgl.mMatrix, cgl.mMatrix, vScale);
+
+        if (!disabled)mesh.render(cgl.getShader());
+
+        cgl.popModelMatrix();
+
+        cgl.setTexture(0, null);
+        cgl.popShader();
+        cgl.popBlendMode();
+    }
+
+    next.trigger();
+};
+
+letterSpace.onChange = function ()
+{
+    createMesh = true;
+};
+
+function generateMesh()
+{
+    const theString = String(str.get() + "");
+    if (!textureOut.get()) return;
+
+    const font = getFont();
+    if (!font.geom)
+    {
+        font.geom = new CGL.Geometry("textmesh");
+
+        font.geom.vertices = [
+            1.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+            1.0, 0.0, 0.0,
+            0.0, 0.0, 0.0
+        ];
+
+        font.geom.texCoords = new Float32Array([
+            1.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 0.0
+        ]);
+
+        font.geom.verticesIndices = [
+            0, 1, 2,
+            2, 1, 3
+        ];
+    }
+
+    if (!mesh)mesh = new CGL.Mesh(cgl, font.geom);
+
+    const strings = (theString).split("\n");
+    outLines.set(strings.length);
+
+    const transformations = [];
+    const tcOffsets = [];
+    const tcSize = [];
+    const texPos = [];
+    const m = mat4.create();
+    let charCounter = 0;
+    let maxWidth = 0;
+    createTexture = false;
+
+    for (let s = 0; s < strings.length; s++)
+    {
+        const txt = strings[s];
+        const numChars = txt.length;
+
+        let pos = 0;
+        let offX = 0;
+        let width = 0;
+
+        for (let i = 0; i < numChars; i++)
+        {
+            const chStr = txt.substring(i, i + 1);
+            const char = font.chars[String(chStr)];
+            if (char)
+            {
+                width += (char.texCoordWidth / char.texCoordHeight);
+                width += letterSpace.get();
+            }
+        }
+
+        width -= letterSpace.get();
+
+        height = 0;
+
+        if (align.get() == "left") offX = 0;
+        else if (align.get() == "right") offX = width;
+        else if (align.get() == "center") offX = width / 2;
+
+        height = (s + 1) * lineHeight.get();
+
+        for (let i = 0; i < numChars; i++)
+        {
+            const chStr = txt.substring(i, i + 1);
+            const char = font.chars[String(chStr)];
+
+            if (!char)
+            {
+                createTexture = true;
+                return;
+            }
+            else
+            {
+                texPos.push(pos / width * 0.99 + 0.005, (1.0 - (s / (strings.length - 1))) * 0.99 + 0.005);
+                tcOffsets.push(char.texCoordX, 1 - char.texCoordY - char.texCoordHeight);
+                tcSize.push(char.texCoordWidth, char.texCoordHeight);
+
+                mat4.identity(m);
+                mat4.translate(m, m, [pos - offX, 0 - s * lineHeight.get(), 0]);
+
+                pos += (char.texCoordWidth / char.texCoordHeight) + letterSpace.get();
+                maxWidth = Math.max(maxWidth, pos - offX);
+
+                transformations.push(Array.prototype.slice.call(m));
+
+                charCounter++;
+            }
+        }
+    }
+
+    const transMats = [].concat.apply([], transformations);
+
+    disabled = false;
+    if (transMats.length == 0)disabled = true;
+
+    const n = transMats.length / 16;
+    mesh.setNumInstances(n);
+
+    if (mesh.numInstances == 0)
+    {
+        disabled = true;
+        return;
+    }
+
+    outWidth.set(maxWidth * scale.get());
+    mesh.setAttribute("instMat", new Float32Array(transMats), 16, { "instanced": true });
+    mesh.setAttribute("attrTexOffsets", new Float32Array(tcOffsets), 2, { "instanced": true });
+    mesh.setAttribute("attrTexSize", new Float32Array(tcSize), 2, { "instanced": true });
+    mesh.setAttribute("attrTexPos", new Float32Array(texPos), 2, { "instanced": true });
+
+    createMesh = false;
+
+    if (createTexture) generateTexture();
+}
+
+function printChars(fontSize, simulate)
+{
+    const font = getFont();
+    if (!simulate) font.chars = {};
+
+    const ctx = font.ctx;
+
+    ctx.font = fontSize + "px " + inFont.get();
+    ctx.textAlign = "left";
+
+    let posy = 0;
+    let posx = 0;
+    const lineHeight = fontSize * 1.4;
+    const result =
+        {
+            "fits": true
+        };
+
+    for (let i = 0; i < font.characters.length; i++)
+    {
+        const chStr = String(font.characters.substring(i, i + 1));
+        const chWidth = (ctx.measureText(chStr).width);
+
+        if (posx + chWidth >= textureSize)
+        {
+            posy += lineHeight + 2;
+            posx = 0;
+        }
+
+        if (!simulate)
+        {
+            font.chars[chStr] =
+                {
+                    "str": chStr,
+                    "texCoordX": posx / textureSize,
+                    "texCoordY": posy / textureSize,
+                    "texCoordWidth": chWidth / textureSize,
+                    "texCoordHeight": lineHeight / textureSize,
+                };
+
+            ctx.fillText(chStr, posx, posy + fontSize);
+        }
+
+        posx += chWidth + 12;
+    }
+
+    if (posy > textureSize - lineHeight)
+    {
+        result.fits = false;
+    }
+
+    result.spaceLeft = textureSize - posy;
+
+    return result;
+}
+
+function generateTexture()
+{
+    let filter = CGL.Texture.FILTER_LINEAR;
+    if (tfilter.get() == "nearest") filter = CGL.Texture.FILTER_NEAREST;
+    if (tfilter.get() == "mipmap") filter = CGL.Texture.FILTER_MIPMAP;
+
+    const font = getFont();
+    let string = String(str.get());
+    if (string == null || string == undefined)string = "";
+    for (let i = 0; i < string.length; i++)
+    {
+        const ch = string.substring(i, i + 1);
+        if (font.characters.indexOf(ch) == -1)
+        {
+            font.characters += ch;
+            createTexture = true;
+        }
+    }
+
+    const ctx = font.ctx;
+    font.canvas.width = font.canvas.height = textureSize;
+
+    if (!font.texture)
+        font.texture = CGL.Texture.createFromImage(cgl, font.canvas, {
+            "filter": filter,
+            "anisotropic": parseFloat(aniso.get())
+        });
+
+    font.texture.setSize(textureSize, textureSize);
+
+    ctx.fillStyle = "transparent";
+    ctx.clearRect(0, 0, textureSize, textureSize);
+    ctx.fillStyle = "rgba(255,255,255,255)";
+
+    let fontSize = font.fontSize + 40;
+    let simu = printChars(fontSize, true);
+
+    while (!simu.fits)
+    {
+        fontSize -= 5;
+        simu = printChars(fontSize, true);
+    }
+
+    printChars(fontSize, false);
+
+    ctx.restore();
+
+    font.texture.initTexture(font.canvas, filter);
+    font.texture.unpackAlpha = true;
+    textureOut.setRef(font.texture);
+
+    font.lastChange = CABLES.now();
+
+    createMesh = true;
+    createTexture = false;
+}
+
+}
+};
+
+CABLES.OPS["2390f6b3-2122-412e-8c8d-5c2f574e8bd1"]={f:Ops.Gl.Meshes.TextMesh_v2,objName:"Ops.Gl.Meshes.TextMesh_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.String.NumberToString_v2
+// 
+// **************************************************************
+
+Ops.String.NumberToString_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    val = op.inValue("Number"),
+    decPlaces = op.inInt("Decimal Places", 4),
+    result = op.outString("Result");
+
+let doDec = false;
+let decm = 1;
+decPlaces.onChange = updateDecm;
+val.onChange = update;
+updateDecm();
+update();
+
+function updateDecm()
+{
+    doDec = decPlaces.get() < 100;
+    decm = Math.pow(10, decPlaces.get());
+    update();
+}
+
+function update()
+{
+    if (doDec)
+        result.set(String(Math.round(val.get() * decm) / decm));
+    else
+        result.set(String(val.get() || 0));
+}
+
+}
+};
+
+CABLES.OPS["5c6d375a-82db-4366-8013-93f56b4061a9"]={f:Ops.String.NumberToString_v2,objName:"Ops.String.NumberToString_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.String.StringCompose_v3
+// 
+// **************************************************************
+
+Ops.String.StringCompose_v3= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    format=op.inString('Format',"hello $a, $b $c und $d"),
+    a=op.inString('String A','world'),
+    b=op.inString('String B',1),
+    c=op.inString('String C',2),
+    d=op.inString('String D',3),
+    e=op.inString('String E'),
+    f=op.inString('String F'),
+    result=op.outString("Result");
+
+format.onChange=
+    a.onChange=
+    b.onChange=
+    c.onChange=
+    d.onChange=
+    e.onChange=
+    f.onChange=update;
+
+update();
+
+function update()
+{
+    var str=format.get()||'';
+    if(typeof str!='string')
+        str='';
+
+    str = str.replace(/\$a/g, a.get());
+    str = str.replace(/\$b/g, b.get());
+    str = str.replace(/\$c/g, c.get());
+    str = str.replace(/\$d/g, d.get());
+    str = str.replace(/\$e/g, e.get());
+    str = str.replace(/\$f/g, f.get());
+
+    result.set(str);
+}
+}
+};
+
+CABLES.OPS["6afea9f4-728d-4f3c-9e75-62ddc1448bf0"]={f:Ops.String.StringCompose_v3,objName:"Ops.String.StringCompose_v3"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.Multiply
+// 
+// **************************************************************
+
+Ops.Math.Multiply= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValueFloat("number1", 1),
+    number2 = op.inValueFloat("number2", 1),
+    result = op.outNumber("result");
+
+op.setUiAttribs({ "mathTitle": true });
+
+number1.onChange = number2.onChange = update;
+update();
+
+function update()
+{
+    const n1 = number1.get();
+    const n2 = number2.get();
+
+    result.set(n1 * n2);
+}
+
+}
+};
+
+CABLES.OPS["1bbdae06-fbb2-489b-9bcc-36c9d65bd441"]={f:Ops.Math.Multiply,objName:"Ops.Math.Multiply"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.Round
+// 
+// **************************************************************
+
+Ops.Math.Round= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValueFloat("number"),
+    decPlaces = op.inInt("Decimal Places", 0),
+    result = op.outNumber("result");
+
+let decm = 0;
+
+number1.onChange = exec;
+decPlaces.onChange = updateDecm;
+
+updateDecm();
+
+function updateDecm()
+{
+    decm = Math.pow(10, decPlaces.get());
+    exec();
+}
+
+function exec()
+{
+    result.set(Math.round(number1.get() * decm) / decm);
+}
+
+}
+};
+
+CABLES.OPS["1a1ef636-6d02-42ba-ae1e-627b917d0d2b"]={f:Ops.Math.Round,objName:"Ops.Math.Round"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Vars.VarSetNumber_v2
+// 
+// **************************************************************
+
+Ops.Vars.VarSetNumber_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const val = op.inValueFloat("Value", 0);
+op.varName = op.inDropDown("Variable", [], "", true);
+
+new CABLES.VarSetOpWrapper(op, "number", val, op.varName);
+
+}
+};
+
+CABLES.OPS["b5249226-6095-4828-8a1c-080654e192fa"]={f:Ops.Vars.VarSetNumber_v2,objName:"Ops.Vars.VarSetNumber_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Vars.VarGetNumber_v2
+// 
+// **************************************************************
+
+Ops.Vars.VarGetNumber_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const val = op.outNumber("Value");
+op.varName = op.inValueSelect("Variable", [], "", true);
+
+new CABLES.VarGetOpWrapper(op, "number", op.varName, val);
+
+}
+};
+
+CABLES.OPS["421f5b52-c0fa-47c4-8b7a-012b9e1c864a"]={f:Ops.Vars.VarGetNumber_v2,objName:"Ops.Vars.VarGetNumber_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Group
+// 
+// **************************************************************
+
+Ops.Sidebar.Group= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+// inputs
+let parentPort = op.inObject("link");
+let labelPort = op.inString("Text", "Group");
+const inShowTitle = op.inBool("Show Title", true);
+let defaultMinimizedPort = op.inValueBool("Default Minimized");
+const inVisible = op.inBool("Visible", true);
+
+// outputs
+let nextPort = op.outObject("next");
+let childrenPort = op.outObject("childs");
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+// vars
+let el = document.createElement("div");
+el.dataset.op = op.id;
+el.classList.add("sidebar__group");
+onDefaultMinimizedPortChanged();
+let header = document.createElement("div");
+header.classList.add("sidebar__group-header");
+header.classList.add("cablesEle");
+el.appendChild(header);
+header.addEventListener("click", onClick);
+let headerTitle = document.createElement("div");
+headerTitle.classList.add("sidebar__group-header-title");
+// headerTitle.textContent = labelPort.get();
+header.appendChild(headerTitle);
+let headerTitleText = document.createElement("span");
+headerTitleText.textContent = labelPort.get();
+headerTitleText.classList.add("sidebar__group-header-title-text");
+headerTitle.appendChild(headerTitleText);
+let icon = document.createElement("span");
+icon.classList.add("sidebar__group-header-icon");
+icon.classList.add("iconsidebar-chevron-up");
+headerTitle.appendChild(icon);
+let groupItems = document.createElement("div");
+groupItems.classList.add("sidebar__group-items");
+el.appendChild(groupItems);
+op.toWorkPortsNeedToBeLinked(parentPort);
+
+// events
+parentPort.onChange = onParentChanged;
+labelPort.onChange = onLabelTextChanged;
+defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
+op.onDelete = onDelete;
+
+// functions
+
+inShowTitle.onChange = () =>
+{
+    if (inShowTitle.get())header.style.display = "block";
+    else header.style.display = "none";
+};
+
+function onDefaultMinimizedPortChanged()
+{
+    if (defaultMinimizedPort.get())
+    {
+        el.classList.add("sidebar__group--closed");
+    }
+    else
+    {
+        el.classList.remove("sidebar__group--closed");
+    }
+}
+
+function onClick(ev)
+{
+    ev.stopPropagation();
+    el.classList.toggle("sidebar__group--closed");
+}
+
+function onLabelTextChanged()
+{
+    let labelText = labelPort.get();
+    headerTitleText.textContent = labelText;
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
+}
+
+function onParentChanged()
+{
+    childrenPort.set(null);
+    let parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        childrenPort.set({
+            "parentElement": groupItems,
+            "parentOp": op,
+        });
+        nextPort.set(parent);
+    }
+    else
+    { // detach
+        if (el.parentElement)
+        {
+            el.parentElement.removeChild(el);
+        }
+    }
+}
+
+function showElement(el)
+{
+    if (el)
+    {
+        el.style.display = "block";
+    }
+}
+
+function hideElement(el)
+{
+    if (el)
+    {
+        el.style.display = "none";
+    }
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["86ea2333-b51c-48ed-94c2-8b7b6e9ff34c"]={f:Ops.Sidebar.Group,objName:"Ops.Sidebar.Group"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.Compare.Equals
+// 
+// **************************************************************
+
+Ops.Math.Compare.Equals= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValue("number1", 1),
+    number2 = op.inValue("number2", 1),
+    result = op.outBoolNum("result");
+
+number1.onChange =
+    number2.onChange = exec;
+exec();
+
+function exec()
+{
+    result.set(number1.get() == number2.get());
+}
+
+}
+};
+
+CABLES.OPS["4dd3cc55-eebc-4187-9d4e-2e053a956fab"]={f:Ops.Math.Compare.Equals,objName:"Ops.Math.Compare.Equals"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Sidebar
+// 
+// **************************************************************
+
+Ops.Sidebar.Sidebar= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"style_css":" /*\n * SIDEBAR\n  http://danielstern.ca/range.css/#/\n  https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-progress-value\n */\n\n.sidebar-icon-undo\n{\n    width:10px;\n    height:10px;\n    background-image: url(\"data:image/svg+xml;charset=utf8, %3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='grey' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7v6h6'/%3E%3Cpath d='M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13'/%3E%3C/svg%3E\");\n    background-size: 19px;\n    background-repeat: no-repeat;\n    top: -19px;\n    margin-top: -7px;\n}\n\n.icon-chevron-down {\n    top: 2px;\n    right: 9px;\n}\n\n.iconsidebar-chevron-up,.sidebar__close-button {\n\tbackground-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tdXAiPjxwb2x5bGluZSBwb2ludHM9IjE4IDE1IDEyIDkgNiAxNSI+PC9wb2x5bGluZT48L3N2Zz4=);\n}\n\n.iconsidebar-minimizebutton {\n    background-position: 98% center;\n    background-repeat: no-repeat;\n}\n\n.sidebar-cables-right\n{\n    right: 15px;\n    left: initial !important;\n}\n\n.sidebar-cables *\n{\n    color: #BBBBBB !important;\n    font-family: Arial;\n}\n\n.sidebar-cables {\n    --sidebar-color: #07f78c;\n    --sidebar-width: 220px;\n    --sidebar-border-radius: 10px;\n    --sidebar-monospace-font-stack: \"SFMono-Regular\", Consolas, \"Liberation Mono\", Menlo, Courier, monospace;\n    --sidebar-hover-transition-time: .2s;\n\n    position: absolute;\n    top: 15px;\n    left: 15px;\n    border-radius: var(--sidebar-border-radius);\n    z-index: 100000;\n    width: var(--sidebar-width);\n    max-height: 100%;\n    box-sizing: border-box;\n    overflow-y: auto;\n    overflow-x: hidden;\n    font-size: 13px;\n    line-height: 1em; /* prevent emojis from breaking height of the title */\n}\n\n.sidebar-cables::selection {\n    background-color: var(--sidebar-color);\n    color: #EEEEEE;\n}\n\n.sidebar-cables::-webkit-scrollbar {\n    background-color: transparent;\n    --cables-scrollbar-width: 8px;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables::-webkit-scrollbar-track {\n    background-color: transparent;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables::-webkit-scrollbar-thumb {\n    background-color: #333333;\n    border-radius: 4px;\n    width: var(--cables-scrollbar-width);\n}\n\n.sidebar-cables--closed {\n    width: auto;\n}\n\n.sidebar__close-button {\n    background-color: #222;\n    /*-webkit-user-select: none;  */\n    /*-moz-user-select: none;     */\n    /*-ms-user-select: none;      */\n    /*user-select: none;          */\n    /*transition: background-color var(--sidebar-hover-transition-time);*/\n    /*color: #CCCCCC;*/\n    height: 2px;\n    /*border-bottom:20px solid #222;*/\n\n    /*box-sizing: border-box;*/\n    /*padding-top: 2px;*/\n    /*text-align: center;*/\n    /*cursor: pointer;*/\n    /*border-radius: 0 0 var(--sidebar-border-radius) var(--sidebar-border-radius);*/\n    /*opacity: 1.0;*/\n    /*transition: opacity 0.3s;*/\n    /*overflow: hidden;*/\n}\n\n.sidebar__close-button-icon {\n    display: inline-block;\n    /*opacity: 0;*/\n    width: 20px;\n    height: 20px;\n    /*position: relative;*/\n    /*top: -1px;*/\n\n\n}\n\n.sidebar--closed {\n    width: auto;\n    margin-right: 20px;\n}\n\n.sidebar--closed .sidebar__close-button {\n    margin-top: 8px;\n    margin-left: 8px;\n    padding:10px;\n\n    height: 25px;\n    width:25px;\n    border-radius: 50%;\n    cursor: pointer;\n    opacity: 0.3;\n    background-repeat: no-repeat;\n    background-position: center center;\n    transform:rotate(180deg);\n}\n\n.sidebar--closed .sidebar__group\n{\n    display:none;\n\n}\n.sidebar--closed .sidebar__close-button-icon {\n    background-position: 0px 0px;\n}\n\n.sidebar__close-button:hover {\n    background-color: #111111;\n    opacity: 1.0 !important;\n}\n\n/*\n * SIDEBAR ITEMS\n */\n\n.sidebar__items {\n    /* max-height: 1000px; */\n    /* transition: max-height 0.5;*/\n    background-color: #222;\n    padding-bottom: 20px;\n}\n\n.sidebar--closed .sidebar__items {\n    /* max-height: 0; */\n    height: 0;\n    display: none;\n    pointer-interactions: none;\n}\n\n.sidebar__item__right {\n    float: right;\n}\n\n/*\n * SIDEBAR GROUP\n */\n\n.sidebar__group {\n    /*background-color: #1A1A1A;*/\n    overflow: hidden;\n    box-sizing: border-box;\n    animate: height;\n    /*background-color: #151515;*/\n    /* max-height: 1000px; */\n    /* transition: max-height 0.5s; */\n--sidebar-group-header-height: 33px;\n}\n\n.sidebar__group-items\n{\n    padding-top: 15px;\n    padding-bottom: 15px;\n}\n\n.sidebar__group--closed {\n    /* max-height: 13px; */\n    height: var(--sidebar-group-header-height);\n}\n\n.sidebar__group-header {\n    box-sizing: border-box;\n    color: #EEEEEE;\n    background-color: #151515;\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n\n    /*height: 100%;//var(--sidebar-group-header-height);*/\n\n    padding-top: 7px;\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    cursor: pointer;\n    /*transition: background-color var(--sidebar-hover-transition-time);*/\n    position: relative;\n}\n\n.sidebar__group-header:hover {\n  background-color: #111111;\n}\n\n.sidebar__group-header-title {\n  /*float: left;*/\n  overflow: hidden;\n  padding: 0 15px;\n  padding-top:5px;\n  padding-bottom:10px;\n  font-weight:bold;\n}\n\n.sidebar__group-header-undo {\n    float: right;\n    overflow: hidden;\n    padding-right: 15px;\n    padding-top:5px;\n    font-weight:bold;\n  }\n\n.sidebar__group-header-icon {\n    width: 17px;\n    height: 14px;\n    background-repeat: no-repeat;\n    display: inline-block;\n    position: absolute;\n    background-size: cover;\n\n    /* icon open */\n    /* feather icon: chevron up */\n    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tdXAiPjxwb2x5bGluZSBwb2ludHM9IjE4IDE1IDEyIDkgNiAxNSI+PC9wb2x5bGluZT48L3N2Zz4=);\n    top: 4px;\n    right: 5px;\n    opacity: 0.0;\n    transition: opacity 0.3;\n}\n\n.sidebar__group-header:hover .sidebar__group-header-icon {\n    opacity: 1.0;\n}\n\n/* icon closed */\n.sidebar__group--closed .sidebar__group-header-icon {\n    /* feather icon: chevron down */\n    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tZG93biI+PHBvbHlsaW5lIHBvaW50cz0iNiA5IDEyIDE1IDE4IDkiPjwvcG9seWxpbmU+PC9zdmc+);\n    top: 4px;\n    right: 5px;\n}\n\n/*\n * SIDEBAR ITEM\n */\n\n.sidebar__item\n{\n    box-sizing: border-box;\n    padding: 7px;\n    padding-left:15px;\n    padding-right:15px;\n\n    overflow: hidden;\n    position: relative;\n}\n\n.sidebar__item-label {\n    display: inline-block;\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    width: calc(50% - 7px);\n    margin-right: 7px;\n    margin-top: 2px;\n    text-overflow: ellipsis;\n    /* overflow: hidden; */\n}\n\n.sidebar__item-value-label {\n    font-family: var(--sidebar-monospace-font-stack);\n    display: inline-block;\n    text-overflow: ellipsis;\n    overflow: hidden;\n    white-space: nowrap;\n    max-width: 60%;\n}\n\n.sidebar__item-value-label::selection {\n    background-color: var(--sidebar-color);\n    color: #EEEEEE;\n}\n\n.sidebar__item + .sidebar__item,\n.sidebar__item + .sidebar__group,\n.sidebar__group + .sidebar__item,\n.sidebar__group + .sidebar__group {\n    /*border-top: 1px solid #272727;*/\n}\n\n/*\n * SIDEBAR ITEM TOGGLE\n */\n\n/*.sidebar__toggle */\n.icon_toggle{\n    cursor: pointer;\n}\n\n.sidebar__toggle-input {\n    --sidebar-toggle-input-color: #CCCCCC;\n    --sidebar-toggle-input-color-hover: #EEEEEE;\n    --sidebar-toggle-input-border-size: 2px;\n    display: inline;\n    float: right;\n    box-sizing: border-box;\n    border-radius: 50%;\n    /*outline-style: solid;*/\n    /*outline-color:red;*/\n    cursor: pointer;\n    --toggle-size: 11px;\n    margin-top: 2px;\n    background-color: transparent !important;\n    border: var(--sidebar-toggle-input-border-size) solid var(--sidebar-toggle-input-color);\n    width: var(--toggle-size);\n    height: var(--toggle-size);\n    transition: background-color var(--sidebar-hover-transition-time);\n    transition: border-color var(--sidebar-hover-transition-time);\n}\n.sidebar__toggle:hover .sidebar__toggle-input {\n    border-color: var(--sidebar-toggle-input-color-hover);\n}\n\n.sidebar__toggle .sidebar__item-value-label {\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    max-width: calc(50% - 12px);\n}\n.sidebar__toggle-input::after { clear: both; }\n\n.sidebar__toggle--active .icon_toggle\n{\n\n    background-image: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE1cHgiIHdpZHRoPSIzMHB4IiBmaWxsPSIjMDZmNzhiIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwIDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iIzA2Zjc4YiIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCBjMTIuNjUsMCwyMy0xMC4zNSwyMy0yM2wwLDBjMC0xMi42NS0xMC4zNS0yMy0yMy0yM0gzMHogTTcwLDY3Yy05LjM4OSwwLTE3LTcuNjEtMTctMTdzNy42MTEtMTcsMTctMTdzMTcsNy42MSwxNywxNyAgICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PC9nPjwvZz48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMweiBNNzAsNjdjLTkuMzg5LDAtMTctNy42MS0xNy0xN3M3LjYxMS0xNywxNy0xN3MxNyw3LjYxLDE3LDE3ICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48cGF0aCBmaWxsPSIjMDZmNzhiIiBzdHJva2U9IiMwNmY3OGIiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNyw1MGMwLDEyLjY1LDEwLjM1LDIzLDIzLDIzaDQwICAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMwQzE3LjM1LDI3LDcsMzcuMzUsNyw1MEw3LDUweiI+PC9wYXRoPjwvZz48Y2lyY2xlIGRpc3BsYXk9ImlubGluZSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiMwNmY3OGIiIHN0cm9rZT0iIzA2Zjc4YiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI3MCIgY3k9IjUwIiByPSIxNyI+PC9jaXJjbGU+PC9nPjxnIGRpc3BsYXk9Im5vbmUiPjxwYXRoIGRpc3BsYXk9ImlubGluZSIgZD0iTTcwLDI1SDMwQzE2LjIxNSwyNSw1LDM2LjIxNSw1LDUwczExLjIxNSwyNSwyNSwyNWg0MGMxMy43ODUsMCwyNS0xMS4yMTUsMjUtMjVTODMuNzg1LDI1LDcwLDI1eiBNNzAsNzEgICBIMzBDMTguNDIxLDcxLDksNjEuNTc5LDksNTBzOS40MjEtMjEsMjEtMjFoNDBjMTEuNTc5LDAsMjEsOS40MjEsMjEsMjFTODEuNTc5LDcxLDcwLDcxeiBNNzAsMzFjLTEwLjQ3NywwLTE5LDguNTIzLTE5LDE5ICAgczguNTIzLDE5LDE5LDE5czE5LTguNTIzLDE5LTE5UzgwLjQ3NywzMSw3MCwzMXogTTcwLDY1Yy04LjI3MSwwLTE1LTYuNzI5LTE1LTE1czYuNzI5LTE1LDE1LTE1czE1LDYuNzI5LDE1LDE1Uzc4LjI3MSw2NSw3MCw2NXoiPjwvcGF0aD48L2c+PC9zdmc+);\n    opacity: 1;\n    transform: rotate(0deg);\n    background-position: -4px -9px;\n}\n\n\n.icon_toggle\n{\n    float: right;\n    width:40px;\n    height:18px;\n    background-image: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE1cHgiIHdpZHRoPSIzMHB4IiBmaWxsPSIjYWFhYWFhIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwIDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2FhYWFhYSIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCBjMTIuNjUsMCwyMy0xMC4zNSwyMy0yM2wwLDBjMC0xMi42NS0xMC4zNS0yMy0yMy0yM0gzMHogTTcwLDY3Yy05LjM4OSwwLTE3LTcuNjEtMTctMTdzNy42MTEtMTcsMTctMTdzMTcsNy42MSwxNywxNyAgICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PC9nPjwvZz48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMwLDI3QzE3LjM1LDI3LDcsMzcuMzUsNyw1MGwwLDBjMCwxMi42NSwxMC4zNSwyMywyMywyM2g0MCAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMweiBNNzAsNjdjLTkuMzg5LDAtMTctNy42MS0xNy0xN3M3LjYxMS0xNywxNy0xN3MxNyw3LjYxLDE3LDE3ICAgUzc5LjM4OSw2Nyw3MCw2N3oiPjwvcGF0aD48L2c+PGcgZGlzcGxheT0ibm9uZSI+PGcgZGlzcGxheT0iaW5saW5lIj48cGF0aCBmaWxsPSIjYWFhYWFhIiBzdHJva2U9IiNhYWFhYWEiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNyw1MGMwLDEyLjY1LDEwLjM1LDIzLDIzLDIzaDQwICAgIGMxMi42NSwwLDIzLTEwLjM1LDIzLTIzbDAsMGMwLTEyLjY1LTEwLjM1LTIzLTIzLTIzSDMwQzE3LjM1LDI3LDcsMzcuMzUsNyw1MEw3LDUweiI+PC9wYXRoPjwvZz48Y2lyY2xlIGRpc3BsYXk9ImlubGluZSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhYWFhYWEiIHN0cm9rZT0iI2FhYWFhYSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGN4PSI3MCIgY3k9IjUwIiByPSIxNyI+PC9jaXJjbGU+PC9nPjxnIGRpc3BsYXk9Im5vbmUiPjxwYXRoIGRpc3BsYXk9ImlubGluZSIgZD0iTTcwLDI1SDMwQzE2LjIxNSwyNSw1LDM2LjIxNSw1LDUwczExLjIxNSwyNSwyNSwyNWg0MGMxMy43ODUsMCwyNS0xMS4yMTUsMjUtMjVTODMuNzg1LDI1LDcwLDI1eiBNNzAsNzEgICBIMzBDMTguNDIxLDcxLDksNjEuNTc5LDksNTBzOS40MjEtMjEsMjEtMjFoNDBjMTEuNTc5LDAsMjEsOS40MjEsMjEsMjFTODEuNTc5LDcxLDcwLDcxeiBNNzAsMzFjLTEwLjQ3NywwLTE5LDguNTIzLTE5LDE5ICAgczguNTIzLDE5LDE5LDE5czE5LTguNTIzLDE5LTE5UzgwLjQ3NywzMSw3MCwzMXogTTcwLDY1Yy04LjI3MSwwLTE1LTYuNzI5LTE1LTE1czYuNzI5LTE1LDE1LTE1czE1LDYuNzI5LDE1LDE1Uzc4LjI3MSw2NSw3MCw2NXoiPjwvcGF0aD48L2c+PC9zdmc+);\n    background-size: 50px 37px;\n    background-position: -6px -10px;\n    transform: rotate(180deg);\n    opacity: 0.4;\n}\n\n\n\n/*.sidebar__toggle--active .sidebar__toggle-input {*/\n/*    transition: background-color var(--sidebar-hover-transition-time);*/\n/*    background-color: var(--sidebar-toggle-input-color);*/\n/*}*/\n/*.sidebar__toggle--active .sidebar__toggle-input:hover*/\n/*{*/\n/*    background-color: var(--sidebar-toggle-input-color-hover);*/\n/*    border-color: var(--sidebar-toggle-input-color-hover);*/\n/*    transition: background-color var(--sidebar-hover-transition-time);*/\n/*    transition: border-color var(--sidebar-hover-transition-time);*/\n/*}*/\n\n/*\n * SIDEBAR ITEM BUTTON\n */\n\n.sidebar__button {}\n\n.sidebar__button-input:active\n{\n    background-color: #555 !important;\n}\n\n.sidebar__button-input {\n    -webkit-user-select: none;  /* Chrome all / Safari all */\n    -moz-user-select: none;     /* Firefox all */\n    -ms-user-select: none;      /* IE 10+ */\n    user-select: none;          /* Likely future */\n    min-height: 24px;\n    background-color: transparent;\n    color: #CCCCCC;\n    box-sizing: border-box;\n    padding-top: 3px;\n    text-align: center;\n    border-radius: 125px;\n    border:2px solid #555;\n    cursor: pointer;\n    padding-bottom: 3px;\n    display:block;\n}\n\n.sidebar__button-input.plus, .sidebar__button-input.minus {\n    display: inline-block;\n    min-width: 20px;\n}\n\n.sidebar__button-input:hover {\n  background-color: #333;\n  border:2px solid var(--sidebar-color);\n}\n\n/*\n * VALUE DISPLAY (shows a value)\n */\n\n.sidebar__value-display {}\n\n/*\n * SLIDER\n */\n\n.sidebar__slider {\n    --sidebar-slider-input-height: 3px;\n}\n\n.sidebar__slider-input-wrapper {\n    width: 100%;\n\n    margin-top: 8px;\n    position: relative;\n}\n\n.sidebar__slider-input {\n    -webkit-appearance: none;\n    appearance: none;\n    margin: 0;\n    width: 100%;\n    height: var(--sidebar-slider-input-height);\n    background: #555;\n    cursor: pointer;\n    /*outline: 0;*/\n\n    -webkit-transition: .2s;\n    transition: background-color .2s;\n    border: none;\n}\n\n.sidebar__slider-input:focus, .sidebar__slider-input:hover {\n    border: none;\n}\n\n.sidebar__slider-input-active-track {\n    user-select: none;\n    position: absolute;\n    z-index: 11;\n    top: 0;\n    left: 0;\n    background-color: var(--sidebar-color);\n    pointer-events: none;\n    height: var(--sidebar-slider-input-height);\n    max-width: 100%;\n}\n\n/* Mouse-over effects */\n.sidebar__slider-input:hover {\n    /*background-color: #444444;*/\n}\n\n/*.sidebar__slider-input::-webkit-progress-value {*/\n/*    background-color: green;*/\n/*    color:green;*/\n\n/*    }*/\n\n/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */\n\n.sidebar__slider-input::-moz-range-thumb\n{\n    position: absolute;\n    height: 15px;\n    width: 15px;\n    z-index: 900 !important;\n    border-radius: 20px !important;\n    cursor: pointer;\n    background: var(--sidebar-color) !important;\n    user-select: none;\n\n}\n\n.sidebar__slider-input::-webkit-slider-thumb\n{\n    position: relative;\n    appearance: none;\n    -webkit-appearance: none;\n    user-select: none;\n    height: 15px;\n    width: 15px;\n    display: block;\n    z-index: 900 !important;\n    border: 0;\n    border-radius: 20px !important;\n    cursor: pointer;\n    background: #777 !important;\n}\n\n.sidebar__slider-input:hover ::-webkit-slider-thumb {\n    background-color: #EEEEEE !important;\n}\n\n/*.sidebar__slider-input::-moz-range-thumb {*/\n\n/*    width: 0 !important;*/\n/*    height: var(--sidebar-slider-input-height);*/\n/*    background: #EEEEEE;*/\n/*    cursor: pointer;*/\n/*    border-radius: 0 !important;*/\n/*    border: none;*/\n/*    outline: 0;*/\n/*    z-index: 100 !important;*/\n/*}*/\n\n.sidebar__slider-input::-moz-range-track {\n    background-color: transparent;\n    z-index: 11;\n}\n\n.sidebar__slider input[type=text],\n.sidebar__slider input[type=paddword]\n{\n    box-sizing: border-box;\n    /*background-color: #333333;*/\n    text-align: right;\n    color: #BBBBBB;\n    display: inline-block;\n    background-color: transparent !important;\n\n    width: 40%;\n    height: 18px;\n    /*outline: none;*/\n    border: none;\n    border-radius: 0;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n}\n\n.sidebar__slider input[type=text]:active,\n.sidebar__slider input[type=text]:focus,\n.sidebar__slider input[type=text]:hover,\n.sidebar__slider input[type=password]:active,\n.sidebar__slider input[type=password]:focus,\n.sidebar__slider input[type=password]:hover\n{\n\n    color: #EEEEEE;\n}\n\n/*\n * TEXT / DESCRIPTION\n */\n\n.sidebar__text .sidebar__item-label {\n    width: auto;\n    display: block;\n    max-height: none;\n    margin-right: 0;\n    line-height: 1.1em;\n}\n\n/*\n * SIDEBAR INPUT\n */\n.sidebar__text-input textarea,\n.sidebar__text-input input[type=date],\n.sidebar__text-input input[type=datetime-local],\n.sidebar__text-input input[type=text],\n.sidebar__text-input input[type=search],\n.sidebar__text-input input[type=password] {\n    box-sizing: border-box;\n    background-color: #333333;\n    color: #BBBBBB;\n    display: inline-block;\n    width: 50%;\n    height: 18px;\n\n\n    border: none;\n    border-radius: 0;\n    border:1px solid #666;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n    color-scheme: dark;\n}\n\n.sidebar__text-input textarea:focus::placeholder {\n  color: transparent;\n}\n\n\n\n\n\n.sidebar__color-picker .sidebar__item-label\n{\n    width:45%;\n}\n\n.sidebar__text-input textarea,\n.sidebar__text-input input[type=text]:active,\n.sidebar__text-input input[type=text]:focus,\n.sidebar__text-input input[type=text]:hover,\n.sidebar__text-input input[type=search]:active,\n.sidebar__text-input input[type=search]:focus,\n.sidebar__text-input input[type=search]:hover,\n.sidebar__text-input input[type=password]:active,\n.sidebar__text-input input[type=password]:focus,\n.sidebar__text-input input[type=password]:hover {\n    background-color: transparent;\n    color: #EEEEEE;\n\n}\n\n.sidebar__text-input textarea\n{\n    margin-top:10px;\n    height:60px;\n    width:100%;\n}\n\n/*\n * SIDEBAR SELECT\n */\n\n\n\n .sidebar__select {}\n .sidebar__select-select {\n    color: #BBBBBB;\n    /*-webkit-appearance: none;*/\n    /*-moz-appearance: none;*/\n    appearance: none;\n    /*box-sizing: border-box;*/\n    width: 50%;\n    /*height: 20px;*/\n    background-color: #333333;\n    /*background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4ODg4ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWNoZXZyb24tZG93biI+PHBvbHlsaW5lIHBvaW50cz0iNiA5IDEyIDE1IDE4IDkiPjwvcG9seWxpbmU+PC9zdmc+);*/\n    background-repeat: no-repeat;\n    background-position: right center;\n    background-size: 16px 16px;\n    margin: 0;\n    /*padding: 0 2 2 6px;*/\n    border-radius: 5px;\n    border: 1px solid #777;\n    background-color: #444;\n    cursor: pointer;\n    /*outline: none;*/\n    padding-left: 5px;\n\n }\n\n.sidebar__select-select:hover,\n.sidebar__select-select:active,\n.sidebar__select-select:inactive {\n    background-color: #444444;\n    color: #EEEEEE;\n}\n\n/*.sidebar__select-select option*/\n/*{*/\n/*    background-color: #444444;*/\n/*    color: #bbb;*/\n/*}*/\n\n.sidebar__select-select option:checked\n{\n    background-color: #000;\n    color: #FFF;\n}\n\n\n/*\n * COLOR PICKER\n */\n\n\n .sidebar__color-picker input[type=text] {\n    box-sizing: border-box;\n    background-color: #333333;\n    color: #BBBBBB;\n    display: inline-block;\n    width: calc(50% - 21px); /* 50% minus space of picker circle */\n    height: 18px;\n    /*outline: none;*/\n    border: none;\n    border-radius: 0;\n    padding: 0 0 0 4px !important;\n    margin: 0;\n    margin-right: 7px;\n}\n\n.sidebar__color-picker input[type=text]:active,\n.sidebar__color-picker input[type=text]:focus,\n.sidebar__color-picker input[type=text]:hover {\n    background-color: #444444;\n    color: #EEEEEE;\n}\n\ndiv.sidebar__color-picker-color-input,\n.sidebar__color-picker input[type=color],\n.sidebar__palette-picker input[type=color] {\n    display: inline-block;\n    border-radius: 100%;\n    height: 14px;\n    width: 14px;\n\n    padding: 0;\n    border: none;\n    /*border:2px solid red;*/\n    border-color: transparent;\n    outline: none;\n    background: none;\n    appearance: none;\n    -moz-appearance: none;\n    -webkit-appearance: none;\n    cursor: pointer;\n    position: relative;\n    top: 3px;\n}\n.sidebar__color-picker input[type=color]:focus,\n.sidebar__palette-picker input[type=color]:focus {\n    outline: none;\n}\n.sidebar__color-picker input[type=color]::-moz-color-swatch,\n.sidebar__palette-picker input[type=color]::-moz-color-swatch {\n    border: none;\n}\n.sidebar__color-picker input[type=color]::-webkit-color-swatch-wrapper,\n.sidebar__palette-picker input[type=color]::-webkit-color-swatch-wrapper {\n    padding: 0;\n}\n.sidebar__color-picker input[type=color]::-webkit-color-swatch,\n.sidebar__palette-picker input[type=color]::-webkit-color-swatch {\n    border: none;\n    border-radius: 100%;\n}\n\n/*\n * Palette Picker\n */\n.sidebar__palette-picker .sidebar__palette-picker-color-input.first {\n    margin-left: 0;\n}\n.sidebar__palette-picker .sidebar__palette-picker-color-input.last {\n    margin-right: 0;\n}\n.sidebar__palette-picker .sidebar__palette-picker-color-input {\n    margin: 0 4px;\n}\n\n.sidebar__palette-picker .circlebutton {\n    width: 14px;\n    height: 14px;\n    border-radius: 1em;\n    display: inline-block;\n    top: 3px;\n    position: relative;\n}\n\n/*\n * Preset\n */\n.sidebar__item-presets-preset\n{\n    padding:4px;\n    cursor:pointer;\n    padding-left:8px;\n    padding-right:8px;\n    margin-right:4px;\n    background-color:#444;\n}\n\n.sidebar__item-presets-preset:hover\n{\n    background-color:#666;\n}\n\n.sidebar__greyout\n{\n    background: #222;\n    opacity: 0.8;\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    z-index: 1000;\n    right: 0;\n    top: 0;\n}\n\n.sidebar_tabs\n{\n    background-color: #151515;\n    padding-bottom: 0px;\n}\n\n.sidebar_switchs\n{\n    float: right;\n}\n\n.sidebar_tab\n{\n    float:left;\n    background-color: #151515;\n    border-bottom:1px solid transparent;\n    padding-right:7px;\n    padding-left:7px;\n    padding-bottom: 5px;\n    padding-top: 5px;\n    cursor:pointer;\n}\n\n.sidebar_tab_active\n{\n    background-color: #272727;\n    color:white;\n}\n\n.sidebar_tab:hover\n{\n    border-bottom:1px solid #777;\n    color:white;\n}\n\n\n.sidebar_switch\n{\n    float:left;\n    background-color: #444;\n    padding-right:7px;\n    padding-left:7px;\n    padding-bottom: 5px;\n    padding-top: 5px;\n    cursor:pointer;\n}\n\n.sidebar_switch:last-child\n{\n    border-top-right-radius: 7px;\n    border-bottom-right-radius: 7px;\n}\n\n.sidebar_switch:first-child\n{\n    border-top-left-radius: 7px;\n    border-bottom-left-radius: 7px;\n}\n\n\n.sidebar_switch_active\n{\n    background-color: #999;\n    color:white;\n}\n\n.sidebar_switch:hover\n{\n    color:white;\n}\n\n.sidebar__text-input-input::focus-visible,\n/*.sidebar__text-input-input:active,*/\n.sidebar__button-input:focus-visible,\n.sidebar__text-input:focus-visible\n/*.sidebar__text-input:active*/\n{\n    outline-style: solid;\n    outline-color:white;\n    outline-width: 1px;\n\n}\n\n",};
+// vars
+const CSS_ELEMENT_CLASS = "cables-sidebar-style"; /* class for the style element to be generated */
+const CSS_ELEMENT_DYNAMIC_CLASS = "cables-sidebar-dynamic-style"; /* things which can be set via op-port, but not attached to the elements themselves, e.g. minimized opacity */
+const SIDEBAR_CLASS = "sidebar-cables";
+const SIDEBAR_ID = "sidebar" + CABLES.uuid();
+const SIDEBAR_ITEMS_CLASS = "sidebar__items";
+const SIDEBAR_OPEN_CLOSE_BTN_CLASS = "sidebar__close-button";
+
+const BTN_TEXT_OPEN = ""; // 'Close';
+const BTN_TEXT_CLOSED = ""; // 'Show Controls';
+
+let openCloseBtn = null;
+let openCloseBtnIcon = null;
+let headerTitleText = null;
+
+// inputs
+const visiblePort = op.inValueBool("Visible", true);
+const opacityPort = op.inValueSlider("Opacity", 1);
+const defaultMinimizedPort = op.inValueBool("Default Minimized");
+const minimizedOpacityPort = op.inValueSlider("Minimized Opacity", 0.5);
+const undoButtonPort = op.inValueBool("Show undo button", false);
+const inMinimize = op.inValueBool("Show Minimize", false);
+
+const inTitle = op.inString("Title", "");
+const side = op.inValueBool("Side");
+const addCss = op.inValueBool("Default CSS", true);
+
+let doc = op.patch.cgl.canvas.ownerDocument;
+
+// outputs
+const childrenPort = op.outObject("childs");
+childrenPort.setUiAttribs({ "title": "Children" });
+
+const isOpenOut = op.outBool("Opfened");
+isOpenOut.setUiAttribs({ "title": "Opened" });
+
+let sidebarEl = doc.querySelector("." + SIDEBAR_ID);
+if (!sidebarEl) sidebarEl = initSidebarElement();
+
+const sidebarItemsEl = sidebarEl.querySelector("." + SIDEBAR_ITEMS_CLASS);
+childrenPort.set({
+    "parentElement": sidebarItemsEl,
+    "parentOp": op,
+});
+onDefaultMinimizedPortChanged();
+initSidebarCss();
+updateDynamicStyles();
+
+addCss.onChange = () =>
+{
+    initSidebarCss();
+    updateDynamicStyles();
+};
+visiblePort.onChange = onVisiblePortChange;
+opacityPort.onChange = onOpacityPortChange;
+defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
+minimizedOpacityPort.onChange = onMinimizedOpacityPortChanged;
+undoButtonPort.onChange = onUndoButtonChange;
+op.onDelete = onDelete;
+
+function onMinimizedOpacityPortChanged()
+{
+    updateDynamicStyles();
+}
+
+inMinimize.onChange = updateMinimize;
+
+function updateMinimize(header)
+{
+    if (!header || header.uiAttribs) header = doc.querySelector(".sidebar-cables .sidebar__group-header");
+    if (!header) return;
+
+    const undoButton = doc.querySelector(".sidebar-cables .sidebar__group-header .sidebar__group-header-undo");
+
+    if (inMinimize.get())
+    {
+        header.classList.add("iconsidebar-chevron-up");
+        header.classList.add("iconsidebar-minimizebutton");
+
+        if (undoButton)undoButton.style.marginRight = "20px";
+    }
+    else
+    {
+        header.classList.remove("iconsidebar-chevron-up");
+        header.classList.remove("iconsidebar-minimizebutton");
+
+        if (undoButton)undoButton.style.marginRight = "initial";
+    }
+}
+
+side.onChange = function ()
+{
+    if (!sidebarEl) return;
+    if (side.get()) sidebarEl.classList.add("sidebar-cables-right");
+    else sidebarEl.classList.remove("sidebar-cables-right");
+};
+
+function onUndoButtonChange()
+{
+    const header = doc.querySelector(".sidebar-cables .sidebar__group-header");
+    if (header)
+    {
+        initUndoButton(header);
+    }
+}
+
+function initUndoButton(header)
+{
+    if (header)
+    {
+        const undoButton = doc.querySelector(".sidebar-cables .sidebar__group-header .sidebar__group-header-undo");
+        if (undoButton)
+        {
+            if (!undoButtonPort.get())
+            {
+                // header.removeChild(undoButton);
+                undoButton.remove();
+            }
+        }
+        else
+        {
+            if (undoButtonPort.get())
+            {
+                const headerUndo = doc.createElement("span");
+                headerUndo.classList.add("sidebar__group-header-undo");
+                headerUndo.classList.add("sidebar-icon-undo");
+
+                headerUndo.addEventListener("click", function (event)
+                {
+                    event.stopPropagation();
+                    const reloadables = doc.querySelectorAll(".sidebar-cables .sidebar__reloadable");
+                    const doubleClickEvent = doc.createEvent("MouseEvents");
+                    doubleClickEvent.initEvent("dblclick", true, true);
+                    reloadables.forEach((reloadable) =>
+                    {
+                        reloadable.dispatchEvent(doubleClickEvent);
+                    });
+                });
+                header.appendChild(headerUndo);
+            }
+        }
+    }
+    updateMinimize(header);
+}
+
+function onDefaultMinimizedPortChanged()
+{
+    if (!openCloseBtn) { return; }
+    if (defaultMinimizedPort.get())
+    {
+        sidebarEl.classList.add("sidebar--closed");
+        if (visiblePort.get()) isOpenOut.set(false);
+    }
+    else
+    {
+        sidebarEl.classList.remove("sidebar--closed");
+        if (visiblePort.get()) isOpenOut.set(true);
+    }
+}
+
+function onOpacityPortChange()
+{
+    const opacity = opacityPort.get();
+    sidebarEl.style.opacity = opacity;
+}
+
+function onVisiblePortChange()
+{
+    if (!sidebarEl) return;
+    if (visiblePort.get())
+    {
+        sidebarEl.style.display = "block";
+        if (!sidebarEl.classList.contains("sidebar--closed")) isOpenOut.set(true);
+    }
+    else
+    {
+        sidebarEl.style.display = "none";
+        isOpenOut.set(false);
+    }
+}
+
+side.onChanged = function ()
+{
+
+};
+
+/**
+ * Some styles cannot be set directly inline, so a dynamic stylesheet is needed.
+ * Here hover states can be set later on e.g.
+ */
+function updateDynamicStyles()
+{
+    const dynamicStyles = doc.querySelectorAll("." + CSS_ELEMENT_DYNAMIC_CLASS);
+    if (dynamicStyles)
+    {
+        dynamicStyles.forEach(function (e)
+        {
+            e.parentNode.removeChild(e);
+        });
+    }
+
+    if (!addCss.get()) return;
+
+    const newDynamicStyle = doc.createElement("style");
+    newDynamicStyle.classList.add("cablesEle");
+    newDynamicStyle.classList.add(CSS_ELEMENT_DYNAMIC_CLASS);
+    let cssText = ".sidebar--closed .sidebar__close-button { ";
+    cssText += "opacity: " + minimizedOpacityPort.get();
+    cssText += "}";
+    const cssTextEl = doc.createTextNode(cssText);
+    newDynamicStyle.appendChild(cssTextEl);
+    doc.body.appendChild(newDynamicStyle);
+}
+
+function initSidebarElement()
+{
+    const element = doc.createElement("div");
+    element.classList.add(SIDEBAR_CLASS);
+    element.classList.add(SIDEBAR_ID);
+    const canvasWrapper = op.patch.cgl.canvas.parentElement; /* maybe this is bad outside cables!? */
+
+    // header...
+    const headerGroup = doc.createElement("div");
+    headerGroup.classList.add("sidebar__group");
+
+    element.appendChild(headerGroup);
+    const header = doc.createElement("div");
+    header.classList.add("sidebar__group-header");
+
+    element.appendChild(header);
+    const headerTitle = doc.createElement("span");
+    headerTitle.classList.add("sidebar__group-header-title");
+    headerTitleText = doc.createElement("span");
+    headerTitleText.classList.add("sidebar__group-header-title-text");
+    headerTitleText.innerHTML = inTitle.get();
+    headerTitle.appendChild(headerTitleText);
+    header.appendChild(headerTitle);
+
+    initUndoButton(header);
+    updateMinimize(header);
+
+    headerGroup.appendChild(header);
+    element.appendChild(headerGroup);
+    headerGroup.addEventListener("click", onOpenCloseBtnClick);
+
+    if (!canvasWrapper)
+    {
+        op.warn("[sidebar] no canvas parentelement found...");
+        return;
+    }
+    canvasWrapper.appendChild(element);
+    const items = doc.createElement("div");
+    items.classList.add(SIDEBAR_ITEMS_CLASS);
+    element.appendChild(items);
+    openCloseBtn = doc.createElement("div");
+    openCloseBtn.classList.add(SIDEBAR_OPEN_CLOSE_BTN_CLASS);
+    openCloseBtn.addEventListener("click", onOpenCloseBtnClick);
+    element.appendChild(openCloseBtn);
+
+    return element;
+}
+
+inTitle.onChange = function ()
+{
+    if (headerTitleText)headerTitleText.innerHTML = inTitle.get();
+};
+
+function setClosed(b)
+{
+
+}
+
+function onOpenCloseBtnClick(ev)
+{
+    ev.stopPropagation();
+    if (!sidebarEl) { op.logError("Sidebar could not be closed..."); return; }
+    sidebarEl.classList.toggle("sidebar--closed");
+    const btn = ev.target;
+    let btnText = BTN_TEXT_OPEN;
+    if (sidebarEl.classList.contains("sidebar--closed"))
+    {
+        btnText = BTN_TEXT_CLOSED;
+        isOpenOut.set(false);
+    }
+    else
+    {
+        isOpenOut.set(true);
+    }
+}
+
+function initSidebarCss()
+{
+    const cssElements = doc.querySelectorAll("." + CSS_ELEMENT_CLASS);
+    // remove old script tag
+    if (cssElements)
+    {
+        cssElements.forEach((e) =>
+        {
+            e.parentNode.removeChild(e);
+        });
+    }
+
+    if (!addCss.get()) return;
+
+    const newStyle = doc.createElement("style");
+
+    newStyle.innerHTML = attachments.style_css;
+    newStyle.classList.add(CSS_ELEMENT_CLASS);
+    newStyle.classList.add("cablesEle");
+    doc.body.appendChild(newStyle);
+}
+
+function onDelete()
+{
+    removeElementFromDOM(sidebarEl);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
+}
+
+}
+};
+
+CABLES.OPS["5a681c35-78ce-4cb3-9858-bc79c34c6819"]={f:Ops.Sidebar.Sidebar,objName:"Ops.Sidebar.Sidebar"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.SideBarSwitch
+// 
+// **************************************************************
+
+Ops.Sidebar.SideBarSwitch= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const parentPort = op.inObject("link"),
+    inArr = op.inArray("Names"),
+    inStyle = op.inSwitch("Style", ["Tabs", "Switch"], "Switch"),
+    labelPort = op.inString("Text", "Switch"),
+
+    inInput = op.inInt("Input", 0),
+
+    setDefaultValueButtonPort = op.inTriggerButton("Set Default"),
+    inGreyOut = op.inBool("Grey Out", false),
+    inDefault = op.inValue("Default", 0),
+
+    siblingsPort = op.outObject("childs"),
+    outIndex = op.outNumber("Index", -1),
+    outStr = op.outString("String");
+
+let elTabActive = null;
+const el = document.createElement("div");
+el.classList.add("sidebar__item");
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+inDefault.setUiAttribs({ "greyout": true });
+
+const label = document.createElement("div");
+label.classList.add("sidebar__item-label");
+const labelText = document.createTextNode(labelPort.get());
+label.appendChild(labelText);
+el.appendChild(label);
+
+const switchGroup = document.createElement("div");
+el.appendChild(switchGroup);
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+el.appendChild(greyOut);
+greyOut.style.display = "none";
+
+parentPort.onChange = onParentChanged;
+op.onDelete = onDelete;
+
+op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
+op.setPortGroup("Default Item", [inDefault, setDefaultValueButtonPort]);
+const tabEles = [];
+
+inArr.onChange = rebuildHtml;
+inStyle.onChange = updateStyle;
+updateStyle();
+
+labelPort.onChange = () =>
+{
+    label.innerHTML = labelPort.get();
+};
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+function rebuildHtml()
+{
+    tabEles.length = 0;
+    switchGroup.innerHTML = "";
+    elTabActive = null;
+
+    const arr = inArr.get();
+    if (!arr) return;
+
+    for (let i = 0; i < arr.length; i++)
+    {
+        const el = addTab(String(arr[i]));
+        if (i == inDefault.get())setActiveTab(el);
+    }
+}
+
+setDefaultValueButtonPort.onTriggered = () =>
+{
+    inDefault.set(outIndex.get());
+    op.refreshParams();
+};
+
+function updateStyle()
+{
+    if (inStyle.get() == "Tabs")
+    {
+        el.classList.add("sidebar_tabs");
+        switchGroup.classList.remove("sidebar_switchs");
+        label.style.display = "none";
+    }
+    else
+    {
+        el.classList.remove("sidebar_tabs");
+        switchGroup.classList.add("sidebar_switchs");
+        label.style.display = "inline-block";
+    }
+
+    labelPort.setUiAttribs({ "greyout": inStyle.get() == "Tabs" });
+
+    rebuildHtml();
+}
+
+function addTab(title)
+{
+    const tabEle = document.createElement("div");
+
+    if (inStyle.get() == "Tabs") tabEle.classList.add("sidebar_tab");
+    else tabEle.classList.add("sidebar_switch");
+
+    tabEle.id = "tabEle" + tabEles.length;
+    tabEle.innerHTML = title;
+    tabEle.dataset.index = tabEles.length;
+    tabEle.dataset.txt = title;
+
+    tabEle.addEventListener("click", tabClicked);
+
+    switchGroup.appendChild(tabEle);
+
+    tabEles.push(tabEle);
+
+    return tabEle;
+}
+
+inInput.onChange = () =>
+{
+    if (tabEles.length > inInput.get())
+        tabClicked({ "target": tabEles[inInput.get()] });
+    // setActiveTab(tabEles[inInput.get()]);
+};
+
+function setActiveTab(el)
+{
+    if (el)
+    {
+        elTabActive = el;
+        outIndex.set(parseInt(el.dataset.index));
+        outStr.set(el.dataset.txt);
+
+        if (inStyle.get() == "Tabs") el.classList.add("sidebar_tab_active");
+        else el.classList.add("sidebar_switch_active");
+    }
+}
+
+function tabClicked(e)
+{
+    if (elTabActive)
+        if (inStyle.get() == "Tabs") elTabActive.classList.remove("sidebar_tab_active");
+        else elTabActive.classList.remove("sidebar_switch_active");
+    setActiveTab(e.target);
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    const parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else
+    {
+        if (el.parentElement)
+            el.parentElement.removeChild(el);
+    }
+}
+
+function showElement(el)
+{
+    if (!el) return;
+    el.style.display = "block";
+}
+
+function hideElement(el)
+{
+    if (!el) return;
+    el.style.display = "none";
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["ebc8c92c-5fa6-4598-a9c6-b8e12f22f7c2"]={f:Ops.Sidebar.SideBarSwitch,objName:"Ops.Sidebar.SideBarSwitch"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Array.StringToArray_v2
+// 
+// **************************************************************
+
+Ops.Array.StringToArray_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const text = op.inStringEditor("text", "1,2,3"),
+    separator = op.inString("separator", ","),
+    toNumber = op.inValueBool("Numbers", true),
+    trim = op.inValueBool("Trim", true),
+    splitNewLines = op.inBool("Split Lines", false),
+    arr = op.outArray("array"),
+    parsed = op.outTrigger("Parsed"),
+    len = op.outNumber("length");
+
+text.setUiAttribs({ "ignoreBigPort": true });
+
+text.onChange = separator.onChange = toNumber.onChange = trim.onChange = parse;
+
+splitNewLines.onChange = () =>
+{
+    separator.setUiAttribs({ "greyout": splitNewLines.get() });
+    parse();
+};
+
+parse();
+
+function parse()
+{
+    if (!text.get())
+    {
+        arr.set(null);
+        arr.set([]);
+        len.set(0);
+        return;
+    }
+
+    let textInput = text.get();
+    if (trim.get() && textInput)
+    {
+        textInput = textInput.replace(/^\s+|\s+$/g, "");
+        textInput = textInput.trim();
+    }
+
+    let r;
+    let sep = separator.get();
+    if (separator.get() === "\\n") sep = "\n";
+    if (splitNewLines.get()) r = textInput.split("\n");
+    else r = textInput.split(sep);
+
+    if (r[r.length - 1] === "") r.length -= 1;
+
+    len.set(r.length);
+
+    if (trim.get())
+    {
+        for (let i = 0; i < r.length; i++)
+        {
+            r[i] = r[i].replace(/^\s+|\s+$/g, "");
+            r[i] = r[i].trim();
+        }
+    }
+
+    op.setUiError("notnum", null);
+    if (toNumber.get())
+    {
+        let hasStrings = false;
+        for (let i = 0; i < r.length; i++)
+        {
+            r[i] = Number(r[i]);
+            if (!CABLES.isNumeric(r[i]))
+            {
+                hasStrings = true;
+            }
+        }
+        if (hasStrings)
+        {
+            op.setUiError("notnum", "Parse Error / Not all values numerical!", 1);
+        }
+    }
+
+    arr.setRef(r);
+    parsed.trigger();
+}
+
+}
+};
+
+CABLES.OPS["c974de41-4ce4-4432-b94d-724741109c71"]={f:Ops.Array.StringToArray_v2,objName:"Ops.Array.StringToArray_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Trigger.TriggerSend
+// 
+// **************************************************************
+
+Ops.Trigger.TriggerSend= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    trigger = op.inTriggerButton("Trigger"),
+    next = op.outTrigger("Next");
+
+op.varName = op.inValueSelect("Named Trigger", [], "", true);
+
+op.varName.onChange = updateName;
+
+trigger.onTriggered = doTrigger;
+
+op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
+
+updateVarNamesDropdown();
+
+op.varName.setUiAttribs({ "_triggerSelect": true });
+
+function updateVarNamesDropdown()
+{
+    if (CABLES.UI)
+    {
+        let varnames = [];
+        const vars = op.patch.namedTriggers;
+        varnames.push("+ create new one");
+        for (const i in vars) varnames.push(i);
+        varnames = varnames.sort();
+        op.varName.uiAttribs.values = varnames;
+    }
+}
+
+function updateName()
+{
+    if (CABLES.UI)
+    {
+        if (op.varName.get() == "+ create new one")
+        {
+            new CABLES.UI.ModalDialog({
+                "prompt": true,
+                "title": "New Trigger",
+                "text": "Enter a name for the new trigger",
+                "promptValue": "",
+                "promptOk": (str) =>
+                {
+                    op.varName.set(str);
+                    op.patch.namedTriggers[str] = op.patch.namedTriggers[str] || [];
+                    updateVarNamesDropdown();
+                }
+            });
+            return;
+        }
+
+        op.refreshParams();
+    }
+
+    if (!op.patch.namedTriggers[op.varName.get()])
+    {
+        op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
+        op.patch.emitEvent("namedTriggersChanged");
+    }
+
+    op.setTitle(">" + op.varName.get());
+
+    op.refreshParams();
+    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
+}
+
+function doTrigger()
+{
+    const arr = op.patch.namedTriggers[op.varName.get()];
+    // fire an event even if noone is receiving this trigger
+    // this way TriggerReceiveFilter can still handle it
+    op.patch.emitEvent("namedTriggerSent", op.varName.get());
+
+    if (!arr)
+    {
+        op.setUiError("unknowntrigger", "unknown trigger");
+        return;
+    }
+    else op.setUiError("unknowntrigger", null);
+
+    for (let i = 0; i < arr.length; i++)
+    {
+        arr[i]();
+    }
+
+    next.trigger();
+}
+
+}
+};
+
+CABLES.OPS["ce1eaf2b-943b-4dc0-ab5e-ee11b63c9ed0"]={f:Ops.Trigger.TriggerSend,objName:"Ops.Trigger.TriggerSend"};
 
 
 
