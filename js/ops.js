@@ -7313,272 +7313,6 @@ CABLES.OPS["790f3702-9833-464e-8e37-6f0f813f7e16"]={f:Ops.Gl.Texture_v2,objName:
 
 // **************************************************************
 // 
-// Ops.Ui.VizObject
-// 
-// **************************************************************
-
-Ops.Ui.VizObject= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    inObj = op.inObject("Object"),
-    inConsole = op.inTriggerButton("console log"),
-    inZoomText = op.inBool("ZoomText", false),
-    inLineNums = op.inBool("Line Numbers", true),
-    inExpString = op.inBool("Experimental Stringify", true),
-    inSort = op.inBool("Sort Keys", false),
-    inFontSize = op.inFloat("Font Size", 10),
-    inPos = op.inFloatSlider("Scroll", 0);
-
-let lines = [];
-inConsole.setUiAttribs({ "hidePort": true });
-
-op.setUiAttrib({ "height": 200, "width": 400, "resizable": true, "vizLayerMaxZoom": 2500 });
-
-function myStringify(o, level = 0)
-{
-    let ind = "   ";
-    let indent = "";
-
-    let str = "";
-    for (let i = 0; i < level; i++) indent += ind;
-
-    if (level > 4)
-    {
-        return indent + "/* too deep... */";
-    }
-
-    if (typeof o === "string") str += "\"" + o + "\""; //  e.g. in arrays
-    else if (typeof o === "number") str += o; //  e.g. in arrays
-    else
-    {
-        // let keys = Object.keys(o);
-        let keys = [];
-        for (const kk in o) keys.push(kk);
-        let numKeys = keys.length;
-
-        if (inSort.get())
-            if (!(Array.isArray(o) || (o.constructor && o.constructor.name === "Float32Array")))
-                keys = keys.sort();
-
-        try
-        {
-            if (numKeys == 0)
-            {
-                str += indent + "{}";
-            }
-            else
-            {
-                let keyCounter = 0;
-                str += indent + "{\n";
-                for (let i = 0; i < keys.length; i++)
-                {
-                    const item = o[keys[i]];
-
-                    keyCounter++;
-                    str += indent + ind;
-                    str += "\"" + keys[i] + "\": ";
-
-                    if (item === null)
-                    {
-                        str += "null";
-                    }
-                    else
-                    if (item === undefined)
-                    {
-                        str += "undefined";
-                    }
-                    else
-                    if (item === true)
-                    {
-                        str += "true";
-                    }
-                    else
-                    if (item === false)
-                    {
-                        str += "false";
-                    }
-                    else
-                    if (item === 0)
-                    {
-                        str += "0";
-                    }
-                    else
-                    if (typeof item === "number")
-                    {
-                        str += String(item);
-                    }
-                    else if (typeof item === "string")
-                    {
-                        str += "\"" + item + "\"";
-                    }
-                    else if (item && (Array.isArray(item) || (item.constructor && item.constructor.name === "Float32Array")))
-                    {
-                        const maxItems = 5;
-                        str += "{" + item.constructor.name + "[" + item.length + "]} ";
-                        str += "[";
-                        for (let a = 0; a < Math.min(maxItems, item.length); a++)
-                        {
-                            if (a > 0)str += ",";
-                            try
-                            {
-                                str += myStringify(item[a], level + 1);
-                            }
-                            catch (e)
-                            {
-                            // console.log(e);
-                                str += "exception:" + e.message;
-                            }
-                        }
-                        if (item.length > maxItems)
-                            str += ",/* ... " + (item.length - maxItems) + " more items */";
-                        str += "]";
-                    }
-                    else if (item && item.constructor.name === "Object")
-                    {
-                        if (Object.keys(item).length == 0) str += "{}";
-                        else str += "\n" + myStringify(item, level + 1);
-                    }
-                    else
-                    if (!item)
-                    {
-                        str += "/*no item?*/";
-                        console.log("no item????????", item);
-                    }
-                    else
-                    {
-                        if (item)
-                        {
-                            str += "[" + item.constructor.name + "]";
-                            str += "\n" + myStringify(item, level + 1);
-                        }
-                        else
-                        {
-                            str += "??";
-                        }
-                    }
-
-                    if (keyCounter != numKeys)str += ",";
-                    str += "\n";
-                }
-
-                str += indent;
-                str += "}";
-            }
-        }
-        catch (e)
-        {
-            console.log(e);
-        }
-    }
-
-    return str;
-}
-
-inExpString.onChange =
-inObj.onChange = () =>
-{
-    let obj = inObj.get();
-    let str = "???";
-    if (obj && obj.getInfo) obj = obj.getInfo();
-
-    if (obj && obj.constructor && obj.constructor.name != "Object") op.setUiAttribs({ "extendTitle": obj.constructor.name });
-
-    if (obj === undefined)str = "undefined";
-    else if (obj === null)str = "null";
-    else if (obj === false)str = "false";
-    else if (obj === 0)str = "0";
-    else
-        try
-        {
-            if (inExpString.get()) str = myStringify(obj);
-            else
-            {
-                str = JSON.stringify(obj, false, 4);
-
-                if (
-                    obj.hasOwnProperty("isTrusted") && Object.keys(obj).length == 1 ||
-            (str == "{}" && obj && obj.constructor && obj.constructor.name != "Object"))
-                {
-                    str = "could not stringify object: " + obj.constructor.name + "\n";
-
-                    const o = {};
-                    for (const i in obj)
-                    {
-                        if (!obj[i]) continue;
-
-                        if (obj[i].constructor)
-                        {
-                            if (obj[i].constructor.name == "Number" || obj[i].constructor.name == "String" || obj[i].constructor.name == "Boolean")
-                                o[i] = obj[i];
-                        }
-                        else
-                            o[i] = "{???}";
-                    }
-                    obj = o;
-                    str = JSON.stringify(obj, false, 4);
-                }
-            }
-        }
-        catch (e)
-        {
-            str = "object can not be displayed as string\n" + e.message;
-            // console.log(obj);
-        }
-
-    str = String(str);
-    lines = str.split("\n");
-};
-
-inObj.onLinkChanged = () =>
-{
-    if (inObj.isLinked())
-    {
-        const p = inObj.links[0].getOtherPort(inObj);
-
-        op.setUiAttrib({ "extendTitle": p.uiAttribs.objType });
-    }
-};
-
-inConsole.onTriggered = () =>
-{
-    console.info(inObj.get());
-};
-
-op.renderVizLayer = (ctx, layer, viz) =>
-{
-    viz.clear(ctx, layer);
-
-    ctx.save();
-    ctx.scale(layer.scale, layer.scale);
-
-    viz.renderText(ctx, layer, lines, {
-        "zoomText": inZoomText.get(),
-        "showLineNum": inLineNums.get(),
-        "syntax": "js",
-        "fontSize": inFontSize.get(),
-        "scroll": inPos.get()
-    });
-
-    ctx.restore();
-};
-
-//
-
-}
-};
-
-CABLES.OPS["d09bc53e-9f52-4872-94c7-4ef777512222"]={f:Ops.Ui.VizObject,objName:"Ops.Ui.VizObject"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Trigger.SequenceMultiPort
 // 
 // **************************************************************
@@ -8628,45 +8362,6 @@ function renderLight()
 };
 
 CABLES.OPS["76418c17-abd5-401b-82e2-688db6f966ee"]={f:Ops.Gl.Phong.SpotLight_v5,objName:"Ops.Gl.Phong.SpotLight_v5"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Math.Sum
-// 
-// **************************************************************
-
-Ops.Math.Sum= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    number1 = op.inValueFloat("number1", 0),
-    number2 = op.inValueFloat("number2", 0),
-    result = op.outNumber("result");
-
-op.setUiAttribs({ "mathTitle": true });
-
-number1.onChange =
-number2.onChange = exec;
-exec();
-
-function exec()
-{
-    const v = number1.get() + number2.get();
-    if (!isNaN(v))
-        result.set(v);
-}
-
-}
-};
-
-CABLES.OPS["c8fb181e-0b03-4b41-9e55-06b6267bc634"]={f:Ops.Math.Sum,objName:"Ops.Math.Sum"};
 
 
 
@@ -10003,247 +9698,6 @@ CABLES.OPS["1a1ef636-6d02-42ba-ae1e-627b917d0d2b"]={f:Ops.Math.Round,objName:"Op
 
 // **************************************************************
 // 
-// Ops.Vars.VarSetNumber_v2
-// 
-// **************************************************************
-
-Ops.Vars.VarSetNumber_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const val = op.inValueFloat("Value", 0);
-op.varName = op.inDropDown("Variable", [], "", true);
-
-new CABLES.VarSetOpWrapper(op, "number", val, op.varName);
-
-}
-};
-
-CABLES.OPS["b5249226-6095-4828-8a1c-080654e192fa"]={f:Ops.Vars.VarSetNumber_v2,objName:"Ops.Vars.VarSetNumber_v2"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Vars.VarGetNumber_v2
-// 
-// **************************************************************
-
-Ops.Vars.VarGetNumber_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const val = op.outNumber("Value");
-op.varName = op.inValueSelect("Variable", [], "", true);
-
-new CABLES.VarGetOpWrapper(op, "number", op.varName, val);
-
-}
-};
-
-CABLES.OPS["421f5b52-c0fa-47c4-8b7a-012b9e1c864a"]={f:Ops.Vars.VarGetNumber_v2,objName:"Ops.Vars.VarGetNumber_v2"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.Group
-// 
-// **************************************************************
-
-Ops.Sidebar.Group= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-// inputs
-let parentPort = op.inObject("link");
-let labelPort = op.inString("Text", "Group");
-const inShowTitle = op.inBool("Show Title", true);
-let defaultMinimizedPort = op.inValueBool("Default Minimized");
-const inVisible = op.inBool("Visible", true);
-
-// outputs
-let nextPort = op.outObject("next");
-let childrenPort = op.outObject("childs");
-
-inVisible.onChange = function ()
-{
-    el.style.display = inVisible.get() ? "block" : "none";
-};
-
-// vars
-let el = document.createElement("div");
-el.dataset.op = op.id;
-el.classList.add("sidebar__group");
-onDefaultMinimizedPortChanged();
-let header = document.createElement("div");
-header.classList.add("sidebar__group-header");
-header.classList.add("cablesEle");
-el.appendChild(header);
-header.addEventListener("click", onClick);
-let headerTitle = document.createElement("div");
-headerTitle.classList.add("sidebar__group-header-title");
-// headerTitle.textContent = labelPort.get();
-header.appendChild(headerTitle);
-let headerTitleText = document.createElement("span");
-headerTitleText.textContent = labelPort.get();
-headerTitleText.classList.add("sidebar__group-header-title-text");
-headerTitle.appendChild(headerTitleText);
-let icon = document.createElement("span");
-icon.classList.add("sidebar__group-header-icon");
-icon.classList.add("iconsidebar-chevron-up");
-headerTitle.appendChild(icon);
-let groupItems = document.createElement("div");
-groupItems.classList.add("sidebar__group-items");
-el.appendChild(groupItems);
-op.toWorkPortsNeedToBeLinked(parentPort);
-
-// events
-parentPort.onChange = onParentChanged;
-labelPort.onChange = onLabelTextChanged;
-defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
-op.onDelete = onDelete;
-
-// functions
-
-inShowTitle.onChange = () =>
-{
-    if (inShowTitle.get())header.style.display = "block";
-    else header.style.display = "none";
-};
-
-function onDefaultMinimizedPortChanged()
-{
-    if (defaultMinimizedPort.get())
-    {
-        el.classList.add("sidebar__group--closed");
-    }
-    else
-    {
-        el.classList.remove("sidebar__group--closed");
-    }
-}
-
-function onClick(ev)
-{
-    ev.stopPropagation();
-    el.classList.toggle("sidebar__group--closed");
-}
-
-function onLabelTextChanged()
-{
-    let labelText = labelPort.get();
-    headerTitleText.textContent = labelText;
-    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
-}
-
-function onParentChanged()
-{
-    childrenPort.set(null);
-    let parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        childrenPort.set({
-            "parentElement": groupItems,
-            "parentOp": op,
-        });
-        nextPort.set(parent);
-    }
-    else
-    { // detach
-        if (el.parentElement)
-        {
-            el.parentElement.removeChild(el);
-        }
-    }
-}
-
-function showElement(el)
-{
-    if (el)
-    {
-        el.style.display = "block";
-    }
-}
-
-function hideElement(el)
-{
-    if (el)
-    {
-        el.style.display = "none";
-    }
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["86ea2333-b51c-48ed-94c2-8b7b6e9ff34c"]={f:Ops.Sidebar.Group,objName:"Ops.Sidebar.Group"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Math.Compare.Equals
-// 
-// **************************************************************
-
-Ops.Math.Compare.Equals= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    number1 = op.inValue("number1", 1),
-    number2 = op.inValue("number2", 1),
-    result = op.outBoolNum("result");
-
-number1.onChange =
-    number2.onChange = exec;
-exec();
-
-function exec()
-{
-    result.set(number1.get() == number2.get());
-}
-
-}
-};
-
-CABLES.OPS["4dd3cc55-eebc-4187-9d4e-2e053a956fab"]={f:Ops.Math.Compare.Equals,objName:"Ops.Math.Compare.Equals"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Array.StringToArray_v2
 // 
 // **************************************************************
@@ -10575,6 +10029,195 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["5e9c6933-0605-4bf7-8671-a016d917f327"]={f:Ops.Sidebar.Button_v2,objName:"Ops.Sidebar.Button_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.Compare.Equals
+// 
+// **************************************************************
+
+Ops.Math.Compare.Equals= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValue("number1", 1),
+    number2 = op.inValue("number2", 1),
+    result = op.outBoolNum("result");
+
+number1.onChange =
+    number2.onChange = exec;
+exec();
+
+function exec()
+{
+    result.set(number1.get() == number2.get());
+}
+
+}
+};
+
+CABLES.OPS["4dd3cc55-eebc-4187-9d4e-2e053a956fab"]={f:Ops.Math.Compare.Equals,objName:"Ops.Math.Compare.Equals"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Group
+// 
+// **************************************************************
+
+Ops.Sidebar.Group= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+// inputs
+let parentPort = op.inObject("link");
+let labelPort = op.inString("Text", "Group");
+const inShowTitle = op.inBool("Show Title", true);
+let defaultMinimizedPort = op.inValueBool("Default Minimized");
+const inVisible = op.inBool("Visible", true);
+
+// outputs
+let nextPort = op.outObject("next");
+let childrenPort = op.outObject("childs");
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+// vars
+let el = document.createElement("div");
+el.dataset.op = op.id;
+el.classList.add("sidebar__group");
+onDefaultMinimizedPortChanged();
+let header = document.createElement("div");
+header.classList.add("sidebar__group-header");
+header.classList.add("cablesEle");
+el.appendChild(header);
+header.addEventListener("click", onClick);
+let headerTitle = document.createElement("div");
+headerTitle.classList.add("sidebar__group-header-title");
+// headerTitle.textContent = labelPort.get();
+header.appendChild(headerTitle);
+let headerTitleText = document.createElement("span");
+headerTitleText.textContent = labelPort.get();
+headerTitleText.classList.add("sidebar__group-header-title-text");
+headerTitle.appendChild(headerTitleText);
+let icon = document.createElement("span");
+icon.classList.add("sidebar__group-header-icon");
+icon.classList.add("iconsidebar-chevron-up");
+headerTitle.appendChild(icon);
+let groupItems = document.createElement("div");
+groupItems.classList.add("sidebar__group-items");
+el.appendChild(groupItems);
+op.toWorkPortsNeedToBeLinked(parentPort);
+
+// events
+parentPort.onChange = onParentChanged;
+labelPort.onChange = onLabelTextChanged;
+defaultMinimizedPort.onChange = onDefaultMinimizedPortChanged;
+op.onDelete = onDelete;
+
+// functions
+
+inShowTitle.onChange = () =>
+{
+    if (inShowTitle.get())header.style.display = "block";
+    else header.style.display = "none";
+};
+
+function onDefaultMinimizedPortChanged()
+{
+    if (defaultMinimizedPort.get())
+    {
+        el.classList.add("sidebar__group--closed");
+    }
+    else
+    {
+        el.classList.remove("sidebar__group--closed");
+    }
+}
+
+function onClick(ev)
+{
+    ev.stopPropagation();
+    el.classList.toggle("sidebar__group--closed");
+}
+
+function onLabelTextChanged()
+{
+    let labelText = labelPort.get();
+    headerTitleText.textContent = labelText;
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
+}
+
+function onParentChanged()
+{
+    childrenPort.set(null);
+    let parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        childrenPort.set({
+            "parentElement": groupItems,
+            "parentOp": op,
+        });
+        nextPort.set(parent);
+    }
+    else
+    { // detach
+        if (el.parentElement)
+        {
+            el.parentElement.removeChild(el);
+        }
+    }
+}
+
+function showElement(el)
+{
+    if (el)
+    {
+        el.style.display = "block";
+    }
+}
+
+function hideElement(el)
+{
+    if (el)
+    {
+        el.style.display = "none";
+    }
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["86ea2333-b51c-48ed-94c2-8b7b6e9ff34c"]={f:Ops.Sidebar.Group,objName:"Ops.Sidebar.Group"};
 
 
 
@@ -11537,6 +11180,97 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["5a681c35-78ce-4cb3-9858-bc79c34c6819"]={f:Ops.Sidebar.Sidebar,objName:"Ops.Sidebar.Sidebar"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Vars.VarSetNumber_v2
+// 
+// **************************************************************
+
+Ops.Vars.VarSetNumber_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const val = op.inValueFloat("Value", 0);
+op.varName = op.inDropDown("Variable", [], "", true);
+
+new CABLES.VarSetOpWrapper(op, "number", val, op.varName);
+
+}
+};
+
+CABLES.OPS["b5249226-6095-4828-8a1c-080654e192fa"]={f:Ops.Vars.VarSetNumber_v2,objName:"Ops.Vars.VarSetNumber_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Vars.VarGetNumber_v2
+// 
+// **************************************************************
+
+Ops.Vars.VarGetNumber_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const val = op.outNumber("Value");
+op.varName = op.inValueSelect("Variable", [], "", true);
+
+new CABLES.VarGetOpWrapper(op, "number", op.varName, val);
+
+}
+};
+
+CABLES.OPS["421f5b52-c0fa-47c4-8b7a-012b9e1c864a"]={f:Ops.Vars.VarGetNumber_v2,objName:"Ops.Vars.VarGetNumber_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.Sum
+// 
+// **************************************************************
+
+Ops.Math.Sum= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    number1 = op.inValueFloat("number1", 0),
+    number2 = op.inValueFloat("number2", 0),
+    result = op.outNumber("result");
+
+op.setUiAttribs({ "mathTitle": true });
+
+number1.onChange =
+number2.onChange = exec;
+exec();
+
+function exec()
+{
+    const v = number1.get() + number2.get();
+    if (!isNaN(v))
+        result.set(v);
+}
+
+}
+};
+
+CABLES.OPS["c8fb181e-0b03-4b41-9e55-06b6267bc634"]={f:Ops.Math.Sum,objName:"Ops.Math.Sum"};
 
 
 
