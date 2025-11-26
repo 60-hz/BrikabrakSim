@@ -8740,415 +8740,6 @@ CABLES.OPS["d2343a1e-64ea-45b2-99ed-46e167bbdcd3"]={f:Ops.Math.MathExpression,ob
 
 // **************************************************************
 // 
-// Ops.Sidebar.Slider_v3
-// 
-// **************************************************************
-
-Ops.Sidebar.Slider_v3= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-// constants
-const STEP_DEFAULT = 0.00001;
-
-// inputs
-const parentPort = op.inObject("link");
-const labelPort = op.inString("Text", "Slider");
-const minPort = op.inValue("Min", 0);
-const maxPort = op.inValue("Max", 1);
-const stepPort = op.inValue("Step", STEP_DEFAULT);
-const labelSuffix = op.inString("Suffix", "");
-
-const inGreyOut = op.inBool("Grey Out", false);
-const inVisible = op.inBool("Visible", true);
-
-const inputValuePort = op.inValue("Input", 0.5);
-const setDefaultValueButtonPort = op.inTriggerButton("Set Default");
-const reset = op.inTriggerButton("Reset");
-
-let parent = null;
-
-const defaultValuePort = op.inValue("Default", 0.5);
-defaultValuePort.setUiAttribs({ "hidePort": true, "greyout": true });
-
-// outputs
-const siblingsPort = op.outObject("childs");
-const valuePort = op.outNumber("Result", defaultValuePort.get());
-
-op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
-op.setPortGroup("Range", [minPort, maxPort, stepPort]);
-op.setPortGroup("Display", [inGreyOut, inVisible]);
-
-// vars
-const el = document.createElement("div");
-el.addEventListener("dblclick", function ()
-{
-    valuePort.set(parseFloat(defaultValuePort.get()));
-    inputValuePort.set(parseFloat(defaultValuePort.get()));
-    setValueFieldValue(defaultValuePort.get());
-});
-
-el.dataset.op = op.id;
-el.classList.add("cablesEle");
-
-el.classList.add("sidebar__item");
-el.classList.add("sidebar__slider");
-el.classList.add("sidebar__reloadable");
-
-op.patch.on("sidebarStylesChanged", () => { updateActiveTrack(); });
-
-const label = document.createElement("div");
-label.classList.add("sidebar__item-label");
-
-const greyOut = document.createElement("div");
-greyOut.classList.add("sidebar__greyout");
-el.appendChild(greyOut);
-greyOut.style.display = "none";
-
-const labelText = document.createTextNode(labelPort.get());
-label.appendChild(labelText);
-el.appendChild(label);
-
-const value = document.createElement("input");
-value.value = defaultValuePort.get();
-value.classList.add("sidebar__text-input-input");
-value.setAttribute("type", "text");
-
-value.oninput = onTextInputChanged;
-el.appendChild(value);
-
-const suffixEle = document.createElement("span");
-// setValueFieldValue(defaultValuePort).get();
-// value.setAttribute("type", "text");
-// value.oninput = onTextInputChanged;
-
-el.appendChild(suffixEle);
-
-labelSuffix.onChange = () =>
-{
-    suffixEle.innerHTML = labelSuffix.get();
-};
-
-const inputWrapper = document.createElement("div");
-inputWrapper.classList.add("sidebar__slider-input-wrapper");
-el.appendChild(inputWrapper);
-
-const activeTrack = document.createElement("div");
-activeTrack.classList.add("sidebar__slider-input-active-track");
-inputWrapper.appendChild(activeTrack);
-const input = document.createElement("input");
-input.classList.add("sidebar__slider-input");
-input.setAttribute("min", minPort.get());
-input.setAttribute("max", maxPort.get());
-input.setAttribute("type", "range");
-input.setAttribute("step", stepPort.get());
-input.setAttribute("value", defaultValuePort.get());
-input.style.display = "block"; /* needed because offsetWidth returns 0 otherwise */
-inputWrapper.appendChild(input);
-
-updateActiveTrack();
-input.addEventListener("input", onSliderInput);
-
-// events
-parentPort.onChange = onParentChanged;
-labelPort.onChange = onLabelTextChanged;
-inputValuePort.onChange = onInputValuePortChanged;
-defaultValuePort.onChange = onDefaultValueChanged;
-setDefaultValueButtonPort.onTriggered = onSetDefaultValueButtonPress;
-minPort.onChange = onMinPortChange;
-maxPort.onChange = onMaxPortChange;
-stepPort.onChange = stepPortChanged;
-op.onDelete = onDelete;
-
-// op.onLoadedValueSet=function()
-op.onLoaded = op.onInit = function ()
-{
-    if (op.patch.config.sidebar)
-    {
-        op.patch.config.sidebar[labelPort.get()];
-        valuePort.set(op.patch.config.sidebar[labelPort.get()]);
-    }
-    else
-    {
-        valuePort.set(parseFloat(defaultValuePort.get()));
-        inputValuePort.set(parseFloat(defaultValuePort.get()));
-        // onInputValuePortChanged();
-    }
-};
-
-reset.onTriggered = function ()
-{
-    const newValue = parseFloat(defaultValuePort.get());
-    valuePort.set(newValue);
-    setValueFieldValue(newValue);
-    setInputFieldValue(newValue);
-    inputValuePort.set(newValue);
-    updateActiveTrack();
-};
-
-inGreyOut.onChange = function ()
-{
-    greyOut.style.display = inGreyOut.get() ? "block" : "none";
-};
-
-inVisible.onChange = function ()
-{
-    el.style.display = inVisible.get() ? "block" : "none";
-};
-
-function onTextInputChanged(ev)
-{
-    let newValue = parseFloat(ev.target.value);
-    if (isNaN(newValue)) newValue = 0;
-    const min = minPort.get();
-    const max = maxPort.get();
-    if (newValue < min) { newValue = min; }
-    else if (newValue > max) { newValue = max; }
-    // setInputFieldValue(newValue);
-    valuePort.set(newValue);
-    updateActiveTrack();
-    inputValuePort.set(newValue);
-    op.refreshParams();
-}
-
-function onInputValuePortChanged()
-{
-    let newValue = parseFloat(inputValuePort.get());
-    const minValue = minPort.get();
-    const maxValue = maxPort.get();
-    if (newValue > maxValue) { newValue = maxValue; }
-    else if (newValue < minValue) { newValue = minValue; }
-    setValueFieldValue(newValue);
-    setInputFieldValue(newValue);
-    valuePort.set(newValue);
-    updateActiveTrack();
-}
-
-function onSetDefaultValueButtonPress()
-{
-    let newValue = parseFloat(inputValuePort.get());
-    const minValue = minPort.get();
-    const maxValue = maxPort.get();
-    if (newValue > maxValue) { newValue = maxValue; }
-    else if (newValue < minValue) { newValue = minValue; }
-    setValueFieldValue(newValue);
-    setInputFieldValue(newValue);
-    valuePort.set(newValue);
-    defaultValuePort.set(newValue);
-    op.refreshParams();
-
-    updateActiveTrack();
-}
-
-function onSliderInput(ev)
-{
-    ev.preventDefault();
-    ev.stopPropagation();
-    setValueFieldValue(ev.target.value);
-    const inputFloat = parseFloat(ev.target.value);
-    valuePort.set(inputFloat);
-    inputValuePort.set(inputFloat);
-    op.refreshParams();
-
-    updateActiveTrack();
-    return false;
-}
-
-function stepPortChanged()
-{
-    const step = stepPort.get();
-    input.setAttribute("step", step);
-    updateActiveTrack();
-}
-
-function updateActiveTrack(val)
-{
-    let valueToUse = parseFloat(input.value);
-    if (typeof val !== "undefined") valueToUse = val;
-    let availableWidth = activeTrack.parentElement.getBoundingClientRect().width || 220;
-    if (parent) availableWidth = parseInt(getComputedStyle(parent.parentElement).getPropertyValue("--sidebar-width")) - 20;
-
-    const trackWidth = CABLES.map(
-        valueToUse,
-        parseFloat(input.min),
-        parseFloat(input.max),
-        0,
-        availableWidth - 16 /* subtract slider thumb width */
-    );
-    activeTrack.style.width = trackWidth + "px";
-}
-
-function onMinPortChange()
-{
-    const min = minPort.get();
-    input.setAttribute("min", min);
-    updateActiveTrack();
-}
-
-function onMaxPortChange()
-{
-    const max = maxPort.get();
-    input.setAttribute("max", max);
-    updateActiveTrack();
-}
-
-function onDefaultValueChanged()
-{
-    const defaultValue = defaultValuePort.get();
-    valuePort.set(parseFloat(defaultValue));
-    onMinPortChange();
-    onMaxPortChange();
-    setInputFieldValue(defaultValue);
-    setValueFieldValue(defaultValue);
-
-    updateActiveTrack(defaultValue); // needs to be passed as argument, is this async?
-}
-
-function onLabelTextChanged()
-{
-    const labelText = labelPort.get();
-    label.textContent = labelText;
-    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
-    value.setAttribute("aria-label", "slider " + labelPort.get());
-    input.setAttribute("aria-label", "slider " + labelPort.get());
-}
-
-function onParentChanged()
-{
-    siblingsPort.set(null);
-    parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        siblingsPort.set(parent);
-    }
-    else if (el.parentElement) el.parentElement.removeChild(el);
-
-    updateActiveTrack();
-}
-
-function setValueFieldValue(v)
-{
-    value.value = v;
-}
-
-function setInputFieldValue(v)
-{
-    input.value = v;
-}
-
-function showElement(el)
-{
-    if (el)el.style.display = "block";
-}
-
-function hideElement(el)
-{
-    if (el)el.style.display = "none";
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
-}
-
-}
-};
-
-CABLES.OPS["74730122-5cba-4d0d-b610-df334ec6220a"]={f:Ops.Sidebar.Slider_v3,objName:"Ops.Sidebar.Slider_v3"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Trigger.TriggerReceive
-// 
-// **************************************************************
-
-Ops.Trigger.TriggerReceive= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const next = op.outTrigger("Triggered");
-op.varName = op.inValueSelect("Named Trigger", [], "", true);
-
-op.varName.setUiAttribs({ "_triggerSelect": true });
-
-updateVarNamesDropdown();
-op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
-
-let oldName = null;
-
-function doTrigger()
-{
-    next.trigger();
-}
-
-function updateVarNamesDropdown()
-{
-    if (CABLES.UI)
-    {
-        let varnames = [];
-        let vars = op.patch.namedTriggers;
-
-        for (let i in vars) varnames.push(i);
-        varnames = varnames.sort();
-        op.varName.uiAttribs.values = varnames;
-    }
-}
-
-op.varName.onChange = function ()
-{
-    if (oldName)
-    {
-        let oldCbs = op.patch.namedTriggers[oldName];
-        let a = oldCbs.indexOf(doTrigger);
-        if (a != -1) oldCbs.splice(a, 1);
-    }
-
-    op.setTitle(">" + op.varName.get());
-    op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
-    let cbs = op.patch.namedTriggers[op.varName.get()];
-
-    cbs.push(doTrigger);
-    oldName = op.varName.get();
-    updateError();
-    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
-};
-
-op.on("uiParamPanel", updateError);
-
-function updateError()
-{
-    if (!op.varName.get())
-    {
-        op.setUiError("unknowntrigger", "unknown trigger");
-    }
-    else op.setUiError("unknowntrigger", null);
-}
-
-}
-};
-
-CABLES.OPS["0816c999-f2db-466b-9777-2814573574c5"]={f:Ops.Trigger.TriggerReceive,objName:"Ops.Trigger.TriggerReceive"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Extension.Standalone.Net.Osc_v2
 // 
 // **************************************************************
@@ -9559,135 +9150,6 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["52dc1ef8-deb0-4664-a924-4c5548aa8a55"]={f:Ops.Sidebar.ColorPicker_v3,objName:"Ops.Sidebar.ColorPicker_v3"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Sidebar.Button_v2
-// 
-// **************************************************************
-
-Ops.Sidebar.Button_v2= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-// inputs
-const parentPort = op.inObject("link");
-const buttonTextPort = op.inString("Text", "Button");
-
-// outputs
-const siblingsPort = op.outObject("childs");
-const buttonPressedPort = op.outTrigger("Pressed Trigger");
-
-const inGreyOut = op.inBool("Grey Out", false);
-const inVisible = op.inBool("Visible", true);
-
-// vars
-const el = document.createElement("div");
-el.dataset.op = op.id;
-el.classList.add("cablesEle");
-el.classList.add("sidebar__item");
-el.classList.add("sidebar--button");
-const input = document.createElement("button");
-input.classList.add("sidebar__button-input");
-el.appendChild(input);
-input.addEventListener("click", onButtonClick);
-input.style.width = "100%";
-const inputText = document.createTextNode(buttonTextPort.get());
-input.appendChild(inputText);
-op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
-
-// events
-parentPort.onChange = onParentChanged;
-buttonTextPort.onChange = onButtonTextChanged;
-op.onDelete = onDelete;
-
-const greyOut = document.createElement("div");
-greyOut.classList.add("sidebar__greyout");
-el.appendChild(greyOut);
-greyOut.style.display = "none";
-
-inGreyOut.onChange = function ()
-{
-    greyOut.style.display = inGreyOut.get() ? "block" : "none";
-};
-
-inVisible.onChange = function ()
-{
-    el.style.display = inVisible.get() ? "block" : "none";
-};
-
-function onButtonClick()
-{
-    buttonPressedPort.trigger();
-}
-
-function onButtonTextChanged()
-{
-    const buttonText = buttonTextPort.get();
-    input.textContent = buttonText;
-
-    input.setAttribute("aria-label", "button " + buttonTextPort.get());
-
-    if (CABLES.UI) op.setUiAttrib({ "extendTitle": buttonText });
-}
-
-function onParentChanged()
-{
-    siblingsPort.set(null);
-    const parent = parentPort.get();
-    if (parent && parent.parentElement)
-    {
-        parent.parentElement.appendChild(el);
-        siblingsPort.set(parent);
-    }
-    else
-    { // detach
-        if (el.parentElement)
-        {
-            el.parentElement.removeChild(el);
-        }
-    }
-}
-
-function showElement(el)
-{
-    if (el)
-    {
-        el.style.display = "block";
-    }
-}
-
-function hideElement(el)
-{
-    if (el)
-    {
-        el.style.display = "none";
-    }
-}
-
-function onDelete()
-{
-    removeElementFromDOM(el);
-}
-
-function removeElementFromDOM(el)
-{
-    if (el && el.parentNode && el.parentNode.removeChild)
-    {
-        el.parentNode.removeChild(el);
-    }
-}
-
-}
-};
-
-CABLES.OPS["5e9c6933-0605-4bf7-8671-a016d917f327"]={f:Ops.Sidebar.Button_v2,objName:"Ops.Sidebar.Button_v2"};
 
 
 
@@ -10984,6 +10446,544 @@ function doTrigger()
 };
 
 CABLES.OPS["ce1eaf2b-943b-4dc0-ab5e-ee11b63c9ed0"]={f:Ops.Trigger.TriggerSend,objName:"Ops.Trigger.TriggerSend"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Button_v2
+// 
+// **************************************************************
+
+Ops.Sidebar.Button_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+// inputs
+const parentPort = op.inObject("link");
+const buttonTextPort = op.inString("Text", "Button");
+
+// outputs
+const siblingsPort = op.outObject("childs");
+const buttonPressedPort = op.outTrigger("Pressed Trigger");
+
+const inGreyOut = op.inBool("Grey Out", false);
+const inVisible = op.inBool("Visible", true);
+
+// vars
+const el = document.createElement("div");
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+el.classList.add("sidebar__item");
+el.classList.add("sidebar--button");
+const input = document.createElement("button");
+input.classList.add("sidebar__button-input");
+el.appendChild(input);
+input.addEventListener("click", onButtonClick);
+input.style.width = "100%";
+const inputText = document.createTextNode(buttonTextPort.get());
+input.appendChild(inputText);
+op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
+
+// events
+parentPort.onChange = onParentChanged;
+buttonTextPort.onChange = onButtonTextChanged;
+op.onDelete = onDelete;
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+el.appendChild(greyOut);
+greyOut.style.display = "none";
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+function onButtonClick()
+{
+    buttonPressedPort.trigger();
+}
+
+function onButtonTextChanged()
+{
+    const buttonText = buttonTextPort.get();
+    input.textContent = buttonText;
+
+    input.setAttribute("aria-label", "button " + buttonTextPort.get());
+
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": buttonText });
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    const parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else
+    { // detach
+        if (el.parentElement)
+        {
+            el.parentElement.removeChild(el);
+        }
+    }
+}
+
+function showElement(el)
+{
+    if (el)
+    {
+        el.style.display = "block";
+    }
+}
+
+function hideElement(el)
+{
+    if (el)
+    {
+        el.style.display = "none";
+    }
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild)
+    {
+        el.parentNode.removeChild(el);
+    }
+}
+
+}
+};
+
+CABLES.OPS["5e9c6933-0605-4bf7-8671-a016d917f327"]={f:Ops.Sidebar.Button_v2,objName:"Ops.Sidebar.Button_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Trigger.TriggerReceive
+// 
+// **************************************************************
+
+Ops.Trigger.TriggerReceive= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const next = op.outTrigger("Triggered");
+op.varName = op.inValueSelect("Named Trigger", [], "", true);
+
+op.varName.setUiAttribs({ "_triggerSelect": true });
+
+updateVarNamesDropdown();
+op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
+
+let oldName = null;
+
+function doTrigger()
+{
+    next.trigger();
+}
+
+function updateVarNamesDropdown()
+{
+    if (CABLES.UI)
+    {
+        let varnames = [];
+        let vars = op.patch.namedTriggers;
+
+        for (let i in vars) varnames.push(i);
+        varnames = varnames.sort();
+        op.varName.uiAttribs.values = varnames;
+    }
+}
+
+op.varName.onChange = function ()
+{
+    if (oldName)
+    {
+        let oldCbs = op.patch.namedTriggers[oldName];
+        let a = oldCbs.indexOf(doTrigger);
+        if (a != -1) oldCbs.splice(a, 1);
+    }
+
+    op.setTitle(">" + op.varName.get());
+    op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
+    let cbs = op.patch.namedTriggers[op.varName.get()];
+
+    cbs.push(doTrigger);
+    oldName = op.varName.get();
+    updateError();
+    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
+};
+
+op.on("uiParamPanel", updateError);
+
+function updateError()
+{
+    if (!op.varName.get())
+    {
+        op.setUiError("unknowntrigger", "unknown trigger");
+    }
+    else op.setUiError("unknowntrigger", null);
+}
+
+}
+};
+
+CABLES.OPS["0816c999-f2db-466b-9777-2814573574c5"]={f:Ops.Trigger.TriggerReceive,objName:"Ops.Trigger.TriggerReceive"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Slider_v3
+// 
+// **************************************************************
+
+Ops.Sidebar.Slider_v3= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+// constants
+const STEP_DEFAULT = 0.00001;
+
+// inputs
+const parentPort = op.inObject("link");
+const labelPort = op.inString("Text", "Slider");
+const minPort = op.inValue("Min", 0);
+const maxPort = op.inValue("Max", 1);
+const stepPort = op.inValue("Step", STEP_DEFAULT);
+const labelSuffix = op.inString("Suffix", "");
+
+const inGreyOut = op.inBool("Grey Out", false);
+const inVisible = op.inBool("Visible", true);
+
+const inputValuePort = op.inValue("Input", 0.5);
+const setDefaultValueButtonPort = op.inTriggerButton("Set Default");
+const reset = op.inTriggerButton("Reset");
+
+let parent = null;
+
+const defaultValuePort = op.inValue("Default", 0.5);
+defaultValuePort.setUiAttribs({ "hidePort": true, "greyout": true });
+
+// outputs
+const siblingsPort = op.outObject("childs");
+const valuePort = op.outNumber("Result", defaultValuePort.get());
+
+op.toWorkNeedsParent("Ops.Sidebar.Sidebar");
+op.setPortGroup("Range", [minPort, maxPort, stepPort]);
+op.setPortGroup("Display", [inGreyOut, inVisible]);
+
+// vars
+const el = document.createElement("div");
+el.addEventListener("dblclick", function ()
+{
+    valuePort.set(parseFloat(defaultValuePort.get()));
+    inputValuePort.set(parseFloat(defaultValuePort.get()));
+    setValueFieldValue(defaultValuePort.get());
+});
+
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+
+el.classList.add("sidebar__item");
+el.classList.add("sidebar__slider");
+el.classList.add("sidebar__reloadable");
+
+op.patch.on("sidebarStylesChanged", () => { updateActiveTrack(); });
+
+const label = document.createElement("div");
+label.classList.add("sidebar__item-label");
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+el.appendChild(greyOut);
+greyOut.style.display = "none";
+
+const labelText = document.createTextNode(labelPort.get());
+label.appendChild(labelText);
+el.appendChild(label);
+
+const value = document.createElement("input");
+value.value = defaultValuePort.get();
+value.classList.add("sidebar__text-input-input");
+value.setAttribute("type", "text");
+
+value.oninput = onTextInputChanged;
+el.appendChild(value);
+
+const suffixEle = document.createElement("span");
+// setValueFieldValue(defaultValuePort).get();
+// value.setAttribute("type", "text");
+// value.oninput = onTextInputChanged;
+
+el.appendChild(suffixEle);
+
+labelSuffix.onChange = () =>
+{
+    suffixEle.innerHTML = labelSuffix.get();
+};
+
+const inputWrapper = document.createElement("div");
+inputWrapper.classList.add("sidebar__slider-input-wrapper");
+el.appendChild(inputWrapper);
+
+const activeTrack = document.createElement("div");
+activeTrack.classList.add("sidebar__slider-input-active-track");
+inputWrapper.appendChild(activeTrack);
+const input = document.createElement("input");
+input.classList.add("sidebar__slider-input");
+input.setAttribute("min", minPort.get());
+input.setAttribute("max", maxPort.get());
+input.setAttribute("type", "range");
+input.setAttribute("step", stepPort.get());
+input.setAttribute("value", defaultValuePort.get());
+input.style.display = "block"; /* needed because offsetWidth returns 0 otherwise */
+inputWrapper.appendChild(input);
+
+updateActiveTrack();
+input.addEventListener("input", onSliderInput);
+
+// events
+parentPort.onChange = onParentChanged;
+labelPort.onChange = onLabelTextChanged;
+inputValuePort.onChange = onInputValuePortChanged;
+defaultValuePort.onChange = onDefaultValueChanged;
+setDefaultValueButtonPort.onTriggered = onSetDefaultValueButtonPress;
+minPort.onChange = onMinPortChange;
+maxPort.onChange = onMaxPortChange;
+stepPort.onChange = stepPortChanged;
+op.onDelete = onDelete;
+
+// op.onLoadedValueSet=function()
+op.onLoaded = op.onInit = function ()
+{
+    if (op.patch.config.sidebar)
+    {
+        op.patch.config.sidebar[labelPort.get()];
+        valuePort.set(op.patch.config.sidebar[labelPort.get()]);
+    }
+    else
+    {
+        valuePort.set(parseFloat(defaultValuePort.get()));
+        inputValuePort.set(parseFloat(defaultValuePort.get()));
+        // onInputValuePortChanged();
+    }
+};
+
+reset.onTriggered = function ()
+{
+    const newValue = parseFloat(defaultValuePort.get());
+    valuePort.set(newValue);
+    setValueFieldValue(newValue);
+    setInputFieldValue(newValue);
+    inputValuePort.set(newValue);
+    updateActiveTrack();
+};
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+function onTextInputChanged(ev)
+{
+    let newValue = parseFloat(ev.target.value);
+    if (isNaN(newValue)) newValue = 0;
+    const min = minPort.get();
+    const max = maxPort.get();
+    if (newValue < min) { newValue = min; }
+    else if (newValue > max) { newValue = max; }
+    // setInputFieldValue(newValue);
+    valuePort.set(newValue);
+    updateActiveTrack();
+    inputValuePort.set(newValue);
+    op.refreshParams();
+}
+
+function onInputValuePortChanged()
+{
+    let newValue = parseFloat(inputValuePort.get());
+    const minValue = minPort.get();
+    const maxValue = maxPort.get();
+    if (newValue > maxValue) { newValue = maxValue; }
+    else if (newValue < minValue) { newValue = minValue; }
+    setValueFieldValue(newValue);
+    setInputFieldValue(newValue);
+    valuePort.set(newValue);
+    updateActiveTrack();
+}
+
+function onSetDefaultValueButtonPress()
+{
+    let newValue = parseFloat(inputValuePort.get());
+    const minValue = minPort.get();
+    const maxValue = maxPort.get();
+    if (newValue > maxValue) { newValue = maxValue; }
+    else if (newValue < minValue) { newValue = minValue; }
+    setValueFieldValue(newValue);
+    setInputFieldValue(newValue);
+    valuePort.set(newValue);
+    defaultValuePort.set(newValue);
+    op.refreshParams();
+
+    updateActiveTrack();
+}
+
+function onSliderInput(ev)
+{
+    ev.preventDefault();
+    ev.stopPropagation();
+    setValueFieldValue(ev.target.value);
+    const inputFloat = parseFloat(ev.target.value);
+    valuePort.set(inputFloat);
+    inputValuePort.set(inputFloat);
+    op.refreshParams();
+
+    updateActiveTrack();
+    return false;
+}
+
+function stepPortChanged()
+{
+    const step = stepPort.get();
+    input.setAttribute("step", step);
+    updateActiveTrack();
+}
+
+function updateActiveTrack(val)
+{
+    let valueToUse = parseFloat(input.value);
+    if (typeof val !== "undefined") valueToUse = val;
+    let availableWidth = activeTrack.parentElement.getBoundingClientRect().width || 220;
+    if (parent) availableWidth = parseInt(getComputedStyle(parent.parentElement).getPropertyValue("--sidebar-width")) - 20;
+
+    const trackWidth = CABLES.map(
+        valueToUse,
+        parseFloat(input.min),
+        parseFloat(input.max),
+        0,
+        availableWidth - 16 /* subtract slider thumb width */
+    );
+    activeTrack.style.width = trackWidth + "px";
+}
+
+function onMinPortChange()
+{
+    const min = minPort.get();
+    input.setAttribute("min", min);
+    updateActiveTrack();
+}
+
+function onMaxPortChange()
+{
+    const max = maxPort.get();
+    input.setAttribute("max", max);
+    updateActiveTrack();
+}
+
+function onDefaultValueChanged()
+{
+    const defaultValue = defaultValuePort.get();
+    valuePort.set(parseFloat(defaultValue));
+    onMinPortChange();
+    onMaxPortChange();
+    setInputFieldValue(defaultValue);
+    setValueFieldValue(defaultValue);
+
+    updateActiveTrack(defaultValue); // needs to be passed as argument, is this async?
+}
+
+function onLabelTextChanged()
+{
+    const labelText = labelPort.get();
+    label.textContent = labelText;
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": labelText });
+    value.setAttribute("aria-label", "slider " + labelPort.get());
+    input.setAttribute("aria-label", "slider " + labelPort.get());
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else if (el.parentElement) el.parentElement.removeChild(el);
+
+    updateActiveTrack();
+}
+
+function setValueFieldValue(v)
+{
+    value.value = v;
+}
+
+function setInputFieldValue(v)
+{
+    input.value = v;
+}
+
+function showElement(el)
+{
+    if (el)el.style.display = "block";
+}
+
+function hideElement(el)
+{
+    if (el)el.style.display = "none";
+}
+
+function onDelete()
+{
+    removeElementFromDOM(el);
+}
+
+function removeElementFromDOM(el)
+{
+    if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
+}
+
+}
+};
+
+CABLES.OPS["74730122-5cba-4d0d-b610-df334ec6220a"]={f:Ops.Sidebar.Slider_v3,objName:"Ops.Sidebar.Slider_v3"};
 
 
 
