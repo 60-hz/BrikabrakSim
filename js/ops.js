@@ -6,6 +6,7 @@ CABLES.OPS=CABLES.OPS||{};
 var Ops=Ops || {};
 Ops.Gl=Ops.Gl || {};
 Ops.Ui=Ops.Ui || {};
+Ops.Html=Ops.Html || {};
 Ops.Math=Ops.Math || {};
 Ops.Vars=Ops.Vars || {};
 Ops.Array=Ops.Array || {};
@@ -25,11 +26,14 @@ Ops.Extension=Ops.Extension || {};
 Ops.Gl.Matrix=Ops.Gl.Matrix || {};
 Ops.Gl.Meshes=Ops.Gl.Meshes || {};
 Ops.Gl.Shader=Ops.Gl.Shader || {};
+Ops.Gl.Textures=Ops.Gl.Textures || {};
 Ops.Math.Compare=Ops.Math.Compare || {};
 Ops.Devices.Mouse=Ops.Devices.Mouse || {};
 Ops.Extension.Osc=Ops.Extension.Osc || {};
 Ops.Graphics.Meshes=Ops.Graphics.Meshes || {};
+Ops.Devices.Keyboard=Ops.Devices.Keyboard || {};
 Ops.Gl.ShaderEffects=Ops.Gl.ShaderEffects || {};
+Ops.Graphics.Geometry=Ops.Graphics.Geometry || {};
 Ops.Extension.Standalone=Ops.Extension.Standalone || {};
 Ops.Extension.Standalone.Net=Ops.Extension.Standalone.Net || {};
 
@@ -5807,156 +5811,6 @@ CABLES.OPS["50e7f565-0cdb-47ca-912b-87c04e2f00e3"]={f:Ops.Gl.Matrix.Scale,objNam
 
 // **************************************************************
 // 
-// Ops.Graphics.Transform
-// 
-// **************************************************************
-
-Ops.Graphics.Transform= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    render = op.inTrigger("render"),
-    posX = op.inValue("posX", 0),
-    posY = op.inValue("posY", 0),
-    posZ = op.inValue("posZ", 0),
-    scale = op.inValue("scale", 1),
-    rotX = op.inValue("rotX", 0),
-    rotY = op.inValue("rotY", 0),
-    rotZ = op.inValue("rotZ", 0),
-    trigger = op.outTrigger("trigger");
-
-op.setPortGroup("Rotation", [rotX, rotY, rotZ]);
-op.setPortGroup("Position", [posX, posY, posZ]);
-op.setPortGroup("Scale", [scale]);
-op.setUiAxisPorts(posX, posY, posZ);
-
-op.toWorkPortsNeedToBeLinked(render, trigger);
-
-const vPos = vec3.create();
-const vScale = vec3.create();
-const transMatrix = mat4.create();
-mat4.identity(transMatrix);
-
-let
-    doScale = false,
-    doTranslate = false,
-    translationChanged = true,
-    scaleChanged = true,
-    rotChanged = true;
-
-rotX.onChange = rotY.onChange = rotZ.onChange = setRotChanged;
-posX.onChange = posY.onChange = posZ.onChange = setTranslateChanged;
-scale.onChange = setScaleChanged;
-
-render.onTriggered = function ()
-{
-    // if(!CGL.TextureEffect.checkOpNotInTextureEffect(op)) return;
-
-    let updateMatrix = false;
-    if (translationChanged)
-    {
-        updateTranslation();
-        updateMatrix = true;
-    }
-    if (scaleChanged)
-    {
-        updateScale();
-        updateMatrix = true;
-    }
-    if (rotChanged) updateMatrix = true;
-
-    if (updateMatrix) doUpdateMatrix();
-
-    const cg = op.patch.cg || op.patch.cgl;
-    cg.pushModelMatrix();
-    mat4.multiply(cg.mMatrix, cg.mMatrix, transMatrix);
-
-    trigger.trigger();
-    cg.popModelMatrix();
-
-    if (CABLES.UI)
-    {
-        if (!posX.isLinked() && !posY.isLinked() && !posZ.isLinked())
-        {
-            gui.setTransform(op.id, posX.get(), posY.get(), posZ.get());
-
-            if (op.isCurrentUiOp())
-                gui.setTransformGizmo(
-                    {
-                        "posX": posX,
-                        "posY": posY,
-                        "posZ": posZ,
-                    });
-        }
-    }
-};
-
-// op.transform3d = function ()
-// {
-//     return { "pos": [posX, posY, posZ] };
-// };
-
-function doUpdateMatrix()
-{
-    mat4.identity(transMatrix);
-    if (doTranslate)mat4.translate(transMatrix, transMatrix, vPos);
-
-    if (rotX.get() !== 0)mat4.rotateX(transMatrix, transMatrix, rotX.get() * CGL.DEG2RAD);
-    if (rotY.get() !== 0)mat4.rotateY(transMatrix, transMatrix, rotY.get() * CGL.DEG2RAD);
-    if (rotZ.get() !== 0)mat4.rotateZ(transMatrix, transMatrix, rotZ.get() * CGL.DEG2RAD);
-
-    if (doScale)mat4.scale(transMatrix, transMatrix, vScale);
-    rotChanged = false;
-}
-
-function updateTranslation()
-{
-    doTranslate = false;
-    if (posX.get() !== 0.0 || posY.get() !== 0.0 || posZ.get() !== 0.0) doTranslate = true;
-    vec3.set(vPos, posX.get(), posY.get(), posZ.get());
-    translationChanged = false;
-}
-
-function updateScale()
-{
-    // doScale=false;
-    // if(scale.get()!==0.0)
-    doScale = true;
-    vec3.set(vScale, scale.get(), scale.get(), scale.get());
-    scaleChanged = false;
-}
-
-function setTranslateChanged()
-{
-    translationChanged = true;
-}
-
-function setScaleChanged()
-{
-    scaleChanged = true;
-}
-
-function setRotChanged()
-{
-    rotChanged = true;
-}
-
-doUpdateMatrix();
-
-}
-};
-
-CABLES.OPS["650baeb1-db2d-4781-9af6-ab4e9d4277be"]={f:Ops.Graphics.Transform,objName:"Ops.Graphics.Transform"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Gl.PixelProjection_v3
 // 
 // **************************************************************
@@ -7313,11 +7167,11 @@ CABLES.OPS["790f3702-9833-464e-8e37-6f0f813f7e16"]={f:Ops.Gl.Texture_v2,objName:
 
 // **************************************************************
 // 
-// Ops.Trigger.SequenceMultiPort
+// Ops.Graphics.Transform
 // 
 // **************************************************************
 
-Ops.Trigger.SequenceMultiPort= class extends CABLES.Op 
+Ops.Graphics.Transform= class extends CABLES.Op 
 {
 constructor()
 {
@@ -7325,25 +7179,138 @@ super(...arguments);
 const op=this;
 const attachments=op.attachments={};
 const
-    inTrigs = op.inMultiPort("Input", CABLES.OP_PORT_TYPE_FUNCTION),
-    outTrigs = op.outMultiPort("Output", CABLES.OP_PORT_TYPE_FUNCTION);
+    render = op.inTrigger("render"),
+    posX = op.inValue("posX", 0),
+    posY = op.inValue("posY", 0),
+    posZ = op.inValue("posZ", 0),
+    scale = op.inValue("scale", 1),
+    rotX = op.inValue("rotX", 0),
+    rotY = op.inValue("rotY", 0),
+    rotZ = op.inValue("rotZ", 0),
+    trigger = op.outTrigger("trigger");
 
-// op.setUiAttrib({ "resizable": true, "resizableY": false, "stretchPorts": true });
+op.setPortGroup("Rotation", [rotX, rotY, rotZ]);
+op.setPortGroup("Position", [posX, posY, posZ]);
+op.setPortGroup("Scale", [scale]);
+op.setUiAxisPorts(posX, posY, posZ);
 
-inTrigs.onTriggered = (index) =>
+op.toWorkPortsNeedToBeLinked(render, trigger);
+
+const vPos = vec3.create();
+const vScale = vec3.create();
+const transMatrix = mat4.create();
+mat4.identity(transMatrix);
+
+let
+    doScale = false,
+    doTranslate = false,
+    translationChanged = true,
+    scaleChanged = true,
+    rotChanged = true;
+
+rotX.onChange = rotY.onChange = rotZ.onChange = setRotChanged;
+posX.onChange = posY.onChange = posZ.onChange = setTranslateChanged;
+scale.onChange = setScaleChanged;
+
+render.onTriggered = function ()
 {
-    const ports = outTrigs.get();
+    // if(!CGL.TextureEffect.checkOpNotInTextureEffect(op)) return;
 
-    for (let i = 0; i < ports.length; i++)
+    let updateMatrix = false;
+    if (translationChanged)
     {
-        ports[i].trigger();
+        updateTranslation();
+        updateMatrix = true;
+    }
+    if (scaleChanged)
+    {
+        updateScale();
+        updateMatrix = true;
+    }
+    if (rotChanged) updateMatrix = true;
+
+    if (updateMatrix) doUpdateMatrix();
+
+    const cg = op.patch.cg || op.patch.cgl;
+    cg.pushModelMatrix();
+    mat4.multiply(cg.mMatrix, cg.mMatrix, transMatrix);
+
+    trigger.trigger();
+    cg.popModelMatrix();
+
+    if (CABLES.UI)
+    {
+        if (!posX.isLinked() && !posY.isLinked() && !posZ.isLinked())
+        {
+            gui.setTransform(op.id, posX.get(), posY.get(), posZ.get());
+
+            if (op.isCurrentUiOp())
+                gui.setTransformGizmo(
+                    {
+                        "posX": posX,
+                        "posY": posY,
+                        "posZ": posZ,
+                    });
+        }
     }
 };
+
+// op.transform3d = function ()
+// {
+//     return { "pos": [posX, posY, posZ] };
+// };
+
+function doUpdateMatrix()
+{
+    mat4.identity(transMatrix);
+    if (doTranslate)mat4.translate(transMatrix, transMatrix, vPos);
+
+    if (rotX.get() !== 0)mat4.rotateX(transMatrix, transMatrix, rotX.get() * CGL.DEG2RAD);
+    if (rotY.get() !== 0)mat4.rotateY(transMatrix, transMatrix, rotY.get() * CGL.DEG2RAD);
+    if (rotZ.get() !== 0)mat4.rotateZ(transMatrix, transMatrix, rotZ.get() * CGL.DEG2RAD);
+
+    if (doScale)mat4.scale(transMatrix, transMatrix, vScale);
+    rotChanged = false;
+}
+
+function updateTranslation()
+{
+    doTranslate = false;
+    if (posX.get() !== 0.0 || posY.get() !== 0.0 || posZ.get() !== 0.0) doTranslate = true;
+    vec3.set(vPos, posX.get(), posY.get(), posZ.get());
+    translationChanged = false;
+}
+
+function updateScale()
+{
+    // doScale=false;
+    // if(scale.get()!==0.0)
+    doScale = true;
+    vec3.set(vScale, scale.get(), scale.get(), scale.get());
+    scaleChanged = false;
+}
+
+function setTranslateChanged()
+{
+    translationChanged = true;
+}
+
+function setScaleChanged()
+{
+    scaleChanged = true;
+}
+
+function setRotChanged()
+{
+    rotChanged = true;
+}
+
+doUpdateMatrix();
 
 }
 };
 
-CABLES.OPS["be066ff6-85e2-408a-9570-59fb7abff7b2"]={f:Ops.Trigger.SequenceMultiPort,objName:"Ops.Trigger.SequenceMultiPort"};
+CABLES.OPS["650baeb1-db2d-4781-9af6-ab4e9d4277be"]={f:Ops.Graphics.Transform,objName:"Ops.Graphics.Transform"};
 
 
 
@@ -11271,6 +11238,2727 @@ function exec()
 };
 
 CABLES.OPS["c8fb181e-0b03-4b41-9e55-06b6267bc634"]={f:Ops.Math.Sum,objName:"Ops.Math.Sum"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Performance
+// 
+// **************************************************************
+
+Ops.Gl.Performance= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exe = op.inTrigger("exe"),
+    inActive = op.inValueBool("Active", true),
+    inShow = op.inValueBool("Visible", true),
+    inDoGpu = op.inValueBool("Measure GPU", true),
+    next = op.outTrigger("childs"),
+    position = op.inSwitch("Position", ["top", "bottom"], "top"),
+    openDefault = op.inBool("Open", false),
+    smoothGraph = op.inBool("Smooth Graph", true),
+    inScaleGraph = op.inFloat("Scale", 3),
+    inSizeGraph = op.inFloat("Size", 128),
+    outCanv = op.outObject("Canvas"),
+    outFPS = op.outNumber("FPS");
+
+const cgl = op.patch.cgl;
+const element = document.createElement("div");
+
+let elementMeasures = null;
+let ctx = null;
+let opened = false;
+let frameCount = 0;
+let fps = 0;
+let fpsStartTime = 0;
+let childsTime = 0;
+let avgMsChilds = 0;
+const queue = [];
+const timesMainloop = [];
+const timesOnFrame = [];
+const timesGPU = [];
+let avgMs = 0;
+let selfTime = 0;
+let canvas = null;
+let lastTime = 0;
+let loadingCounter = 0;
+const loadingChars = ["|", "/", "-", "\\"];
+let initMeasures = true;
+
+const colorRAFSlow = "#007f9c";
+const colorRAFVeruSlow = "#aaaaaa";
+
+const colorBg = "#222222";
+const colorRAF = "#003f5c"; // color: https://learnui.design/tools/data-color-picker.html
+const colorMainloop = "#7a5195";
+const colorOnFrame = "#ef5675";
+const colorGPU = "#ffa600";
+
+let startedQuery = false;
+
+let currentTimeGPU = 0;
+let currentTimeMainloop = 0;
+let currentTimeOnFrame = 0;
+
+op.toWorkPortsNeedToBeLinked(exe, next);
+
+const gl = op.patch.cgl.gl;
+const glQueryExt = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+
+inActive.onChange =
+exe.onLinkChanged =
+    inShow.onChange = () =>
+    {
+        updateOpened();
+        updateVisibility();
+    };
+
+position.onChange = updatePos;
+inSizeGraph.onChange = updateSize;
+
+element.id = "performance";
+element.style.position = "absolute";
+element.style.left = "0px";
+element.style.opacity = "0.8";
+element.style.padding = "10px";
+element.style.cursor = "pointer";
+element.style.background = "#222";
+element.style.color = "white";
+element.style["font-family"] = "monospace";
+element.style["font-size"] = "12px";
+element.style["z-index"] = "99999";
+
+element.innerHTML = "&nbsp;";
+element.addEventListener("click", toggleOpened);
+
+const container = op.patch.cgl.canvas.parentElement;
+container.appendChild(element);
+
+updateSize();
+updateOpened();
+updatePos();
+updateVisibility();
+
+op.onDelete = function ()
+{
+    if (canvas)canvas.remove();
+    if (element)element.remove();
+};
+
+function updatePos()
+{
+    canvas.style["pointer-events"] = "none";
+    if (position.get() == "top")
+    {
+        canvas.style.top = element.style.top = "0px";
+        canvas.style.bottom = element.style.bottom = "initial";
+    }
+    else
+    {
+        canvas.style.bottom = element.style.bottom = "0px";
+        canvas.style.top = element.style.top = "initial";
+    }
+}
+
+function updateVisibility()
+{
+    if (!inShow.get() || !exe.isLinked() || !inActive.get())
+    {
+        element.style.display = "none";
+        element.style.opacity = 0;
+        canvas.style.display = "none";
+    }
+    else
+    {
+        element.style.display = "block";
+        element.style.opacity = 1;
+        canvas.style.display = "block";
+    }
+}
+
+function updateSize()
+{
+    if (!canvas) return;
+
+    const num = Math.max(0, parseInt(inSizeGraph.get()));
+
+    canvas.width = num;
+    canvas.height = num;
+    element.style.left = num + "px";
+
+    queue.length = 0;
+    timesMainloop.length = 0;
+    timesOnFrame.length = 0;
+    timesGPU.length = 0;
+
+    for (let i = 0; i < num; i++)
+    {
+        queue[i] = -1;
+        timesMainloop[i] = -1;
+        timesOnFrame[i] = -1;
+        timesGPU[i] = -1;
+    }
+}
+
+openDefault.onChange = function ()
+{
+    opened = openDefault.get();
+    updateOpened();
+};
+
+function toggleOpened()
+{
+    if (!inShow.get()) return;
+    element.style.opacity = 1;
+    opened = !opened;
+    updateOpened();
+}
+
+function updateOpened()
+{
+    updateText();
+    if (!canvas)createCanvas();
+    if (opened)
+    {
+        canvas.style.display = "block";
+        element.style.left = inSizeGraph.get() + "px";
+        element.style["min-height"] = "56px";
+    }
+    else
+    {
+        canvas.style.display = "none";
+        element.style.left = "0px";
+        element.style["min-height"] = "auto";
+    }
+}
+
+function updateCanvas()
+{
+    const height = canvas.height;
+    const hmul = inScaleGraph.get();
+
+    ctx.fillStyle = colorBg;
+    ctx.fillRect(0, 0, canvas.width, height);
+
+    ctx.fillStyle = colorRAF;
+
+    let k = 0;
+    const numBars = Math.max(0, parseInt(inSizeGraph.get()));
+
+    for (k = numBars; k >= 0; k--)
+    {
+        if (queue[k] > 30) ctx.fillStyle = colorRAFSlow;
+        if (queue[k] > 60) ctx.fillStyle = colorRAFVeruSlow;
+
+        ctx.fillRect(numBars - k, height - queue[k] * hmul, 1, queue[k] * hmul);
+        if (queue[k] > 30)ctx.fillStyle = colorRAF;
+    }
+
+    for (k = numBars; k >= 0; k--)
+    {
+        let sum = 0;
+        ctx.fillStyle = colorMainloop;
+        sum = timesMainloop[k];
+        ctx.fillRect(numBars - k, height - sum * hmul, 1, timesMainloop[k] * hmul);
+
+        ctx.fillStyle = colorOnFrame;
+        sum += timesOnFrame[k];
+        ctx.fillRect(numBars - k, height - sum * hmul, 1, timesOnFrame[k] * hmul);
+
+        ctx.fillStyle = colorGPU;
+        sum += timesGPU[k];
+        ctx.fillRect(numBars - k, height - sum * hmul, 1, timesGPU[k] * hmul);
+    }
+
+    for (let i = 10; i < height; i += 10)
+    {
+        ctx.fillStyle = "#888";
+        const y = height - (i * hmul);
+        ctx.fillRect(canvas.width - 5, y, 5, 1);
+        ctx.font = "8px arial";
+
+        ctx.fillText(i + "ms", canvas.width - 27, y + 3);
+    }
+
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(canvas.width - 5, height - (1000 / fps * hmul), 5, 1);
+    ctx.fillText(Math.round(1000 / fps) + "ms", canvas.width - 27, height - (1000 / fps * hmul));
+}
+
+function createCanvas()
+{
+    canvas = document.createElement("canvas");
+    canvas.id = "performance_" + op.patch.config.glCanvasId;
+    canvas.width = inSizeGraph.get();
+    canvas.height = inSizeGraph.get();
+    canvas.style.display = "block";
+    canvas.style.opacity = 0.9;
+    canvas.style.position = "absolute";
+    canvas.style.left = "0px";
+    canvas.style.cursor = "pointer";
+    canvas.style.top = "-64px";
+    canvas.style["z-index"] = "99998";
+    container.appendChild(canvas);
+    ctx = canvas.getContext("2d");
+
+    canvas.addEventListener("click", toggleOpened);
+
+    updateSize();
+}
+
+function updateText()
+{
+    if (!inShow.get()) return;
+    let warn = "";
+
+    if (op.patch.cgl.profileData.profileShaderCompiles > 0)warn += "Shader compile (" + op.patch.cgl.profileData.profileShaderCompileName + ") ";
+    if (op.patch.cgl.profileData.profileShaderGetUniform > 0)warn += "Shader get uni loc! (" + op.patch.cgl.profileData.profileShaderGetUniformName + ")";
+    if (op.patch.cgl.profileData.profileTextureResize > 0)warn += "Texture resize! ";
+    if (op.patch.cgl.profileData.profileFrameBuffercreate > 0)warn += "Framebuffer create! ";
+    if (op.patch.cgl.profileData.profileEffectBuffercreate > 0)warn += "Effectbuffer create! ";
+    if (op.patch.cgl.profileData.profileTextureDelete > 0)warn += "Texture delete! ";
+    if (op.patch.cgl.profileData.profileNonTypedAttrib > 0)warn += "Not-Typed Buffer Attrib! " + op.patch.cgl.profileData.profileNonTypedAttribNames;
+    if (op.patch.cgl.profileData.profileTextureNew > 0)warn += "new texture created! ";
+    if (op.patch.cgl.profileData.profileGenMipMap > 0)warn += "generating mip maps!";
+
+    if (warn.length > 0)
+    {
+        warn = "| <span style=\"color:#f80;\">WARNING: " + warn + "<span>";
+    }
+
+    let html = "";
+
+    if (opened)
+    {
+        html += "<span style=\"color:" + colorRAF + "\">■</span> " + fps + " fps ";
+        html += "<span style=\"color:" + colorMainloop + "\">■</span> " + Math.round(currentTimeMainloop * 100) / 100 + "ms mainloop ";
+        html += "<span style=\"color:" + colorOnFrame + "\">■</span> " + Math.round((currentTimeOnFrame) * 100) / 100 + "ms onframe ";
+        if (currentTimeGPU) html += "<span style=\"color:" + colorGPU + "\">■</span> " + Math.round(currentTimeGPU * 100) / 100 + "ms GPU";
+        html += warn;
+        element.innerHTML = html;
+    }
+    else
+    {
+        html += fps + " fps / ";
+        html += "CPU: " + Math.round((op.patch.cgl.profileData.profileOnAnimFrameOps) * 100) / 100 + "ms / ";
+        if (currentTimeGPU)html += "GPU: " + Math.round(currentTimeGPU * 100) / 100 + "ms  ";
+        element.innerHTML = html;
+    }
+
+    if (op.patch.loading.getProgress() != 1.0)
+    {
+        element.innerHTML += "<br/>loading " + Math.round(op.patch.loading.getProgress() * 100) + "% " + loadingChars[(++loadingCounter) % loadingChars.length];
+    }
+
+    if (opened)
+    {
+        let count = 0;
+        avgMs = 0;
+        avgMsChilds = 0;
+        for (let i = queue.length; i > queue.length - queue.length / 3; i--)
+        {
+            if (queue[i] > -1)
+            {
+                avgMs += queue[i];
+                count++;
+            }
+
+            if (timesMainloop[i] > -1) avgMsChilds += timesMainloop[i];
+        }
+
+        avgMs /= count;
+        avgMsChilds /= count;
+
+        element.innerHTML += "<br/> " + cgl.canvasWidth + " x " + cgl.canvasHeight + " (x" + cgl.pixelDensity + ") ";
+        element.innerHTML += "<br/>frame avg: " + Math.round(avgMsChilds * 100) / 100 + " ms (" + Math.round(avgMsChilds / avgMs * 100) + "%) / " + Math.round(avgMs * 100) / 100 + " ms";
+        element.innerHTML += " (self: " + Math.round((selfTime) * 100) / 100 + " ms) ";
+
+        element.innerHTML += "<br/>shader binds: " + Math.ceil(op.patch.cgl.profileData.profileShaderBinds / fps) +
+            " uniforms: " + Math.ceil(op.patch.cgl.profileData.profileUniformCount / fps) +
+            " mvp_uni_mat4: " + Math.ceil(op.patch.cgl.profileData.profileMVPMatrixCount / fps) +
+            " num glPrimitives: " + Math.ceil(op.patch.cgl.profileData.profileMeshNumElements / (fps)) +
+
+            " fenced pixelread: " + Math.ceil(op.patch.cgl.profileData.profileFencedPixelRead) +
+
+            " mesh.setGeom: " + op.patch.cgl.profileData.profileMeshSetGeom +
+            " videos: " + op.patch.cgl.profileData.profileVideosPlaying +
+            " tex preview: " + op.patch.cgl.profileData.profileTexPreviews;
+
+        element.innerHTML +=
+        " draw meshes: " + Math.ceil(op.patch.cgl.profileData.profileMeshDraw / fps) +
+        " framebuffer blit: " + Math.ceil(op.patch.cgl.profileData.profileFramebuffer / fps) +
+        " texeffect blit: " + Math.ceil(op.patch.cgl.profileData.profileTextureEffect / fps);
+
+        element.innerHTML += " all shader compiletime: " + Math.round(op.patch.cgl.profileData.shaderCompileTime * 100) / 100;
+    }
+
+    op.patch.cgl.profileData.clear();
+}
+
+function styleMeasureEle(ele)
+{
+    ele.style.padding = "0px";
+    ele.style.margin = "0px";
+}
+
+function addMeasureChild(m, parentEle, timeSum, level)
+{
+    const height = 20;
+    m.usedAvg = (m.usedAvg || m.used);
+
+    if (!m.ele || initMeasures)
+    {
+        const newEle = document.createElement("div");
+        m.ele = newEle;
+
+        if (m.childs && m.childs.length > 0) newEle.style.height = "500px";
+        else newEle.style.height = height + "px";
+
+        newEle.style.overflow = "hidden";
+        newEle.style.display = "inline-block";
+
+        if (!m.isRoot)
+        {
+            newEle.innerHTML = "<div style=\"min-height:" + height + "px;width:100%;overflow:hidden;color:black;position:relative\">&nbsp;" + m.name + "</div>";
+            newEle.style["background-color"] = "rgb(" + m.colR + "," + m.colG + "," + m.colB + ")";
+            newEle.style["border-left"] = "1px solid black";
+        }
+
+        parentEle.appendChild(newEle);
+    }
+
+    if (!m.isRoot)
+    {
+        if (performance.now() - m.lastTime > 200)
+        {
+            m.ele.style.display = "none";
+            m.hidden = true;
+        }
+        else
+        {
+            if (m.hidden)
+            {
+                m.ele.style.display = "inline-block";
+                m.hidden = false;
+            }
+        }
+
+        m.ele.style.float = "left";
+        m.ele.style.width = Math.floor((m.usedAvg / timeSum) * 98.0) + "%";
+    }
+    else
+    {
+        m.ele.style.width = "100%";
+        m.ele.style.clear = "both";
+        m.ele.style.float = "none";
+    }
+
+    if (m && m.childs && m.childs.length > 0)
+    {
+        let thisTimeSum = 0;
+        for (var i = 0; i < m.childs.length; i++)
+        {
+            m.childs[i].usedAvg = (m.childs[i].usedAvg || m.childs[i].used) * 0.95 + m.childs[i].used * 0.05;
+            thisTimeSum += m.childs[i].usedAvg;
+        }
+        for (var i = 0; i < m.childs.length; i++)
+        {
+            addMeasureChild(m.childs[i], m.ele, thisTimeSum, level + 1);
+        }
+    }
+}
+
+function clearMeasures(p)
+{
+    for (let i = 0; i < p.childs.length; i++) clearMeasures(p.childs[i]);
+    p.childs.length = 0;
+}
+
+function measures()
+{
+    if (!CGL.performanceMeasures) return;
+
+    if (!elementMeasures)
+    {
+        op.log("create measure ele");
+        elementMeasures = document.createElement("div");
+        elementMeasures.style.width = "100%";
+        elementMeasures.style["background-color"] = "#444";
+        elementMeasures.style.bottom = "10px";
+        elementMeasures.style.height = "100px";
+        elementMeasures.style.opacity = "1";
+        elementMeasures.style.position = "absolute";
+        elementMeasures.style["z-index"] = "99999";
+        elementMeasures.innerHTML = "";
+        container.appendChild(elementMeasures);
+    }
+
+    let timeSum = 0;
+    const root = CGL.performanceMeasures[0];
+
+    for (let i = 0; i < root.childs.length; i++) timeSum += root.childs[i].used;
+
+    addMeasureChild(CGL.performanceMeasures[0], elementMeasures, timeSum, 0);
+
+    root.childs.length = 0;
+
+    clearMeasures(CGL.performanceMeasures[0]);
+
+    CGL.performanceMeasures.length = 0;
+    initMeasures = false;
+}
+
+exe.onTriggered = render;
+
+function render()
+{
+    const selfTimeStart = performance.now();
+
+    if (inActive.get())
+    {
+        frameCount++;
+
+        if (glQueryExt && inDoGpu.get() && inShow.get())op.patch.cgl.profileData.doProfileGlQuery = true;
+        else op.patch.cgl.profileData.doProfileGlQuery = false;
+
+        if (fpsStartTime === 0)fpsStartTime = Date.now();
+        if (Date.now() - fpsStartTime >= 1000)
+        {
+        // query=null;
+            fps = frameCount;
+            frameCount = 0;
+            // frames = 0;
+            outFPS.set(fps);
+            if (inShow.get())updateText();
+
+            fpsStartTime = Date.now();
+        }
+
+        const glQueryData = op.patch.cgl.profileData.glQueryData;
+        currentTimeGPU = 0;
+        if (glQueryData)
+        {
+            let count = 0;
+            for (let i in glQueryData)
+            {
+                count++;
+                if (glQueryData[i].time)
+                    currentTimeGPU += glQueryData[i].time;
+            }
+        }
+
+        if (inShow.get())
+        {
+            measures();
+
+            if (opened && !op.patch.cgl.profileData.pause)
+            {
+            // const timeUsed = performance.now() - lastTime;
+                queue.push(op.patch.cgl.profileData.profileFrameDelta);
+                queue.shift();
+
+                timesMainloop.push(childsTime);
+                timesMainloop.shift();
+
+                timesOnFrame.push(op.patch.cgl.profileData.profileOnAnimFrameOps - op.patch.cgl.profileData.profileMainloopMs);
+                timesOnFrame.shift();
+
+                timesGPU.push(currentTimeGPU);
+                timesGPU.shift();
+
+                updateCanvas();
+            }
+        }
+
+        lastTime = performance.now();
+        selfTime = performance.now() - selfTimeStart;
+
+        outCanv.setRef(canvas);
+    }
+    const startTimeChilds = performance.now();
+
+    next.trigger();
+
+    if (inActive.get())
+    {
+        const nChildsTime = performance.now() - startTimeChilds;
+        const nCurrentTimeMainloop = op.patch.cgl.profileData.profileMainloopMs;
+        const nCurrentTimeOnFrame = op.patch.cgl.profileData.profileOnAnimFrameOps - op.patch.cgl.profileData.profileMainloopMs;
+
+        if (smoothGraph.get())
+        {
+            childsTime = childsTime * 0.9 + nChildsTime * 0.1;
+            currentTimeMainloop = currentTimeMainloop * 0.5 + nCurrentTimeMainloop * 0.5;
+            currentTimeOnFrame = currentTimeOnFrame * 0.5 + nCurrentTimeOnFrame * 0.5;
+        }
+        else
+        {
+            childsTime = nChildsTime;
+            currentTimeMainloop = nCurrentTimeMainloop;
+            currentTimeOnFrame = nCurrentTimeOnFrame;
+        }
+
+        op.patch.cgl.profileData.clearGlQuery();
+    }
+}
+
+}
+};
+
+CABLES.OPS["9cd2d9de-000f-4a14-bd13-e7d5f057583c"]={f:Ops.Gl.Performance,objName:"Ops.Gl.Performance"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Devices.Keyboard.KeyPressLearn
+// 
+// **************************************************************
+
+Ops.Devices.Keyboard.KeyPressLearn= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const learnedKeyCode = op.inValueInt("key code");
+const canvasOnly = op.inValueBool("canvas only", true);
+const modKey = op.inValueSelect("Mod Key", ["none", "alt"], "none");
+const inEnable = op.inValueBool("Enabled", true);
+const preventDefault = op.inValueBool("Prevent Default");
+const learn = op.inTriggerButton("learn");
+const onPress = op.outTrigger("on press");
+const onRelease = op.outTrigger("on release");
+const outPressed = op.outBoolNum("Pressed", false);
+const outKey = op.outString("Key");
+
+const cgl = op.patch.cgl;
+let learning = false;
+
+modKey.onChange = learnedKeyCode.onChange = updateKeyName;
+
+function onKeyDown(e)
+{
+    if (learning)
+    {
+        learnedKeyCode.set(e.keyCode);
+        if (CABLES.UI)
+        {
+            op.refreshParams();
+        }
+        // op.log("Learned key code: " + learnedKeyCode.get());
+        learning = false;
+        removeListeners();
+        addListener();
+
+        if (CABLES.UI)gui.emitEvent("portValueEdited", op, learnedKeyCode, learnedKeyCode.get());
+    }
+    else
+    {
+        if (e.keyCode == learnedKeyCode.get())
+        {
+            if (modKey.get() == "alt")
+            {
+                if (e.altKey === true)
+                {
+                    onPress.trigger();
+                    outPressed.set(true);
+                    if (preventDefault.get())e.preventDefault();
+                }
+            }
+            else
+            {
+                onPress.trigger();
+                outPressed.set(true);
+                if (preventDefault.get())e.preventDefault();
+            }
+        }
+    }
+}
+
+function onKeyUp(e)
+{
+    if (e.keyCode == learnedKeyCode.get())
+    {
+        let doTrigger = true;
+        if (modKey.get() == "alt" && e.altKey != true) doTrigger = false;
+
+        if (doTrigger)
+        {
+            onRelease.trigger();
+            outPressed.set(false);
+        }
+    }
+}
+
+op.onDelete = function ()
+{
+    cgl.canvas.removeEventListener("keyup", onKeyUp, false);
+    cgl.canvas.removeEventListener("keydown", onKeyDown, false);
+    document.removeEventListener("keyup", onKeyUp, false);
+    document.removeEventListener("keydown", onKeyDown, false);
+};
+
+learn.onTriggered = function ()
+{
+    // op.log("Listening for key...");
+    learning = true;
+    addDocumentListener();
+
+    setTimeout(function ()
+    {
+        learning = false;
+        removeListeners();
+        addListener();
+    }, 3000);
+};
+
+function addListener()
+{
+    if (canvasOnly.get()) addCanvasListener();
+    else addDocumentListener();
+}
+
+function removeListeners()
+{
+    document.removeEventListener("keydown", onKeyDown, false);
+    document.removeEventListener("keyup", onKeyUp, false);
+    cgl.canvas.removeEventListener("keydown", onKeyDown, false);
+    cgl.canvas.removeEventListener("keyup", onKeyUp, false);
+    outPressed.set(false);
+}
+
+function addCanvasListener()
+{
+    if (!CABLES.isNumeric(cgl.canvas.getAttribute("tabindex"))) cgl.canvas.setAttribute("tabindex", 1);
+
+    cgl.canvas.addEventListener("keydown", onKeyDown, false);
+    cgl.canvas.addEventListener("keyup", onKeyUp, false);
+}
+
+function addDocumentListener()
+{
+    document.addEventListener("keydown", onKeyDown, false);
+    document.addEventListener("keyup", onKeyUp, false);
+}
+
+inEnable.onChange = function ()
+{
+    if (!inEnable.get())
+    {
+        removeListeners();
+    }
+    else
+    {
+        addListener();
+    }
+};
+
+canvasOnly.onChange = function ()
+{
+    removeListeners();
+    addListener();
+};
+
+function updateKeyName()
+{
+    let keyName = keyCodeToName(learnedKeyCode.get());
+    const modKeyName = modKey.get();
+    if (modKeyName && modKeyName !== "none")
+    {
+        keyName = modKeyName.charAt(0).toUpperCase() + modKeyName.slice(1) + "-" + keyName;
+    }
+    op.setUiAttribs({ "extendTitle": keyName });
+    outKey.set(keyName);
+}
+
+// todo remove in next version
+function keyCodeToName(keyCode)
+{
+    if (!keyCode && keyCode !== 0) return "Unidentified";
+    const keys = {
+        "8": "Backspace",
+        "9": "Tab",
+        "12": "Clear",
+        "13": "Enter",
+        "16": "Shift",
+        "17": "Control",
+        "18": "Alt",
+        "19": "Pause",
+        "20": "CapsLock",
+        "27": "Escape",
+        "32": "Space",
+        "33": "PageUp",
+        "34": "PageDown",
+        "35": "End",
+        "36": "Home",
+        "37": "ArrowLeft",
+        "38": "ArrowUp",
+        "39": "ArrowRight",
+        "40": "ArrowDown",
+        "45": "Insert",
+        "46": "Delete",
+        "112": "F1",
+        "113": "F2",
+        "114": "F3",
+        "115": "F4",
+        "116": "F5",
+        "117": "F6",
+        "118": "F7",
+        "119": "F8",
+        "120": "F9",
+        "121": "F10",
+        "122": "F11",
+        "123": "F12",
+        "144": "NumLock",
+        "145": "ScrollLock",
+        "224": "Meta"
+    };
+    if (keys[keyCode])
+    {
+        return keys[keyCode];
+    }
+    else
+    {
+        return String.fromCharCode(keyCode);
+    }
+}
+
+addCanvasListener();
+
+}
+};
+
+CABLES.OPS["f069c0db-4051-4eae-989e-6ef7953787fd"]={f:Ops.Devices.Keyboard.KeyPressLearn,objName:"Ops.Devices.Keyboard.KeyPressLearn"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Boolean.ToggleBool_v2
+// 
+// **************************************************************
+
+Ops.Boolean.ToggleBool_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    trigger = op.inTriggerButton("trigger"),
+    reset = op.inTriggerButton("reset"),
+    inDefault = op.inBool("Default", false),
+    next = op.outTrigger("Next"),
+    outBool = op.outBoolNum("result");
+
+let theBool = false;
+
+op.onLoadedValueSet = () =>
+{
+    theBool = inDefault.get();
+    outBool.set(inDefault.get());
+    next.trigger();
+};
+
+trigger.onTriggered = function ()
+{
+    theBool = !theBool;
+    outBool.set(theBool);
+    next.trigger();
+};
+
+reset.onTriggered = function ()
+{
+    theBool = inDefault.get();
+    outBool.set(theBool);
+    next.trigger();
+};
+
+}
+};
+
+CABLES.OPS["4313d9bb-96b6-43bc-9190-6068cfb2593c"]={f:Ops.Boolean.ToggleBool_v2,objName:"Ops.Boolean.ToggleBool_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Boolean.IsZero
+// 
+// **************************************************************
+
+Ops.Boolean.IsZero= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    val = op.inValue("Value"),
+    result = op.outBoolNum("Result", true);
+
+val.onChange = function ()
+{
+    result.set(val.get() == 0);
+};
+
+}
+};
+
+CABLES.OPS["76d37c73-3c32-47bd-8b4a-4229db7e57f1"]={f:Ops.Boolean.IsZero,objName:"Ops.Boolean.IsZero"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Graphics.Geometry.AlignGeometry
+// 
+// **************************************************************
+
+Ops.Graphics.Geometry.AlignGeometry= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    geometry = op.inObject("Geometry"),
+    x = op.inValueSelect("X", ["Ignore", "Center", "Max", "Min"], "Ignore"),
+    y = op.inValueSelect("Y", ["Ignore", "Center", "Max", "Min"], "Ignore"),
+    z = op.inValueSelect("Z", ["Ignore", "Center", "Max", "Min"], "Ignore"),
+    outGeom = op.outObject("Result");
+
+x.onChange = y.onChange = z.onChange = geometry.onChange = update;
+
+const
+    axis = [0, 0, 0],
+    ALIGN_NONE = 0,
+    ALIGN_CENTER = 1,
+    ALIGN_MAX = 2,
+    ALIGN_MIN = 3;
+
+let geom = null;
+
+function getAxisId(port)
+{
+    if (port.get() == "Ignore") return ALIGN_NONE;
+    if (port.get() == "Center") return ALIGN_CENTER;
+    if (port.get() == "Max") return ALIGN_MAX;
+    if (port.get() == "Min") return ALIGN_MIN;
+}
+
+function update()
+{
+    const oldGeom = geometry.get();
+
+    if (!oldGeom)
+    {
+        outGeom.set(null);
+        return;
+    }
+
+    axis[0] = getAxisId(x);
+    axis[1] = getAxisId(y);
+    axis[2] = getAxisId(z);
+
+    const bounds = oldGeom.getBounds();
+    geom = oldGeom.copy();
+
+    for (let axi = 0; axi < 3; axi++)
+    {
+        let min = 0, max = 0;
+        if (axi === 0)
+        {
+            min = bounds.minX;
+            max = bounds.maxX;
+        }
+        else if (axi == 1)
+        {
+            min = bounds.minY;
+            max = bounds.maxY;
+        }
+        else if (axi == 2)
+        {
+            min = bounds.minZ;
+            max = bounds.maxZ;
+        }
+
+        if (axis[axi] == ALIGN_NONE)
+        {
+            for (let i = 0; i < geom.vertices.length; i += 3)
+                geom.vertices[i + axi] = oldGeom.vertices[i + axi];
+        }
+        else if (axis[axi] == ALIGN_CENTER)
+        {
+            const off = min + (max - min) / 2;
+            for (let i = 0; i < geom.vertices.length; i += 3)
+                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - off;
+        }
+        else if (axis[axi] == ALIGN_MAX)
+        {
+            for (let i = 0; i < geom.vertices.length; i += 3)
+                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - max;
+        }
+        else if (axis[axi] == ALIGN_MIN)
+        {
+            for (let i = 0; i < geom.vertices.length; i += 3)
+                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - min;
+        }
+    }
+
+    outGeom.setRef(geom);
+}
+
+}
+};
+
+CABLES.OPS["955c1a40-17ca-4944-8cf6-07e14212be2d"]={f:Ops.Graphics.Geometry.AlignGeometry,objName:"Ops.Graphics.Geometry.AlignGeometry"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Html.WindowHasFocus
+// 
+// **************************************************************
+
+Ops.Html.WindowHasFocus= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    outFocussed = op.outBoolNum("has focus"),
+    outVisible = op.outBoolNum("Tab Visible", true);
+
+const focused = true;
+
+outFocussed.set(op.patch.getDocument().hasFocus());
+
+window.addEventListener("blur", handleBlur);
+window.addEventListener("focus", handleFocus);
+
+op.patch.getDocument().addEventListener("visibilitychange", updateVisibility);
+
+op.onDelete = function ()
+{
+    op.patch.getDocument().removeEventListener("visibilitychange", updateVisibility);
+};
+
+function handleFocus()
+{
+    outFocussed.set(true);
+}
+
+function handleBlur()
+{
+    outFocussed.set(false);
+}
+
+function updateVisibility(e)
+{
+    outVisible.set(!op.patch.getDocument().hidden);
+}
+
+}
+};
+
+CABLES.OPS["6542896e-aa13-4b57-81e0-163597f4149a"]={f:Ops.Html.WindowHasFocus,objName:"Ops.Html.WindowHasFocus"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Sidebar.Toggle_v4
+// 
+// **************************************************************
+
+Ops.Sidebar.Toggle_v4= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    parentPort = op.inObject("link"),
+    labelPort = op.inString("Text", "Toggle"),
+    inputValue = op.inBool("Input", true),
+    storeDefaultValueButton = op.inTriggerButton("Set Default"),
+    defaultValuePort = op.inBool("Default"),
+    inGreyOut = op.inBool("Grey Out", false),
+    inVisible = op.inBool("Visible", true),
+    siblingsPort = op.outObject("childs"),
+    valuePort = op.outBoolNum("Value", defaultValuePort.get()),
+    outToggled = op.outTrigger("Toggled");
+
+defaultValuePort.setUiAttribs({ "hidePort": true, "greyout": true });
+
+const classNameActive = "sidebar__toggle--active";
+
+const el = document.createElement("div");
+el.dataset.op = op.id;
+el.classList.add("cablesEle");
+el.classList.add("sidebar__item");
+el.classList.add("sidebar__toggle");
+el.classList.add("sidebar__reloadable");
+el.classList.add(classNameActive);
+
+const labelText = document.createTextNode(labelPort.get());
+const label = document.createElement("div");
+label.classList.add("sidebar__item-label");
+label.appendChild(labelText);
+
+const icon = document.createElement("a");
+
+valuePort.set(defaultValuePort.get());
+
+icon.classList.add("icon_toggle");
+icon.addEventListener("click", onInputClick);
+icon.addEventListener("keypress", onKeyPress);
+
+icon.setAttribute("tabindex", 0);
+icon.setAttribute("aria-label", "toggle " + labelPort.get());
+
+const greyOut = document.createElement("div");
+greyOut.classList.add("sidebar__greyout");
+greyOut.style.display = "none";
+
+el.appendChild(greyOut);
+el.appendChild(icon);
+el.appendChild(label);
+el.addEventListener("dblclick", reset);
+
+op.init = () =>
+{
+    reset();
+    updateClass();
+};
+op.onDelete = onDelete;
+parentPort.onChange = onParentChanged;
+labelPort.onChange = onLabelTextChanged;
+inputValue.onChange = onInputValueChanged;
+storeDefaultValueButton.onTriggered = storeDefaultValue;
+
+function reset()
+{
+    valuePort.set(defaultValuePort.get());
+    inputValue.set(defaultValuePort.get());
+    outToggled.trigger();
+}
+
+function storeDefaultValue()
+{
+    const defaultValue = inputValue.get();
+
+    defaultValuePort.set(defaultValue);
+    valuePort.set(defaultValue);
+    outToggled.trigger();
+    op.refreshParams();
+}
+
+function updateClass()
+{
+    const isActive = valuePort.get();
+    if (isActive)
+    {
+        icon.classList.add("icon_toggle_true");
+        icon.classList.remove("icon_toggle_false");
+    }
+    else
+    {
+        icon.classList.remove("icon_toggle_true");
+        icon.classList.add("icon_toggle_false");
+    }
+}
+
+function onKeyPress(e)
+{
+    if (e.code === "Enter") onInputClick();
+}
+
+function onInputClick()
+{
+    el.classList.toggle(classNameActive);
+
+    const isActive = el.classList.contains(classNameActive);
+    valuePort.set(isActive);
+    inputValue.set(isActive);
+
+    updateClass();
+    outToggled.trigger();
+    op.refreshParams();
+}
+
+function onInputValueChanged()
+{
+    if (inputValue.get()) el.classList.add(classNameActive);
+    else el.classList.remove(classNameActive);
+
+    valuePort.set(inputValue.get());
+    outToggled.trigger();
+}
+
+function onLabelTextChanged()
+{
+    const text = labelPort.get();
+    label.textContent = text;
+    icon.setAttribute("aria-label", "toggle " + labelPort.get());
+    if (CABLES.UI) op.setUiAttrib({ "extendTitle": text });
+}
+
+function onParentChanged()
+{
+    siblingsPort.set(null);
+    const parent = parentPort.get();
+    if (parent && parent.parentElement)
+    {
+        parent.parentElement.appendChild(el);
+        siblingsPort.set(parent);
+    }
+    else if (el.parentElement) el.parentElement.removeChild(el);
+}
+
+function showElement(element)
+{
+    if (element) element.style.display = "block";
+}
+
+function hideElement(element)
+{
+    if (element) element.style.display = "none";
+}
+
+function onDelete()
+{
+    if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
+}
+
+inGreyOut.onChange = function ()
+{
+    greyOut.style.display = inGreyOut.get() ? "block" : "none";
+};
+
+inVisible.onChange = function ()
+{
+    el.style.display = inVisible.get() ? "block" : "none";
+};
+
+}
+};
+
+CABLES.OPS["247f5aaf-6438-4a37-9649-4c0fe9cc78c9"]={f:Ops.Sidebar.Toggle_v4,objName:"Ops.Sidebar.Toggle_v4"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.ShaderEffects.Bend_v2
+// 
+// **************************************************************
+
+Ops.Gl.ShaderEffects.Bend_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"bend_vert":"\n\nvoid MOD_bendDistort(inout vec3 pos, inout vec3 norm)\n{\n    pos = (MOD_transMatrix * vec4(pos, 1.0)).xyz;\n    norm = (vec4(norm, 0.0) * MOD_invTransMatrix).xyz;\n\n    float PI = 3.14159265;\n    if (abs(MOD_amount) > 1e-5) {\n        float bendAngle = MOD_amount;\n        float radius = 1.0 / bendAngle;\n\n        // float d = clamp(pos.x, MOD_range.x, MOD_range.y);\n        float d = clamp(pos.x, MOD_range.x, MOD_range.y);\n        float th = PI * 0.5 + (bendAngle * d);\n        float s = sin(th);\n        float c = cos(th);\n        pos.xy = vec2(s * (pos.x - d) - c * (radius + pos.y),\n                      c * (pos.x - d) + s * (radius + pos.y) - radius);\n        norm.xy = vec2(s * norm.x - c * norm.y,\n                       c * norm.x + s * norm.y);\n    }\n\n    pos = (MOD_invTransMatrix * vec4(pos, 1.0)).xyz;\n    norm = (vec4(norm, 0.0) * MOD_transMatrix).xyz;\n}\n",};
+const render = op.inTrigger("render");
+const amount = op.inValue("Amount");
+const rotX = op.inValue("RotX");
+const rotY = op.inValue("RotY");
+const rotZ = op.inValue("RotZ");
+const scale = op.inValue("Scale", 2);
+const offset = op.inValue("Offset", 0.25);
+const limited = op.inValueBool("Limited", true);
+
+const next = op.outTrigger("trigger");
+
+const srcHeadVert = attachments.bend_vert;
+const srcBodyVert = ""
+    .endl() + "   MOD_bendDistort(pos.xyz, norm);"
+    .endl();
+
+const uniAmount = null;
+const uniRange = null;
+const uniTransMatrix = null;
+const uniInvTransMatrix = null;
+const cgl = op.patch.cgl;
+
+let matricesValid = false;
+const transMatrix = mat4.create();
+const invTransMatrix = mat4.create();
+let amountRadians = 0;
+
+function invalidateMatrices()
+{
+    matricesValid = false;
+}
+
+rotX.onChange = invalidateMatrices;
+rotY.onChange = invalidateMatrices;
+rotZ.onChange = invalidateMatrices;
+scale.onChange = invalidateMatrices;
+offset.onChange = invalidateMatrices;
+
+const mod = new CGL.ShaderModifier(cgl, op.name, { "opId": op.id });
+mod.addModule({
+    "name": "MODULE_VERTEX_POSITION",
+    "srcHeadVert": attachments.bend_vert,
+    "srcBodyVert": srcBodyVert
+});
+
+mod.addUniformVert("f", "MOD_amount", 0);
+mod.addUniformVert("2f", "MOD_range", [0, 1]);
+mod.addUniformVert("m4", "MOD_transMatrix", transMatrix);
+mod.addUniformVert("m4", "MOD_invTransMatrix", invTransMatrix);
+
+amount.onChange = function () { amountRadians = amount.get() * CGL.DEG2RAD; };
+
+mat4.identity(transMatrix);
+mat4.identity(invTransMatrix);
+
+const tvec = vec3.create();
+const svec = vec4.create();
+function updateMatrices()
+{
+    if (matricesValid) return;
+
+    vec3.set(tvec, offset.get(), 0, 0);
+
+    const s = 1 / scale.get();
+    vec3.set(svec, s, s, s);
+
+    mat4.identity(transMatrix);
+    mat4.translate(transMatrix, transMatrix, tvec);
+
+    mat4.rotateX(transMatrix, transMatrix, rotX.get() * CGL.DEG2RAD);
+    mat4.rotateY(transMatrix, transMatrix, rotY.get() * CGL.DEG2RAD);
+    mat4.rotateZ(transMatrix, transMatrix, rotZ.get() * CGL.DEG2RAD);
+
+    mat4.scale(transMatrix, transMatrix, svec);
+
+    mat4.invert(invTransMatrix, transMatrix);
+    matricesValid = true;
+}
+
+render.onTriggered = function ()
+{
+    mod.setUniformValue("MOD_range", limited.get() ? [0, 1] : [-99999, 99999]);
+
+    updateMatrices();
+
+    mod.bind();
+    mod.setUniformValue("MOD_amount", amountRadians);
+    next.trigger();
+    mod.unbind();
+};
+
+}
+};
+
+CABLES.OPS["7476156e-3ca3-445a-bd30-1b9373a6af4c"]={f:Ops.Gl.ShaderEffects.Bend_v2,objName:"Ops.Gl.ShaderEffects.Bend_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.ShaderEffects.Twist_v3
+// 
+// **************************************************************
+
+Ops.Gl.ShaderEffects.Twist_v3= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"twist_vert":"\nfloat MOD_angle_rad = MOD_amount * 3.14159 / 180.0;\n\nfloat MOD_axis=pos.y;\n\n#ifdef MOD_AXIS_Z\n    MOD_axis=pos.z;\n#endif\n\n#ifdef MOD_AXIS_X\n    MOD_axis=pos.x;\n#endif\n\nfloat MOD_ang = (MOD_height*0.5 + MOD_axis)/MOD_height * MOD_angle_rad;\n\npos = MOD_twist(pos, MOD_ang);\n\n\nnorm = normalize(MOD_twist( vec4(norm, 1.0), MOD_ang ).xyz);\n","twist_head_vert":"vec4 MOD_twist(vec4 pos, float t)\n{\n\tfloat st = sin(t);\n\tfloat ct = cos(t);\n\tvec4 new_pos;\n\n\tnew_pos.x = pos.x;\n\tnew_pos.y = pos.y;\n\tnew_pos.z = pos.z;\n\tnew_pos.w = pos.w;\n\n    #ifdef MOD_AXIS_Z\n    \tnew_pos.x = pos.y*ct - pos.x*st;\n    \tnew_pos.y = pos.y*st + pos.x*ct;\n    #endif\n\n    #ifdef MOD_AXIS_Y\n    \tnew_pos.x = pos.x*ct - pos.z*st;\n    \tnew_pos.z = pos.x*st + pos.z*ct;\n    #endif\n\n    #ifdef MOD_AXIS_X\n    \tnew_pos.y = pos.y*ct - pos.z*st;\n    \tnew_pos.z = pos.y*st + pos.z*ct;\n    #endif\n\n\treturn( new_pos );\n}\n",};
+const
+    render = op.inTrigger("render"),
+    trigger = op.outTrigger("Trigger"),
+    amount = op.inFloat("Degree", 180),
+    height = op.inFloat("Height", 2),
+    axis = op.inValueSelect("Axis", ["X", "Y", "Z"], "Y");
+
+const cgl = op.patch.cgl;
+
+axis.onChange = updateAxis;
+
+const mod = new CGL.ShaderModifier(cgl, op.name, { "opId": op.id });
+mod.addModule({
+    "name": "MODULE_VERTEX_POSITION",
+    "srcHeadVert": attachments.twist_head_vert,
+    "srcBodyVert": attachments.twist_vert
+});
+
+updateAxis();
+
+mod.addUniformVert("f", "MOD_amount", amount);
+mod.addUniformVert("f", "MOD_height", height);
+
+function updateAxis()
+{
+    mod.toggleDefine("MOD_AXIS_X", axis.get() == "X");
+    mod.toggleDefine("MOD_AXIS_Y", axis.get() == "Y");
+    mod.toggleDefine("MOD_AXIS_Z", axis.get() == "Z");
+}
+
+render.onTriggered = function ()
+{
+    if (cgl.shouldDrawHelpers(op))
+    {
+        CABLES.GL_MARKER.drawCube(op, 1, height.get() / 2, 1);
+    }
+
+    mod.bind();
+    trigger.trigger();
+    mod.unbind();
+};
+
+}
+};
+
+CABLES.OPS["4635abe3-a6b1-413f-9cd1-fbf64f8c4942"]={f:Ops.Gl.ShaderEffects.Twist_v3,objName:"Ops.Gl.ShaderEffects.Twist_v3"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.RandomCluster
+// 
+// **************************************************************
+
+Ops.Gl.RandomCluster= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exe = op.inTrigger("exe"),
+    num = op.inValueInt("num"),
+    seed = op.inValueFloat("random seed", 1.5),
+    round = op.inValueBool("round", false),
+    size = op.inValueFloat("size", 10),
+    scaleX = op.inValueFloat("scaleX", 1),
+    scaleY = op.inValueFloat("scaleY", 1),
+    scaleZ = op.inValueFloat("scaleZ", 1),
+    trigger = op.outTrigger("trigger"),
+    idx = op.outNumber("index"),
+    rnd = op.outNumber("rnd"),
+    rotX = op.inValueSlider("Rotate X", 1),
+    rotY = op.inValueSlider("Rotate Y", 1),
+    rotZ = op.inValueSlider("Rotate Z", 1),
+    scrollX = op.inValue("Scroll X", 0);
+
+op.setPortGroup("Area", [size, scaleX, scaleY, scaleZ]);
+op.setPortGroup("Rotation", [rotX, rotY, rotZ]);
+op.setPortGroup("Parameters", [num, round, seed]);
+op.toWorkPortsNeedToBeLinked(exe, trigger);
+
+const randoms = [];
+const origRandoms = [];
+const randomsRot = [];
+const randomsFloats = [];
+
+const transVec = vec3.create();
+const mat = mat4.create();
+
+seed.onChange =
+    num.onChange =
+    size.onChange =
+    scaleX.onChange =
+    scaleZ.onChange =
+    scaleY.onChange =
+    round.onChange =
+    rotX.onChange =
+    rotY.onChange =
+    rotZ.onChange = reset;
+
+num.set(100);
+
+function doRender()
+{
+    const cgl = op.patch.cg || op.patch.cgl;
+
+    if (cgl.shouldDrawHelpers(op))
+    {
+        CABLES.GL_MARKER.drawCube(op,
+            size.get() / 2 * scaleX.get(),
+            size.get() / 2 * scaleY.get(),
+            size.get() / 2 * scaleZ.get());
+    }
+
+    if (scrollX.get() != 0)
+    {
+        for (let i = 0; i < origRandoms.length; i++)
+        {
+            randoms[i][0] = origRandoms[i][0] + scrollX.get();
+            randoms[i][0] = (randoms[i][0] % size.get()) - (size.get() / 2);
+        }
+    }
+
+    for (let i = 0; i < randoms.length; i++)
+    {
+        cgl.pushModelMatrix();
+
+        mat4.translate(cgl.mMatrix, cgl.mMatrix, randoms[i]);
+
+        if (randomsRot[i][0]) mat4.rotateX(cgl.mMatrix, cgl.mMatrix, randomsRot[i][0]);
+        if (randomsRot[i][1]) mat4.rotateY(cgl.mMatrix, cgl.mMatrix, randomsRot[i][1]);
+        if (randomsRot[i][2]) mat4.rotateZ(cgl.mMatrix, cgl.mMatrix, randomsRot[i][2]);
+
+        idx.set(i);
+        rnd.set(randomsFloats[i]);
+
+        trigger.trigger();
+        // op.patch.instancing.increment();
+
+        cgl.popModelMatrix();
+    }
+    // op.patch.instancing.popLoop();
+}
+
+exe.onTriggered = doRender;
+
+function getRandomPos()
+{
+    return vec3.fromValues(
+        scaleX.get() * (Math.seededRandom() - 0.5) * size.get(),
+        scaleY.get() * (Math.seededRandom() - 0.5) * size.get(),
+        scaleZ.get() * (Math.seededRandom() - 0.5) * size.get()
+    );
+}
+
+function reset()
+{
+    randoms.length = 0;
+    randomsRot.length = 0;
+    randomsFloats.length = 0;
+    origRandoms.length = 0;
+
+    Math.randomSeed = seed.get();
+
+    const makeRound = round.get();
+
+    for (let i = 0; i < num.get(); i++)
+    {
+        randomsFloats.push(Math.seededRandom());
+
+        let v = getRandomPos();
+
+        if (makeRound && size.get() > 0)
+            while (vec3.len(v) > size.get() / 2)
+                v = getRandomPos();
+
+        origRandoms.push([v[0], v[1], v[2]]);
+        randoms.push(v);
+
+        randomsRot.push(vec3.fromValues(
+            Math.seededRandom() * 360 * CGL.DEG2RAD * rotX.get(),
+            Math.seededRandom() * 360 * CGL.DEG2RAD * rotY.get(),
+            Math.seededRandom() * 360 * CGL.DEG2RAD * rotZ.get()
+        ));
+    }
+}
+
+}
+};
+
+CABLES.OPS["ca3bc984-e596-48fb-b53d-502eb13979b0"]={f:Ops.Gl.RandomCluster,objName:"Ops.Gl.RandomCluster"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.MeshInstancer_v4
+// 
+// **************************************************************
+
+Ops.Gl.MeshInstancer_v4= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"billboard_vert":"\n#ifdef BILLBOARDING\n\n    modelViewMatrix[0][0] = 1.0;\n    modelViewMatrix[0][1] = 0.0;\n    modelViewMatrix[0][2] = 0.0;\n\n    #ifndef BILLBOARDING_CYLINDRIC\n        modelViewMatrix[1][0] = 0.0;\n        modelViewMatrix[1][1] = 1.0;\n        modelViewMatrix[1][2] = 0.0;\n    #endif\n\n    modelViewMatrix[2][0] = 0.0;\n    modelViewMatrix[2][1] = 0.0;\n    modelViewMatrix[2][2] = 1.0;\n\n#endif","instancer_body_frag":"#define INSTANCING\n#ifdef COLORIZE_INSTANCES\n    #ifdef BLEND_MODE_MULTIPLY\n        col.rgb *= frag_instColor.rgb;\n        col.a *= frag_instColor.a;\n    #endif\n\n    #ifdef BLEND_MODE_ADD\n        col.rgb += frag_instColor.rgb;\n        col.a += frag_instColor.a;\n    #endif\n\n    #ifdef BLEND_MODE_NONE\n        col.rgb = frag_instColor.rgb;\n        col.a = frag_instColor.a;\n    #endif\n#endif\n","instancer_body_vert":"\n\n#ifdef HAS_TEXCOORDS\ntexCoord=(texCoord*instTexCoords.zw)+instTexCoords.xy;\n#endif\n\nmMatrix*=instMat;\npos.xyz*=MOD_scale;\n\n#ifdef HAS_COLORS\nfrag_instColor=instColor;\n#endif\n#ifndef HAS_COLORS\nfrag_instColor=vec4(1.0);\n#endif\n\n\nfrag_instIndex=instanceIndex;\n\n","instancer_head_frag":"IN vec4 frag_instColor;\n\n#ifdef WEBGL2\n    flat IN float frag_instIndex;\n#endif\n#ifdef WEBGL1\n    IN float frag_instIndex;\n#endif\n","instancer_head_vert":"\nIN vec4 instColor;\nIN mat4 instMat;\nIN vec4 instTexCoords;\nIN float instanceIndex;\nOUT mat4 instModelMat;\nOUT vec4 frag_instColor;\n\n#ifdef WEBGL2\n    flat OUT float frag_instIndex;\n#endif\n#ifdef WEBGL1\n    OUT float frag_instIndex;\n#endif\n\n\n\n#define INSTANCING\n\n",};
+const
+    exe = op.inTrigger("exe"),
+    geom = op.inObject("geom", null, "geometry"),
+    inScale = op.inValue("Scale", 1),
+    doLimit = op.inValueBool("Limit Instances", false),
+    inLimit = op.inValueInt("Limit", 100),
+    inTranslates = op.inArray("positions", 3),
+    inScales = op.inArray("Scale Array", 3),
+    inRot = op.inArray("Rotations", 3),
+    inRotMeth = op.inSwitch("Rotation Type", ["Euler", "Quaternions", "Normals"], "Euler"),
+
+    inBillboarding = op.inSwitch("Billboarding", ["Off", "Spherical", "Cylindrical"], "Off"),
+
+    inBlendMode = op.inSwitch("Material blend mode", ["Multiply", "Add", "Normal"], "Multiply"),
+    inColor = op.inArray("Colors", 4),
+    inTexCoords = op.inArray("TexCoords", 4),
+    outTrigger = op.outTrigger("Trigger Out"),
+    outNum = op.outNumber("Num");
+
+op.setPortGroup("Limit Number of Instances", [inLimit, doLimit]);
+op.setPortGroup("Parameters", [inScales, inRot, inTranslates, inRotMeth]);
+op.toWorkPortsNeedToBeLinked(geom);
+op.toWorkPortsNeedToBeLinked(exe);
+
+geom.ignoreValueSerialize = true;
+
+const cgl = op.patch.cgl;
+const m = mat4.create();
+let
+    matrixArray = new Float32Array(1),
+    instColorArray = new Float32Array(1),
+    instTexcoordArray = new Float32Array(1),
+    mesh = null,
+    recalc = true,
+    num = 0,
+    arrayChangedColor = true,
+    arrayChangedTexcoords = true,
+    arrayChangedTrans = true;
+
+const mod = new CGL.ShaderModifier(cgl, op.name, { "opId": op.id });
+mod.addModule({
+    "name": "MODULE_VERTEX_POSITION",
+    "title": op.name,
+    "priority": -2,
+    "srcHeadVert": attachments.instancer_head_vert,
+    "srcBodyVert": attachments.instancer_body_vert
+});
+
+mod.addModule({
+    "name": "MODULE_VERTEX_MODELVIEW",
+    "title": op.name + "_billboard",
+    "srcBodyVert": attachments.billboard_vert
+});
+
+mod.addModule({
+    "name": "MODULE_COLOR",
+    "priority": -2,
+    "title": op.name,
+    "srcHeadFrag": attachments.instancer_head_frag,
+    "srcBodyFrag": attachments.instancer_body_frag,
+});
+
+mod.addUniformVert("f", "MOD_scale", inScale);
+
+let needsUpdateDefines = true;
+
+inBlendMode.onChange = () => { needsUpdateDefines = true; };
+
+doLimit.onChange = updateLimit;
+exe.onTriggered = doRender;
+exe.onLinkChanged = function ()
+{
+    if (!exe.isLinked()) removeModule();
+};
+
+updateLimit();
+
+inRot.onChange =
+inScales.onChange =
+inTranslates.onChange =
+inRotMeth.onChange =
+    function ()
+    {
+        arrayChangedTrans = true;
+        recalc = true;
+    };
+
+inBillboarding.onChange =
+inTexCoords.onChange = function ()
+{
+    arrayChangedTexcoords = true;
+    recalc = true;
+    needsUpdateDefines = true;
+};
+
+inColor.onChange = function ()
+{
+    arrayChangedColor = true;
+    recalc = true;
+    needsUpdateDefines = true;
+};
+
+function reset()
+{
+    arrayChangedColor = true,
+    arrayChangedTrans = true;
+    recalc = true;
+}
+
+function updateDefines()
+{
+    mod.toggleDefine("BILLBOARDING", inBillboarding.get() != "Off");
+    mod.toggleDefine("BILLBOARDING_CYLINDRIC", inBillboarding.get() == "Cylindrical");
+
+    mod.toggleDefine("COLORIZE_INSTANCES", inColor.get());
+    mod.toggleDefine("TEXCOORDS_INSTANCES", inTexCoords.get());
+    mod.toggleDefine("BLEND_MODE_MULTIPLY", inBlendMode.get() === "Multiply");
+    mod.toggleDefine("BLEND_MODE_ADD", inBlendMode.get() === "Add");
+    mod.toggleDefine("BLEND_MODE_NONE", inBlendMode.get() === "Normal");
+    needsUpdateDefines = false;
+}
+
+geom.onChange = function ()
+{
+    if (mesh)mesh.dispose();
+    if (!geom.get())
+    {
+        mesh = null;
+        return;
+    }
+
+    mesh = new CGL.Mesh(cgl, geom.get());
+    reset();
+};
+
+function removeModule()
+{
+
+}
+
+function setupArray()
+{
+    if (!mesh) return;
+
+    let transforms = inTranslates.get();
+    if (!transforms) transforms = [0, 0, 0];
+
+    num = Math.floor(transforms.length / 3);
+
+    if (needsUpdateDefines)updateDefines();
+
+    const colArr = inColor.get();
+    const tcArr = inTexCoords.get();
+    const scales = inScales.get();
+    const useQuats = inRotMeth.get() == "Quaternions";
+    const useEuler = inRotMeth.get() == "Euler";
+    const useNormals = inRotMeth.get() == "Normals";
+
+    let stride = 3;
+    if (useQuats)stride = 4;
+    inRot.setUiAttribs({ "stride": stride });
+
+    if (scales && scales.length != transforms.length) op.setUiError("lengthScales", "Scales array has wrong length");
+    else op.setUiError("lengthScales", null);
+
+    if (matrixArray.length != num * 16) matrixArray = new Float32Array(num * 16);
+    if (instColorArray.length != num * 4)
+    {
+        arrayChangedColor = true;
+        instColorArray = new Float32Array(num * 4);
+    }
+    if (instTexcoordArray.length != num * 4)
+    {
+        arrayChangedTexcoords = true;
+        instTexcoordArray = new Float32Array(num * 4);
+    }
+
+    const rotArr = inRot.get();
+
+    for (let i = 0; i < num; i++)
+    {
+        mat4.identity(m);
+
+        mat4.translate(m, m, [
+            transforms[i * 3],
+            transforms[i * 3 + 1],
+            transforms[i * 3 + 2]
+        ]);
+
+        if (rotArr)
+        {
+            if (useQuats)
+            {
+                const mq = mat4.create();
+                const q = [rotArr[i * 4 + 0], rotArr[i * 4 + 1], rotArr[i * 4 + 2], rotArr[i * 4 + 3]];
+                quat.normalize(q, q);
+                mat4.fromQuat(mq, q);
+                mat4.mul(m, m, mq);
+            }
+            else
+            if (useNormals)
+            {
+                const n = [rotArr[i * 3 + 0], rotArr[i * 3 + 1], rotArr[i * 3 + 2]];
+                const up = [1, 0, 0];
+                const v = vec3.create();
+
+                vec3.cross(v, up, n);
+                vec3.normalize(v, v);
+
+                const angle = Math.acos(vec3.dot(up, n));
+                const q = quat.create();
+
+                quat.setAxisAngle(q, v, angle);
+                quat.normalize(q, q);
+
+                const mq = mat4.create();
+
+                mat4.fromQuat(mq, q);
+                mat4.mul(m, m, mq);
+            }
+            if (useEuler)
+            {
+                mat4.rotateX(m, m, rotArr[i * 3 + 0] * CGL.DEG2RAD);
+                mat4.rotateY(m, m, rotArr[i * 3 + 1] * CGL.DEG2RAD);
+                mat4.rotateZ(m, m, rotArr[i * 3 + 2] * CGL.DEG2RAD);
+            }
+        }
+
+        if (arrayChangedColor && colArr)
+        {
+            instColorArray[i * 4 + 0] = colArr[i * 4 + 0];
+            instColorArray[i * 4 + 1] = colArr[i * 4 + 1];
+            instColorArray[i * 4 + 2] = colArr[i * 4 + 2];
+            instColorArray[i * 4 + 3] = colArr[i * 4 + 3];
+        }
+
+        if (arrayChangedTexcoords && tcArr)
+        {
+            instTexcoordArray[i * 4 + 0] = tcArr[i * 4 + 0];
+            instTexcoordArray[i * 4 + 1] = tcArr[i * 4 + 1];
+            instTexcoordArray[i * 4 + 2] = tcArr[i * 4 + 2];
+            instTexcoordArray[i * 4 + 3] = tcArr[i * 4 + 3];
+        }
+
+        if (scales && scales.length > i) mat4.scale(m, m, [scales[i * 3], scales[i * 3 + 1], scales[i * 3 + 2]]);
+        else mat4.scale(m, m, [1, 1, 1]);
+
+        for (let a = 0; a < 16; a++) matrixArray[i * 16 + a] = m[a];
+    }
+
+    // mesh.numInstances = num;
+    mesh.setNumInstances(num);
+
+    if (arrayChangedTrans) mesh.addAttribute("instMat", matrixArray, 16);
+    if (arrayChangedColor) mesh.addAttribute("instColor", instColorArray, 4, { "instanced": true });
+    if (arrayChangedTexcoords) mesh.addAttribute("instTexCoords", instTexcoordArray, 4, { "instanced": true });
+
+    mod.toggleDefine("HAS_TEXCOORDS", tcArr);
+    mod.toggleDefine("HAS_COLORS", colArr);
+
+    arrayChangedColor = false;
+    recalc = false;
+}
+
+function updateLimit()
+{
+    inLimit.setUiAttribs({ "greyout": !doLimit.get() });
+}
+
+function doRender()
+{
+    if (!mesh) return;
+    if (recalc) setupArray();
+    op.checkGraphicsApi();
+
+    mod.bind();
+
+    if (doLimit.get()) mesh.setNumInstances(Math.min(num, inLimit.get()));
+    else mesh.setNumInstances(num);
+
+    outNum.set(mesh.numInstances);
+
+    if (mesh.numInstances > 0) mesh.render(cgl.getShader());
+
+    outTrigger.trigger();
+
+    mod.unbind();
+}
+
+}
+};
+
+CABLES.OPS["cb58f461-a0bd-4159-a3cb-5e396198b4e9"]={f:Ops.Gl.MeshInstancer_v4,objName:"Ops.Gl.MeshInstancer_v4"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Array.RandomNumbersArray_v4
+// 
+// **************************************************************
+
+Ops.Array.RandomNumbersArray_v4= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    numValues = op.inValueInt("Num Values", 100),
+    inModeSwitch = op.inSwitch("Mode", ["A", "AB", "ABC", "ABCD"], "A"),
+    inSeed = op.inValueFloat("Random Seed ", 0),
+    inInteger = op.inBool("Integer", false),
+    inClosed = op.inValueBool("Last == First"),
+    outValues = op.outArray("Array Out"),
+    outTotalPoints = op.outNumber("Chunks Amount"),
+    outArrayLength = op.outNumber("Array length");
+
+const letters = ["A", "B", "C", "D"];
+const arr = [];
+
+const inArray = letters.map(function (value)
+{
+    return {
+        "min": op.inValueFloat("Min " + value, -1),
+        "max": op.inValueFloat("Max " + value, 1),
+    };
+});
+
+for (let i = 0; i < inArray.length; i += 1)
+{
+    const portObj = inArray[i];
+    const keys = Object.keys(portObj);
+
+    op.setPortGroup("Value Range " + letters[i], keys.map(function (key) { return portObj[key]; }));
+
+    if (i > 0) keys.forEach(function (key) { portObj[key].setUiAttribs({ "greyout": true }); });
+}
+
+inModeSwitch.onChange = function ()
+{
+    const mode = inModeSwitch.get();
+    const modes = inModeSwitch.uiAttribs.values;
+
+    outValues.setUiAttribs({ "stride": inModeSwitch.get().length });
+
+    const index = modes.indexOf(mode);
+
+    inArray.forEach(function (portObj, i)
+    {
+        const keys = Object.keys(portObj);
+        keys.forEach(function (key, j)
+        {
+            if (i <= index) portObj[key].setUiAttribs({ "greyout": false });
+            else portObj[key].setUiAttribs({ "greyout": true });
+        });
+    });
+    init();
+};
+
+outValues.ignoreValueSerialize = true;
+
+inClosed.onChange =
+    numValues.onChange =
+    inSeed.onChange =
+    inInteger.onChange = init;
+
+const minMaxArray = [];
+
+init();
+
+function init()
+{
+    const mode = inModeSwitch.get();
+    const modes = inModeSwitch.uiAttribs.values;
+    const index = modes.indexOf(mode);
+
+    const n = Math.floor(Math.abs(numValues.get()));
+    Math.randomSeed = inSeed.get();
+
+    op.setUiAttrib({ "extendTitle": n + "*" + mode.length });
+
+    const dimension = index + 1;
+    const length = n * dimension;
+
+    arr.length = length;
+    const tupleLength = length / dimension;
+    const isInteger = inInteger.get();
+
+    // optimization: we only need to fetch the max min for each component once
+    for (let i = 0; i < dimension; i += 1)
+    {
+        const portObj = inArray[i];
+        const max = portObj.max.get();
+        const min = portObj.min.get();
+        minMaxArray[i] = [min, max];
+    }
+
+    for (let j = 0; j < tupleLength; j += 1)
+    {
+        for (let k = 0; k < dimension; k += 1)
+        {
+            const min = minMaxArray[k][0];
+            const max = minMaxArray[k][1];
+            const index = j * dimension + k;
+
+            if (isInteger) arr[index] = Math.floor(Math.seededRandom() * ((max + 1) - min) + min);
+            else arr[index] = Math.seededRandom() * (max - min) + min;
+        }
+    }
+
+    if (inClosed.get() && arr.length > dimension)
+    {
+        for (let i = 0; i < dimension; i++)
+            arr[arr.length - 3 + i] = arr[i];
+    }
+
+    outValues.setRef(arr);
+    outTotalPoints.set(arr.length / dimension);
+    outArrayLength.set(arr.length);
+}
+
+// assign change handler
+inArray.forEach(function (obj)
+{
+    Object.keys(obj).forEach(function (key)
+    {
+        const x = obj[key];
+        x.onChange = init;
+    });
+});
+
+}
+};
+
+CABLES.OPS["8a9fa2c6-c229-49a9-9dc8-247001539217"]={f:Ops.Array.RandomNumbersArray_v4,objName:"Ops.Array.RandomNumbersArray_v4"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Graphics.Geometry.FlipNormals
+// 
+// **************************************************************
+
+Ops.Graphics.Geometry.FlipNormals= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    geometry = op.inObject("Geometry"),
+    outGeom = op.outObject("Result"),
+    doFlip = op.inValueBool("Flip", true),
+    doNormalize = op.inValueBool("Normalize", true);
+
+doFlip.onChange =
+    doNormalize.onChange =
+    geometry.onChange = flip;
+
+function flip()
+{
+    let oldGeom = geometry.get();
+
+    if (!oldGeom)
+    {
+        outGeom.set(null);
+        return;
+    }
+
+    let geom = oldGeom.copy();
+
+    if (doFlip.get())
+    {
+        for (let i = 0; i < geom.vertexNormals.length; i++)
+            geom.vertexNormals[i] *= -1;
+
+        if (doNormalize.get())
+        {
+            let vec = vec3.create();
+
+            for (let i = 0; i < geom.vertexNormals.length; i += 3)
+            {
+                vec3.set(vec,
+                    geom.vertexNormals[i + 0],
+                    geom.vertexNormals[i + 1],
+                    geom.vertexNormals[i + 2]);
+                vec3.normalize(vec, vec);
+
+                geom.vertexNormals[i + 0] = vec[0];
+                geom.vertexNormals[i + 1] = vec[1];
+                geom.vertexNormals[i + 2] = vec[2];
+            }
+        }
+    }
+
+    outGeom.set(geom);
+}
+
+}
+};
+
+CABLES.OPS["0055f588-dde6-4232-958b-4c19cdc67abd"]={f:Ops.Graphics.Geometry.FlipNormals,objName:"Ops.Graphics.Geometry.FlipNormals"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.GLTF.GltfGeometry
+// 
+// **************************************************************
+
+Ops.Gl.GLTF.GltfGeometry= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exec = op.inTrigger("Update"),
+    inNodeName = op.inString("Name", "default"),
+    inSubmesh = op.inInt("Submesh", 0),
+    next = op.outTrigger("Next"),
+    outGeom = op.outObject("Geometry", null, "geometry"),
+    outFound = op.outBoolNum("Found");
+
+const cgl = op.patch.cgl;
+let mesh = null;
+let currentSceneLoaded = null;
+
+inSubmesh.onChange =
+inNodeName.onChange = function ()
+{
+    outGeom.set(null);
+    mesh = null;
+    outFound.set(false);
+    op.setUiAttrib({ "extendTitle": inNodeName.get() + "." + inSubmesh.get() });
+};
+
+exec.onTriggered = () =>
+{
+    if (!cgl.tempData.currentScene) return;
+    if (currentSceneLoaded != cgl.tempData.currentScene.loaded) mesh = null;
+
+    if (!mesh)
+    {
+        if (!cgl.tempData || !cgl.tempData.currentScene || !cgl.tempData.currentScene.nodes || !cgl.tempData.currentScene.loaded)
+        {
+            return;
+        }
+        outFound.set(false);
+        outGeom.set(null);
+        const name = inNodeName.get();
+
+        currentSceneLoaded = cgl.tempData.currentScene.loaded;
+
+        for (let i = 0; i < cgl.tempData.currentScene.meshes.length; i++)
+        {
+            if (cgl.tempData.currentScene.meshes[i].name == name)
+            {
+                mesh = cgl.tempData.currentScene.meshes[i];
+
+                const idx = Math.abs(inSubmesh.get());
+                if (mesh.meshes[idx] && mesh.meshes[idx].geom)
+                {
+                    outFound.set(true);
+                    outGeom.set(mesh.meshes[idx].geom);
+                }
+            }
+        }
+    }
+
+    next.trigger();
+};
+
+}
+};
+
+CABLES.OPS["2e59da07-455a-457c-99d8-1c23a1ddeea2"]={f:Ops.Gl.GLTF.GltfGeometry,objName:"Ops.Gl.GLTF.GltfGeometry"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Textures.TextTexture_v6
+// 
+// **************************************************************
+
+Ops.Gl.Textures.TextTexture_v6= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"text_frag":"{{MODULES_HEAD}}\n\nUNI sampler2D tex;\nUNI float a;\nUNI vec4 color;\nIN vec2 texCoord;\n\nvoid main()\n{\n\n    vec4 col=texture(tex,vec2(texCoord.x,(1.0-texCoord.y)));\n\n    {{MODULE_COLOR}}\n\n    outColor=col;\n}\n","text_vert":"{{MODULES_HEAD}}\n\nIN vec3 vPosition;\nUNI mat4 projMatrix;\nUNI mat4 modelMatrix;\nUNI mat4 viewMatrix;\nUNI float aspect;\nOUT vec2 texCoord;\nIN vec2 attrTexCoord;\n\nvoid main()\n{\n    vec4 pos=vec4(vPosition,  1.0);\n\n    pos.x*=aspect;\n\n    texCoord=vec2(attrTexCoord.x,1.0-attrTexCoord.y);;\n\n    mat4 mMatrix=modelMatrix;\n\n    {{MODULE_VERTEX_POSITION}}\n    mat4 modelViewMatrix=viewMatrix*mMatrix;\n\n    gl_Position = projMatrix * modelViewMatrix * pos;\n}\n",};
+const
+    render = op.inTriggerButton("Render"),
+
+    text = op.inString("text", "cables"),
+
+    drawMesh = op.inValueBool("Draw Mesh", true),
+    meshScale = op.inValueFloat("Scale Mesh", 0.5),
+
+    texSizeMeth = op.inSwitch("Size", ["Auto", "Manual"], "Auto"),
+
+    texSizeManWidth = op.inInt("Width", 512),
+    texSizeManHeight = op.inInt("Height", 512),
+    texSizeAutoHeight = op.inBool("Auto Height", true),
+
+    texSizeManBreak = op.inBool("Auto Line Breaks", true),
+
+    font = op.inString("font", "Arial"),
+    weight = op.inString("weight", "normal"),
+    inFontSize = op.inValueFloat("fontSize", 300),
+    align = op.inSwitch("align", ["left", "center", "right"], "center"),
+    valign = op.inSwitch("Vertical align", ["Top", "Middle", "Bottom"], "Top"),
+
+    inLetterspacing = op.inFloat("Letter Spacing", 0),
+    inLineHeight = op.inFloat("Line Height Add", 0),
+
+    inPaddingY = op.inInt("Padding Y Top", 3),
+    inPaddingYBot = op.inInt("Padding Y Bottom", 3),
+    inPaddingX = op.inInt("Padding X", 0),
+
+    tfilter = op.inSwitch("filter", ["nearest", "linear", "mipmap"], "linear"),
+    wrap = op.inValueSelect("Wrap", ["repeat", "mirrored repeat", "clamp to edge"], "clamp to edge"),
+    aniso = op.inSwitch("Anisotropic", [0, 1, 2, 4, 8, 16], 0),
+    cachetexture = op.inValueBool("Reuse Texture", true),
+    drawDebug = op.inBool("Show Debug", false),
+
+    reloadOnFont = op.inBool("Redraw On Font Load", true),
+
+    r = op.inValueSlider("r", 1),
+    g = op.inValueSlider("g", 1),
+    b = op.inValueSlider("b", 1),
+    inOpacity = op.inFloatSlider("Opacity", 1),
+
+    bgR = op.inValueSlider("background R", 0),
+    bgG = op.inValueSlider("background G", 0),
+    bgB = op.inValueSlider("background B", 0),
+    bgA = op.inValueSlider("background A", 1),
+
+    inRedraw = op.inTriggerButton("Force Redraw"),
+
+    next = op.outTrigger("Next"),
+    outRatio = op.outNumber("Ratio"),
+    textureOut = op.outTexture("texture"),
+    outEle = op.outObject("Canvas", null, "element"),
+    outAspect = op.outNumber("Aspect", 1),
+    outLines = op.outNumber("Num Lines");
+
+const SPACE = " ";
+
+r.setUiAttribs({ "colorPick": true });
+bgR.setUiAttribs({ "colorPick": true });
+
+op.toWorkPortsNeedToBeLinked(render);
+
+op.setPortGroup("Text Color", [r, g, b, inOpacity]);
+op.setPortGroup("Background", [bgR, bgG, bgB, bgA]);
+op.setPortGroup("Font", [font, weight, inFontSize, align, valign, inLetterspacing, inLineHeight]);
+op.setPortGroup("Texture", [wrap, tfilter, aniso, cachetexture, drawDebug]);
+
+op.setPortGroup("Rendering", [drawMesh, meshScale]);
+
+render.onLinkChanged = () =>
+{
+    if (!render.isLinked())textureOut.setRef(CGL.Texture.getEmptyTexture(cgl));
+    else textureOut.setRef(tex);
+};
+
+inRedraw.onTriggered =
+    r.onChange =
+    g.onChange =
+    b.onChange =
+    inOpacity.onChange =
+    valign.onChange =
+    texSizeManBreak.onChange =
+    texSizeAutoHeight.onChange =
+    inLineHeight.onChange =
+    texSizeMeth.onChange =
+    texSizeManWidth.onChange =
+    texSizeManHeight.onChange =
+    align.onChange =
+    inLetterspacing.onChange =
+    inPaddingY.onChange =
+    inPaddingYBot.onChange =
+    inPaddingX.onChange =
+    text.onChange =
+    inFontSize.onChange =
+    weight.onChange =
+    aniso.onChange =
+    font.onChange =
+    drawDebug.onChange =
+    cachetexture.onChange = function ()
+    {
+        needsRefresh = true;
+        updateUi();
+    };
+
+textureOut.ignoreValueSerialize = true;
+
+const cgl = op.patch.cgl;
+let tex = new CGL.Texture(cgl);
+let autoHeight = 2;
+let autoWidth = 2;
+
+const fontImage = document.createElement("canvas");
+fontImage.id = "texturetext_" + CABLES.generateUUID();
+fontImage.style.display = "none";
+document.body.appendChild(fontImage);
+fontImage.style.letterSpacing = "0px";
+
+outEle.setRef(fontImage);
+
+let ctx = fontImage.getContext("2d");
+let needsRefresh = true;
+const mesh = CGL.MESHES.getSimpleRect(cgl, "texttexture rect");
+const vScale = vec3.create();
+const shader = new CGL.Shader(cgl, "texttexture");
+shader.setModules(["MODULE_VERTEX_POSITION", "MODULE_COLOR", "MODULE_BEGIN_FRAG"]);
+shader.setSource(attachments.text_vert, attachments.text_frag);
+const texUni = new CGL.Uniform(shader, "t", "tex");
+const aspectUni = new CGL.Uniform(shader, "f", "aspect", 0);
+const opacityUni = new CGL.Uniform(shader, "f", "a", inOpacity);
+const uniColor = new CGL.Uniform(shader, "4f", "color", r, g, b, inOpacity);
+
+if (op.patch.isEditorMode()) CABLES.UI.SIMPLEWIREFRAMERECT = CABLES.UI.SIMPLEWIREFRAMERECT || new CGL.WireframeRect(cgl);
+
+render.onTriggered = doRender;
+drawMesh.onChange = updateUi;
+updateUi();
+
+op.on("delete", () =>
+{
+    ctx = null;
+    fontImage.remove();
+});
+
+aniso.onChange =
+    tfilter.onChange =
+    wrap.onChange = () =>
+    {
+        if (tex)tex.delete();
+        tex = null;
+        needsRefresh = true;
+    };
+
+bgR.onChange = bgG.onChange = bgB.onChange = bgA.onChange = r.onChange = g.onChange = b.onChange = inOpacity.onChange = () =>
+{
+    if (!drawMesh.get() || textureOut.isLinked()) needsRefresh = true;
+};
+
+textureOut.onLinkChanged = () =>
+{
+    if (textureOut.isLinked()) needsRefresh = true;
+};
+
+op.patch.on("fontLoaded", (fontName) =>
+{
+    if (fontName == font.get()) needsRefresh = true;
+});
+
+document.fonts.ready.then(() =>
+{
+    if (reloadOnFont.get()) needsRefresh = true;
+});
+
+document.fonts.onloadingdone = function (fontFaceSetEvent)
+{
+    if (reloadOnFont.get()) needsRefresh = true;
+};
+
+function getWidth()
+{
+    return autoWidth;
+}
+
+function getHeight()
+{
+    return autoHeight;
+}
+
+function doRender()
+{
+    let count = 0;
+    while (needsRefresh && count < 10)
+    {
+        reSize();
+        refresh();
+        count++;
+    }
+
+    if (drawMesh.get())
+    {
+        vScale[0] = vScale[1] = vScale[2] = meshScale.get();
+        cgl.pushBlendMode(CGL.BLEND_NORMAL, false);
+        cgl.pushModelMatrix();
+        mat4.scale(cgl.mMatrix, cgl.mMatrix, vScale);
+
+        shader.popTextures();
+        shader.pushTexture(texUni, tex.tex);
+        aspectUni.set(outAspect.get());
+
+        if (cgl.shouldDrawHelpers(op))
+            CABLES.UI.SIMPLEWIREFRAMERECT.render(outAspect.get(), 1, 1);
+
+        cgl.pushShader(shader);
+        mesh.render(op.patch.cg.getShader());
+
+        cgl.popShader();
+        cgl.popBlendMode();
+        cgl.popModelMatrix();
+    }
+
+    next.trigger();
+}
+
+function reSize()
+{
+    if (tex) tex.setSize(getWidth(), getHeight());
+
+    ctx.canvas.width = fontImage.width = getWidth();
+    ctx.canvas.height = fontImage.height = getHeight();
+
+    outAspect.set(fontImage.width / fontImage.height);
+
+    needsRefresh = true;
+}
+
+function autoLineBreaks(strings)
+{
+    let newString = "";
+
+    for (let i = 0; i < strings.length; i++)
+    {
+        if (!strings[i])
+        {
+            newString += "\n";
+            continue;
+        }
+        let sumWidth = 0;
+        const words = strings[i].split(SPACE);
+
+        for (let j = 0; j < words.length; j++)
+        {
+            if (!words[j]) continue;
+            sumWidth += ctx.measureText(words[j] + SPACE).width;
+
+            if (sumWidth > texSizeManWidth.get())
+            {
+                // found = true;
+                newString += "\n" + words[j] + SPACE;
+                sumWidth = ctx.measureText(words[j] + SPACE).width;
+            }
+            else
+            {
+                newString += words[j] + SPACE;
+            }
+        }
+        newString += "\n";
+    }
+    let txt = newString;
+
+    strings = txt.split("\n");
+
+    if (strings[strings.length - 1] == "")strings.pop();
+
+    return strings;
+}
+
+function refresh()
+{
+    cgl.checkFrameStarted("texttrexture refresh");
+    const rgbStringClear = "rgba(" + Math.floor(bgR.get() * 255) + "," + Math.floor(bgG.get() * 255) + "," + Math.floor(bgB.get() * 255) + "," + bgA.get() + ")";
+    ctx.fillStyle = rgbStringClear;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    const rgbString = "rgba(" + Math.floor(r.get() * 255) + ","
+        + Math.floor(g.get() * 255) + "," + Math.floor(b.get() * 255) + ","
+        + inOpacity.get() + ")";
+
+    ctx.fillStyle = rgbString;
+    let fontSize = parseFloat(inFontSize.get());
+    let fontname = font.get();
+    if (fontname.indexOf(SPACE) > -1) fontname = "\"" + fontname + "\"";
+    ctx.font = weight.get() + SPACE + fontSize + "px " + fontname + "";
+
+    ctx.textBaseline = "top";
+    ctx.textAlign = align.get();
+    ctx.letterSpacing = inLetterspacing.get() + "px";
+
+    let txt = (text.get() + "").replace(/<br\/>/g, "\n");
+    txt = txt.trim();
+    let strings = txt.split("\n");
+
+    needsRefresh = false;
+
+    let paddingY = Math.max(0, inPaddingY.get());
+    let paddingYBot = Math.max(0, inPaddingYBot.get());
+    let paddingX = Math.max(0, inPaddingX.get());
+
+    autoWidth = 0;
+    autoHeight = 0;
+
+    if (texSizeManBreak.get() && texSizeMeth.get() == "Manual")
+    {
+        if (texSizeManWidth.get() > 128)
+        {
+            strings = autoLineBreaks(strings);
+        }
+    }
+
+    const lineHeights = [];
+
+    for (let i = 0; i < strings.length; i++)
+    {
+        const measure = ctx.measureText(strings[i]);
+        lineHeights[i] = Math.ceil(measure.fontBoundingBoxAscent) + Math.ceil(measure.fontBoundingBoxDescent) + inLineHeight.get();
+    }
+
+    for (let i = 0; i < strings.length; i++)
+    {
+        const measure = ctx.measureText(strings[i]);
+        autoWidth = Math.max(autoWidth, Math.ceil(measure.width));
+        autoHeight += lineHeights[i];
+    }
+
+    autoWidth += paddingX * 2;
+
+    if (inLineHeight.get() < 0)autoHeight += (inLineHeight.get() / 2) * -1;
+
+    let calcHeight = autoHeight;
+
+    if (texSizeMeth.get() == "Manual")
+    {
+        autoWidth = texSizeManWidth.get() + paddingX * 2;
+
+        if (!texSizeAutoHeight.get())
+        {
+            autoHeight = texSizeManHeight.get();
+        }
+    }
+
+    autoHeight = Math.ceil(autoHeight);
+    autoWidth = Math.ceil(autoWidth);
+
+    if (autoWidth > cgl.maxTexSize || autoHeight > cgl.maxTexSize) op.setUiError("textoobig", "Texture too big!");
+    else op.setUiError("textoobig", null);
+
+    autoHeight = Math.min(cgl.maxTexSize, autoHeight);
+    autoWidth = Math.min(cgl.maxTexSize, autoWidth);
+
+    let posy = 0;
+    if (valign.get() == "Middle") posy = (autoHeight - calcHeight) / 2;
+    else if (valign.get() == "Bottom") posy = (autoHeight - calcHeight);
+
+    posy += paddingY;
+
+    autoHeight += paddingY + paddingYBot;
+
+    if (ctx.canvas.width != autoWidth || ctx.canvas.height != autoHeight) reSize();
+
+    const dbg = drawDebug.get();
+
+    for (let i = 0; i < strings.length; i++)
+    {
+        let posx = 0 + paddingX; // left
+
+        if (align.get() == "center") posx = ctx.canvas.width / 2;
+        if (align.get() == "right") posx = ctx.canvas.width - paddingX;
+
+        if (texSizeMeth.get() == "Manual") posx += inLetterspacing.get();
+
+        ctx.fillText(strings[i], posx, posy);
+
+        if (dbg)
+        {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#FF0000";
+            ctx.beginPath();
+            ctx.moveTo(0, posy);
+            ctx.lineTo(ctx.canvas.width, posy);
+            ctx.stroke();
+        }
+
+        posy += lineHeights[i];
+    }
+
+    // ctx.restore();
+
+    let cgl_wrap = CGL.Texture.WRAP_REPEAT;
+    if (wrap.get() == "mirrored repeat") cgl_wrap = CGL.Texture.WRAP_MIRRORED_REPEAT;
+    else if (wrap.get() == "clamp to edge") cgl_wrap = CGL.Texture.WRAP_CLAMP_TO_EDGE;
+
+    let f = CGL.Texture.FILTER_LINEAR;
+    if (tfilter.get() == "nearest") f = CGL.Texture.FILTER_NEAREST;
+    else if (tfilter.get() == "mipmap") f = CGL.Texture.FILTER_MIPMAP;
+
+    if (!cachetexture.get() || !tex || !textureOut.get() || tex.width != fontImage.width || tex.height != fontImage.height || tex.anisotropic != parseFloat(aniso.get()))
+    {
+        if (tex)tex.delete();
+        tex = new CGL.Texture.createFromImage(cgl, fontImage, { "filter": f, "anisotropic": parseFloat(aniso.get()), "wrap": cgl_wrap });
+    }
+
+    tex.unpackAlpha = false;
+    tex.flip = false;
+    tex.initTexture(fontImage, f);
+
+    outRatio.set(ctx.canvas.height / ctx.canvas.width);
+    outLines.set(strings.length);
+
+    textureOut.setRef(tex);
+}
+
+function updateUi()
+{
+    texSizeManWidth.setUiAttribs({ "greyout": texSizeMeth.get() != "Manual" });
+    texSizeManHeight.setUiAttribs({ "greyout": texSizeMeth.get() != "Manual" || texSizeAutoHeight.get() });
+    texSizeManBreak.setUiAttribs({ "greyout": texSizeMeth.get() != "Manual" });
+    valign.setUiAttribs({ "greyout": texSizeMeth.get() != "Manual" });
+    texSizeAutoHeight.setUiAttribs({ "greyout": texSizeMeth.get() != "Manual" });
+
+    meshScale.setUiAttribs({ "greyout": !drawMesh.get() });
+}
+
+}
+};
+
+CABLES.OPS["2c042efa-3604-4717-b8f4-5ad08d6740e5"]={f:Ops.Gl.Textures.TextTexture_v6,objName:"Ops.Gl.Textures.TextTexture_v6"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Matrix.Billboard
+// 
+// **************************************************************
+
+Ops.Gl.Matrix.Billboard= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const exec = op.inTrigger("Exec");
+const next = op.outTrigger("Next");
+
+const cgl = op.patch.cgl;
+
+let mm = mat4.create();
+let mv = mat4.create();
+let m = mat4.create();
+let mempty = mat4.create();
+
+exec.onTriggered = function ()
+{
+    mat4.invert(mm, cgl.mMatrix);
+    mat4.invert(mv, cgl.vMatrix);
+
+    mat4.mul(mm, mm, mv);
+
+    mm[12] = 0;
+    mm[13] = 0;
+    mm[14] = 0;
+
+    cgl.pushModelMatrix();
+    cgl.pushViewMatrix();
+    mat4.mul(cgl.mMatrix, cgl.mMatrix, mm);
+    next.trigger();
+    cgl.popViewMatrix();
+    cgl.popModelMatrix();
+};
+
+}
+};
+
+CABLES.OPS["d41e676e-d8a7-4a1e-8abf-f1bddfc982d5"]={f:Ops.Gl.Matrix.Billboard,objName:"Ops.Gl.Matrix.Billboard"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Graphics.DepthTest
+// 
+// **************************************************************
+
+Ops.Graphics.DepthTest= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    render = op.inTrigger("Render"),
+    enable = op.inValueBool("Enable depth testing", true),
+    meth = op.inValueSelect("Depth Test Method", ["never", "always", "less", "less or equal", "greater", "greater or equal", "equal", "not equal"], "less or equal"),
+    write = op.inValueBool("Write to depth buffer", true),
+    trigger = op.outTrigger("Next");
+
+const cgl = op.patch.cgl;
+let compareMethod = CABLES.CG.DEPTH_COMPARE_LESSEQUAL;
+
+meth.onChange = updateFunc;
+
+function updateFunc()
+{
+    const m = meth.get();
+    if (m == "never") compareMethod = CABLES.CG.DEPTH_COMPARE_NEVER;
+    else if (m == "always") compareMethod = CABLES.CG.DEPTH_COMPARE_ALWAYS;
+    else if (m == "less") compareMethod = CABLES.CG.DEPTH_COMPARE_LESS;
+    else if (m == "less or equal") compareMethod = CABLES.CG.DEPTH_COMPARE_LESSEQUAL;
+    else if (m == "greater") compareMethod = CABLES.CG.DEPTH_COMPARE_GREATER;
+    else if (m == "greater or equal") compareMethod = CABLES.CG.DEPTH_COMPARE_GREATEREQUAL;
+    else if (m == "equal") compareMethod = CABLES.CG.DEPTH_COMPARE_EQUAL;
+    else if (m == "not equal") compareMethod = CABLES.CG.DEPTH_COMPARE_NOTEQUAL;
+}
+
+render.onTriggered = function ()
+{
+    const cg = op.patch.cg;
+    if (!cg) return;
+
+    op.patch.cg.pushDepthTest(enable.get());
+    op.patch.cg.pushDepthWrite(write.get());
+    op.patch.cg.pushDepthFunc(cg.DEPTH_FUNCS[compareMethod]);
+
+    trigger.trigger();
+
+    op.patch.cg.popDepthTest();
+    op.patch.cg.popDepthWrite();
+    op.patch.cg.popDepthFunc();
+};
+
+}
+};
+
+CABLES.OPS["3996ed5d-8143-4bec-9cfd-c1b193a295af"]={f:Ops.Graphics.DepthTest,objName:"Ops.Graphics.DepthTest"};
 
 
 
