@@ -12126,115 +12126,6 @@ CABLES.OPS["76d37c73-3c32-47bd-8b4a-4229db7e57f1"]={f:Ops.Boolean.IsZero,objName
 
 // **************************************************************
 // 
-// Ops.Graphics.Geometry.AlignGeometry
-// 
-// **************************************************************
-
-Ops.Graphics.Geometry.AlignGeometry= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    geometry = op.inObject("Geometry"),
-    x = op.inValueSelect("X", ["Ignore", "Center", "Max", "Min"], "Ignore"),
-    y = op.inValueSelect("Y", ["Ignore", "Center", "Max", "Min"], "Ignore"),
-    z = op.inValueSelect("Z", ["Ignore", "Center", "Max", "Min"], "Ignore"),
-    outGeom = op.outObject("Result");
-
-x.onChange = y.onChange = z.onChange = geometry.onChange = update;
-
-const
-    axis = [0, 0, 0],
-    ALIGN_NONE = 0,
-    ALIGN_CENTER = 1,
-    ALIGN_MAX = 2,
-    ALIGN_MIN = 3;
-
-let geom = null;
-
-function getAxisId(port)
-{
-    if (port.get() == "Ignore") return ALIGN_NONE;
-    if (port.get() == "Center") return ALIGN_CENTER;
-    if (port.get() == "Max") return ALIGN_MAX;
-    if (port.get() == "Min") return ALIGN_MIN;
-}
-
-function update()
-{
-    const oldGeom = geometry.get();
-
-    if (!oldGeom)
-    {
-        outGeom.set(null);
-        return;
-    }
-
-    axis[0] = getAxisId(x);
-    axis[1] = getAxisId(y);
-    axis[2] = getAxisId(z);
-
-    const bounds = oldGeom.getBounds();
-    geom = oldGeom.copy();
-
-    for (let axi = 0; axi < 3; axi++)
-    {
-        let min = 0, max = 0;
-        if (axi === 0)
-        {
-            min = bounds.minX;
-            max = bounds.maxX;
-        }
-        else if (axi == 1)
-        {
-            min = bounds.minY;
-            max = bounds.maxY;
-        }
-        else if (axi == 2)
-        {
-            min = bounds.minZ;
-            max = bounds.maxZ;
-        }
-
-        if (axis[axi] == ALIGN_NONE)
-        {
-            for (let i = 0; i < geom.vertices.length; i += 3)
-                geom.vertices[i + axi] = oldGeom.vertices[i + axi];
-        }
-        else if (axis[axi] == ALIGN_CENTER)
-        {
-            const off = min + (max - min) / 2;
-            for (let i = 0; i < geom.vertices.length; i += 3)
-                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - off;
-        }
-        else if (axis[axi] == ALIGN_MAX)
-        {
-            for (let i = 0; i < geom.vertices.length; i += 3)
-                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - max;
-        }
-        else if (axis[axi] == ALIGN_MIN)
-        {
-            for (let i = 0; i < geom.vertices.length; i += 3)
-                geom.vertices[i + axi] = oldGeom.vertices[i + axi] - min;
-        }
-    }
-
-    outGeom.setRef(geom);
-}
-
-}
-};
-
-CABLES.OPS["955c1a40-17ca-4944-8cf6-07e14212be2d"]={f:Ops.Graphics.Geometry.AlignGeometry,objName:"Ops.Graphics.Geometry.AlignGeometry"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Html.WindowHasFocus
 // 
 // **************************************************************
@@ -13959,6 +13850,74 @@ render.onTriggered = function ()
 };
 
 CABLES.OPS["3996ed5d-8143-4bec-9cfd-c1b193a295af"]={f:Ops.Graphics.DepthTest,objName:"Ops.Graphics.DepthTest"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Local.GlMode
+// 
+// **************************************************************
+
+Ops.Local.GlMode= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exec = op.inTrigger("Execute"),
+    next = op.outTrigger("Next"),
+    prim = op.inValueSelect("Primitive", ["LINES", "LINE_STRIP", "LINE_LOOP", "POINTS", "TRIANGLES", "TRIANGLE_FAN", "TRIANGLE_STRIP"], "TRIANGLES");
+
+const cgl = op.patch.cgl;
+let glPrim = cgl.gl.TRIANGLES;
+
+prim.onChange = function ()
+{
+    if (prim.get() == "LINES") glPrim = cgl.gl.LINES;
+    if (prim.get() == "LINE_STRIP") glPrim = cgl.gl.LINE_STRIP;
+    if (prim.get() == "LINE_LOOP") glPrim = cgl.gl.LINE_LOOP;
+    if (prim.get() == "POINTS") glPrim = cgl.gl.POINTS;
+    if (prim.get() == "TRIANGLES") glPrim = cgl.gl.TRIANGLES;
+    if (prim.get() == "TRIANGLE_FAN") glPrim = cgl.gl.TRIANGLE_FAN;
+    if (prim.get() == "TRIANGLE_STRIP") glPrim = cgl.gl.TRIANGLE_STRIP;
+};
+
+exec.onTriggered = function ()
+{
+    // Sauvegarder l'état précédent
+    const oldPrim = cgl.gl._forcedPrimitive;
+
+    // Forcer le primitive pour tous les rendus suivants
+    cgl.gl._forcedPrimitive = glPrim;
+
+    // Hook sur drawElements et drawArrays
+    const origDrawElements = cgl.gl.drawElements;
+    const origDrawArrays = cgl.gl.drawArrays;
+
+    cgl.gl.drawElements = function(mode, count, type, offset) {
+        origDrawElements.call(this, glPrim, count, type, offset);
+    };
+
+    cgl.gl.drawArrays = function(mode, first, count) {
+        origDrawArrays.call(this, glPrim, first, count);
+    };
+
+    // Exécuter la chaîne de rendu
+    next.trigger();
+
+    // Restaurer l'état
+    cgl.gl.drawElements = origDrawElements;
+    cgl.gl.drawArrays = origDrawArrays;
+    cgl.gl._forcedPrimitive = oldPrim;
+};
+}
+};
+
+CABLES.OPS["3ff24a83-db08-437a-b614-cefb4703a2bb"]={f:Ops.Local.GlMode,objName:"Ops.Local.GlMode"};
 
 
 
