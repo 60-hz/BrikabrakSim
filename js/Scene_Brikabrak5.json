@@ -61,11 +61,11 @@
                 },
                 {
                     "name": "width",
-                    "value": 2532
+                    "value": 1658
                 },
                 {
                     "name": "height",
-                    "value": 1542
+                    "value": 1254
                 },
                 {
                     "name": "Pixel Density",
@@ -306,7 +306,7 @@
                 },
                 {
                     "name": "initial radius",
-                    "value": 2
+                    "value": 2.4
                 },
                 {
                     "name": "initial axis y",
@@ -367,15 +367,15 @@
                 },
                 {
                     "name": "radius",
-                    "value": 2
+                    "value": 2.4
                 },
                 {
                     "name": "Rot X",
-                    "value": 90.02215008684028
+                    "value": 90.00000000000006
                 },
                 {
                     "name": "Rot Y",
-                    "value": 90.00000012005287
+                    "value": 90
                 }
             ],
             "objName": "Ops.Graphics.OrbitControls_v3"
@@ -428,11 +428,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.9425046899684044
+                    "value": -0.8959495627261761
                 },
                 {
                     "name": "y",
-                    "value": -0.05192120622568097
+                    "value": -0.06465560207336518
                 },
                 {
                     "name": "click right",
@@ -455,11 +455,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -160
+                    "value": -42
                 },
                 {
                     "name": "Movement Y",
-                    "value": 18.5
+                    "value": -10.5
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -559,6 +559,29 @@
                 }
             ],
             "portsOut": [
+                {
+                    "name": "Next",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "7ehyn4mcp",
+                            "objOut": "pms0q11wo"
+                        },
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "fd2lidhni",
+                            "objOut": "pms0q11wo"
+                        },
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "hmx3hgbtw",
+                            "objOut": "pms0q11wo"
+                        }
+                    ]
+                },
                 {
                     "name": "Generator",
                     "value": "Khronos glTF Blender I/O v1.8.19"
@@ -3682,7 +3705,7 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": -1.273569941520691
+                    "value": -1.3691099882125854
                 },
                 {
                     "name": "World Position Y",
@@ -5516,7 +5539,7 @@
             "portsIn": [
                 {
                     "name": "number1",
-                    "value": 3,
+                    "value": 0,
                     "useVariable": "spotselect"
                 },
                 {
@@ -5588,7 +5611,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Cone Angle"
+                    "value": "Cone Angle°"
                 },
                 {
                     "name": "Min",
@@ -5695,9 +5718,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "jacak2os6",
+                            "objIn": "t7opx29hn",
                             "objOut": "ymspkchgt"
                         }
                     ]
@@ -5762,9 +5785,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "6qvhohrrf",
+                            "objIn": "7f4dh48vj",
                             "objOut": "zxarecs00"
                         }
                     ]
@@ -5778,7 +5801,7 @@
             "portsIn": [
                 {
                     "name": "number1",
-                    "value": 3,
+                    "value": 0,
                     "useVariable": "spotselect"
                 },
                 {
@@ -5886,7 +5909,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Cone Angle"
+                    "value": "Cone Angle°"
                 },
                 {
                     "name": "Min",
@@ -5914,11 +5937,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": 42.7567
+                    "value": 45.78125
                 },
                 {
                     "name": "Default",
-                    "value": 42.7567
+                    "value": 45.78125
                 }
             ],
             "portsOut": [
@@ -5993,9 +6016,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number2",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "q90ll1t8m",
+                            "objIn": "1nje661pp",
                             "objOut": "xw1s0dmwu"
                         }
                     ]
@@ -6060,9 +6083,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number2",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "02siapfro",
+                            "objIn": "4c63qnuv6",
                             "objOut": "g9n88592z"
                         }
                     ]
@@ -8236,7 +8259,7 @@
                 },
                 {
                     "name": "String",
-                    "value": "4-P"
+                    "value": "1-Tapis"
                 }
             ],
             "objName": "Ops.Sidebar.SideBarSwitch"
@@ -8556,7 +8579,7 @@
             "portsIn": [
                 {
                     "name": "number1",
-                    "value": 3,
+                    "value": 0,
                     "useVariable": "spotselect"
                 },
                 {
@@ -8664,7 +8687,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Cone Angle"
+                    "value": "Cone Angle°"
                 },
                 {
                     "name": "Min",
@@ -8771,9 +8794,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "01rgx9tvu",
+                            "objIn": "kpl0cvdng",
                             "objOut": "n3trzakpy"
                         }
                     ]
@@ -8838,9 +8861,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "c0cyiyn59",
+                            "objIn": "qetjo61iw",
                             "objOut": "xto7bxrlu"
                         }
                     ]
@@ -8854,7 +8877,7 @@
             "portsIn": [
                 {
                     "name": "number1",
-                    "value": 3,
+                    "value": 0,
                     "useVariable": "spotselect"
                 },
                 {
@@ -8968,7 +8991,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Cone Angle"
+                    "value": "Cone Angle°"
                 },
                 {
                     "name": "Min",
@@ -8996,11 +9019,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": 35.66518
+                    "value": 53.54018
                 },
                 {
                     "name": "Default",
-                    "value": 35.66518
+                    "value": 53.54018
                 }
             ],
             "portsOut": [
@@ -9052,11 +9075,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.3875
+                    "value": -0.86536
                 },
                 {
                     "name": "Default",
-                    "value": -0.3875
+                    "value": -0.86536
                 }
             ],
             "portsOut": [
@@ -9075,9 +9098,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "mff9gfip1",
+                            "objIn": "n54g95kj0",
                             "objOut": "bhwo10hna"
                         }
                     ]
@@ -9142,9 +9165,9 @@
                     "name": "Result",
                     "links": [
                         {
-                            "portIn": "number1",
+                            "portIn": "Value",
                             "portOut": "Result",
-                            "objIn": "za1dfw3w2",
+                            "objIn": "yqlboi3vf",
                             "objOut": "anoskt8g8"
                         }
                     ]
@@ -9215,10 +9238,6 @@
                 {
                     "name": "Radius",
                     "value": 1
-                },
-                {
-                    "name": "Y",
-                    "value": 2
                 },
                 {
                     "name": "Point At Y",
@@ -9357,7 +9376,7 @@
                 },
                 {
                     "name": "World Position Y",
-                    "value": 2
+                    "value": 1.2100000381469727
                 },
                 {
                     "name": "World Position Z",
@@ -9645,6 +9664,12 @@
                             "portIn": "number2",
                             "portOut": "Value",
                             "objIn": "za1dfw3w2",
+                            "objOut": "lywtrt61w"
+                        },
+                        {
+                            "portIn": "posX",
+                            "portOut": "Value",
+                            "objIn": "gqmzi8imh",
                             "objOut": "lywtrt61w"
                         }
                     ]
@@ -10580,7 +10605,7 @@
                 },
                 {
                     "name": "FPS",
-                    "value": 27
+                    "value": 39
                 }
             ],
             "objName": "Ops.Gl.Performance"
@@ -11095,7 +11120,7 @@
                 },
                 {
                     "name": "posZ",
-                    "value": 0.43
+                    "value": 1.11
                 },
                 {
                     "name": "scale",
@@ -11211,7 +11236,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Dimension"
+                    "value": "Dimension - P"
                 },
                 {
                     "name": "Min",
@@ -15796,11 +15821,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -1.27357
+                    "value": -1.36911
                 },
                 {
                     "name": "Default",
-                    "value": -1.27357
+                    "value": -1.36911
                 }
             ],
             "portsOut": [
@@ -16410,12 +16435,6 @@
                             "portOut": "result",
                             "objIn": "qci3bdmec",
                             "objOut": "za1dfw3w2"
-                        },
-                        {
-                            "portIn": "posX",
-                            "portOut": "result",
-                            "objIn": "gqmzi8imh",
-                            "objOut": "za1dfw3w2"
                         }
                     ]
                 }
@@ -16797,15 +16816,7 @@
                     "value": 1
                 },
                 {
-                    "name": "rotX",
-                    "value": 0
-                },
-                {
                     "name": "rotY",
-                    "value": 0
-                },
-                {
-                    "name": "rotZ",
                     "value": 0
                 }
             ],
@@ -16823,51 +16834,6 @@
                 }
             ],
             "objName": "Ops.Graphics.Transform"
-        },
-        {
-            "id": "9xkaztfwe",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "value",
-                    "value": 0
-                },
-                {
-                    "name": "old min",
-                    "value": 180
-                },
-                {
-                    "name": "old max",
-                    "value": 90
-                },
-                {
-                    "name": "new min",
-                    "value": 0
-                },
-                {
-                    "name": "new max",
-                    "value": 1
-                },
-                {
-                    "name": "Easing index",
-                    "value": 0
-                },
-                {
-                    "name": "Easing",
-                    "value": "Linear"
-                },
-                {
-                    "name": "Clamp",
-                    "value": 1
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "result",
-                    "value": 0
-                }
-            ],
-            "objName": "Ops.Math.MapRange"
         },
         {
             "id": "txvr5ji2k",
@@ -17024,6 +16990,17 @@
             ],
             "portsOut": [
                 {
+                    "name": "Next",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "wd3n9waq7",
+                            "objOut": "txvr5ji2k"
+                        }
+                    ]
+                },
+                {
                     "name": "Ratio",
                     "value": 0.4673024523160763
                 },
@@ -17051,15 +17028,7 @@
                     "value": 1
                 },
                 {
-                    "name": "rotX",
-                    "value": 0
-                },
-                {
                     "name": "rotY",
-                    "value": 0
-                },
-                {
-                    "name": "rotZ",
                     "value": 0
                 }
             ],
@@ -17233,6 +17202,17 @@
             ],
             "portsOut": [
                 {
+                    "name": "Next",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "wd3n9waq7",
+                            "objOut": "a31vk22c4"
+                        }
+                    ]
+                },
+                {
                     "name": "Ratio",
                     "value": 0.4673024523160763
                 },
@@ -17252,23 +17232,11 @@
             "uiAttribs": {},
             "portsIn": [
                 {
-                    "name": "posY",
-                    "value": 1.21
-                },
-                {
                     "name": "scale",
                     "value": 1
                 },
                 {
-                    "name": "rotX",
-                    "value": 0
-                },
-                {
                     "name": "rotY",
-                    "value": 0
-                },
-                {
-                    "name": "rotZ",
                     "value": 0
                 }
             ],
@@ -17442,6 +17410,17 @@
             ],
             "portsOut": [
                 {
+                    "name": "Next",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "wd3n9waq7",
+                            "objOut": "1kfof6ih7"
+                        }
+                    ]
+                },
+                {
                     "name": "Ratio",
                     "value": 0.4673024523160763
                 },
@@ -17469,15 +17448,7 @@
                     "value": 1
                 },
                 {
-                    "name": "rotX",
-                    "value": 0
-                },
-                {
                     "name": "rotY",
-                    "value": 0
-                },
-                {
-                    "name": "rotZ",
                     "value": 0
                 }
             ],
@@ -17650,6 +17621,17 @@
                 }
             ],
             "portsOut": [
+                {
+                    "name": "Next",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "Next",
+                            "objIn": "wd3n9waq7",
+                            "objOut": "r9d5hizr0"
+                        }
+                    ]
+                },
                 {
                     "name": "Ratio",
                     "value": 0.4673024523160763
@@ -18215,17 +18197,6 @@
                 }
             ],
             "objName": "Ops.Gl.ShaderEffects.Shadow_v2"
-        },
-        {
-            "id": "ogo7x2x7w",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "Active",
-                    "value": 1
-                }
-            ],
-            "objName": "Ops.Gl.Meshes.FloorGrid"
         },
         {
             "id": "ah7yw2jpb",
@@ -18853,11 +18824,1828 @@
                 }
             ],
             "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "7ehyn4mcp",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "posX",
+                    "value": 0
+                },
+                {
+                    "name": "posY",
+                    "value": -1
+                },
+                {
+                    "name": "posZ",
+                    "value": 1.1
+                },
+                {
+                    "name": "scale",
+                    "value": 1
+                },
+                {
+                    "name": "rotX",
+                    "value": -90
+                },
+                {
+                    "name": "rotY",
+                    "value": 0
+                },
+                {
+                    "name": "rotZ",
+                    "value": 0
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "trigger",
+                    "links": [
+                        {
+                            "portIn": "Render",
+                            "portOut": "trigger",
+                            "objIn": "b1zmhbf5h",
+                            "objOut": "7ehyn4mcp"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Graphics.Transform"
+        },
+        {
+            "id": "b1zmhbf5h",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "text",
+                    "value": "185 cm"
+                },
+                {
+                    "name": "Scale Mesh",
+                    "value": 0.05
+                },
+                {
+                    "name": "Size index",
+                    "value": 0
+                },
+                {
+                    "name": "Size",
+                    "value": "Auto"
+                },
+                {
+                    "name": "Width",
+                    "value": 512
+                },
+                {
+                    "name": "Height",
+                    "value": 512
+                },
+                {
+                    "name": "Auto Height",
+                    "value": 1
+                },
+                {
+                    "name": "Auto Line Breaks",
+                    "value": 1
+                },
+                {
+                    "name": "font",
+                    "value": "Arial"
+                },
+                {
+                    "name": "weight",
+                    "value": "normal"
+                },
+                {
+                    "name": "fontSize",
+                    "value": 300
+                },
+                {
+                    "name": "align index",
+                    "value": 1
+                },
+                {
+                    "name": "align",
+                    "value": "center"
+                },
+                {
+                    "name": "Vertical align index",
+                    "value": 0
+                },
+                {
+                    "name": "Vertical align",
+                    "value": "Top"
+                },
+                {
+                    "name": "Letter Spacing",
+                    "value": 0
+                },
+                {
+                    "name": "Line Height Add",
+                    "value": 0
+                },
+                {
+                    "name": "Padding Y Top",
+                    "value": 3
+                },
+                {
+                    "name": "Padding Y Bottom",
+                    "value": 3
+                },
+                {
+                    "name": "Padding X",
+                    "value": 0
+                },
+                {
+                    "name": "filter index",
+                    "value": 1
+                },
+                {
+                    "name": "filter",
+                    "value": "linear"
+                },
+                {
+                    "name": "Wrap index",
+                    "value": 2
+                },
+                {
+                    "name": "Wrap",
+                    "value": "clamp to edge"
+                },
+                {
+                    "name": "Anisotropic index",
+                    "value": 0
+                },
+                {
+                    "name": "Anisotropic",
+                    "value": 0
+                },
+                {
+                    "name": "Reuse Texture",
+                    "value": 1
+                },
+                {
+                    "name": "Show Debug",
+                    "value": 0
+                },
+                {
+                    "name": "Redraw On Font Load",
+                    "value": 1
+                },
+                {
+                    "name": "r",
+                    "value": 1
+                },
+                {
+                    "name": "g",
+                    "value": 1
+                },
+                {
+                    "name": "b",
+                    "value": 1
+                },
+                {
+                    "name": "Opacity",
+                    "value": 1
+                },
+                {
+                    "name": "background R",
+                    "value": 0
+                },
+                {
+                    "name": "background G",
+                    "value": 0
+                },
+                {
+                    "name": "background B",
+                    "value": 0
+                },
+                {
+                    "name": "background A",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Ratio",
+                    "value": 0.3485772357723577
+                },
+                {
+                    "name": "Aspect",
+                    "value": 2.868804664723032
+                },
+                {
+                    "name": "Num Lines",
+                    "value": 1
+                }
+            ],
+            "objName": "Ops.Gl.Textures.TextTexture_v6"
+        },
+        {
+            "id": "bm102p3zy",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "labels"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "Draw Mesh",
+                            "portOut": "Value",
+                            "objIn": "b1zmhbf5h",
+                            "objOut": "bm102p3zy"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "fd2lidhni",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "posX",
+                    "value": -0.99
+                },
+                {
+                    "name": "posY",
+                    "value": 0
+                },
+                {
+                    "name": "posZ",
+                    "value": 1.1
+                },
+                {
+                    "name": "scale",
+                    "value": 1
+                },
+                {
+                    "name": "rotX",
+                    "value": 0
+                },
+                {
+                    "name": "rotY",
+                    "value": 90
+                },
+                {
+                    "name": "rotZ",
+                    "value": 90
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "trigger",
+                    "links": [
+                        {
+                            "portIn": "Render",
+                            "portOut": "trigger",
+                            "objIn": "57ofti6j2",
+                            "objOut": "fd2lidhni"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Graphics.Transform"
+        },
+        {
+            "id": "57ofti6j2",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "text",
+                    "value": "100 cm"
+                },
+                {
+                    "name": "Scale Mesh",
+                    "value": 0.05
+                },
+                {
+                    "name": "Size index",
+                    "value": 0
+                },
+                {
+                    "name": "Size",
+                    "value": "Auto"
+                },
+                {
+                    "name": "Width",
+                    "value": 512
+                },
+                {
+                    "name": "Height",
+                    "value": 512
+                },
+                {
+                    "name": "Auto Height",
+                    "value": 1
+                },
+                {
+                    "name": "Auto Line Breaks",
+                    "value": 1
+                },
+                {
+                    "name": "font",
+                    "value": "Arial"
+                },
+                {
+                    "name": "weight",
+                    "value": "normal"
+                },
+                {
+                    "name": "fontSize",
+                    "value": 300
+                },
+                {
+                    "name": "align index",
+                    "value": 1
+                },
+                {
+                    "name": "align",
+                    "value": "center"
+                },
+                {
+                    "name": "Vertical align index",
+                    "value": 0
+                },
+                {
+                    "name": "Vertical align",
+                    "value": "Top"
+                },
+                {
+                    "name": "Letter Spacing",
+                    "value": 0
+                },
+                {
+                    "name": "Line Height Add",
+                    "value": 0
+                },
+                {
+                    "name": "Padding Y Top",
+                    "value": 3
+                },
+                {
+                    "name": "Padding Y Bottom",
+                    "value": 3
+                },
+                {
+                    "name": "Padding X",
+                    "value": 0
+                },
+                {
+                    "name": "filter index",
+                    "value": 1
+                },
+                {
+                    "name": "filter",
+                    "value": "linear"
+                },
+                {
+                    "name": "Wrap index",
+                    "value": 2
+                },
+                {
+                    "name": "Wrap",
+                    "value": "clamp to edge"
+                },
+                {
+                    "name": "Anisotropic index",
+                    "value": 0
+                },
+                {
+                    "name": "Anisotropic",
+                    "value": 0
+                },
+                {
+                    "name": "Reuse Texture",
+                    "value": 1
+                },
+                {
+                    "name": "Show Debug",
+                    "value": 0
+                },
+                {
+                    "name": "Redraw On Font Load",
+                    "value": 1
+                },
+                {
+                    "name": "r",
+                    "value": 1
+                },
+                {
+                    "name": "g",
+                    "value": 1
+                },
+                {
+                    "name": "b",
+                    "value": 1
+                },
+                {
+                    "name": "Opacity",
+                    "value": 1
+                },
+                {
+                    "name": "background R",
+                    "value": 0.00187499999999996
+                },
+                {
+                    "name": "background G",
+                    "value": 0.00187499999999996
+                },
+                {
+                    "name": "background B",
+                    "value": 0.00187499999999996
+                },
+                {
+                    "name": "background A",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Ratio",
+                    "value": 0.3485772357723577
+                },
+                {
+                    "name": "Aspect",
+                    "value": 2.868804664723032
+                },
+                {
+                    "name": "Num Lines",
+                    "value": 1
+                }
+            ],
+            "objName": "Ops.Gl.Textures.TextTexture_v6"
+        },
+        {
+            "id": "ea9c46acs",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "labels"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "Draw Mesh",
+                            "portOut": "Value",
+                            "objIn": "57ofti6j2",
+                            "objOut": "ea9c46acs"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "hmx3hgbtw",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "posX",
+                    "value": -0.99
+                },
+                {
+                    "name": "posY",
+                    "value": 1.2
+                },
+                {
+                    "name": "posZ",
+                    "value": 1.1
+                },
+                {
+                    "name": "scale",
+                    "value": 1
+                },
+                {
+                    "name": "rotX",
+                    "value": 0
+                },
+                {
+                    "name": "rotY",
+                    "value": 90
+                },
+                {
+                    "name": "rotZ",
+                    "value": 90
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "trigger",
+                    "links": [
+                        {
+                            "portIn": "Render",
+                            "portOut": "trigger",
+                            "objIn": "utitmm18i",
+                            "objOut": "hmx3hgbtw"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Graphics.Transform"
+        },
+        {
+            "id": "utitmm18i",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "text",
+                    "value": "20 cm"
+                },
+                {
+                    "name": "Scale Mesh",
+                    "value": 0.05
+                },
+                {
+                    "name": "Size index",
+                    "value": 0
+                },
+                {
+                    "name": "Size",
+                    "value": "Auto"
+                },
+                {
+                    "name": "Width",
+                    "value": 512
+                },
+                {
+                    "name": "Height",
+                    "value": 512
+                },
+                {
+                    "name": "Auto Height",
+                    "value": 1
+                },
+                {
+                    "name": "Auto Line Breaks",
+                    "value": 1
+                },
+                {
+                    "name": "font",
+                    "value": "Arial"
+                },
+                {
+                    "name": "weight",
+                    "value": "normal"
+                },
+                {
+                    "name": "fontSize",
+                    "value": 300
+                },
+                {
+                    "name": "align index",
+                    "value": 1
+                },
+                {
+                    "name": "align",
+                    "value": "center"
+                },
+                {
+                    "name": "Vertical align index",
+                    "value": 0
+                },
+                {
+                    "name": "Vertical align",
+                    "value": "Top"
+                },
+                {
+                    "name": "Letter Spacing",
+                    "value": 0
+                },
+                {
+                    "name": "Line Height Add",
+                    "value": 0
+                },
+                {
+                    "name": "Padding Y Top",
+                    "value": 3
+                },
+                {
+                    "name": "Padding Y Bottom",
+                    "value": 3
+                },
+                {
+                    "name": "Padding X",
+                    "value": 0
+                },
+                {
+                    "name": "filter index",
+                    "value": 1
+                },
+                {
+                    "name": "filter",
+                    "value": "linear"
+                },
+                {
+                    "name": "Wrap index",
+                    "value": 2
+                },
+                {
+                    "name": "Wrap",
+                    "value": "clamp to edge"
+                },
+                {
+                    "name": "Anisotropic index",
+                    "value": 0
+                },
+                {
+                    "name": "Anisotropic",
+                    "value": 0
+                },
+                {
+                    "name": "Reuse Texture",
+                    "value": 1
+                },
+                {
+                    "name": "Show Debug",
+                    "value": 0
+                },
+                {
+                    "name": "Redraw On Font Load",
+                    "value": 1
+                },
+                {
+                    "name": "r",
+                    "value": 1
+                },
+                {
+                    "name": "g",
+                    "value": 1
+                },
+                {
+                    "name": "b",
+                    "value": 1
+                },
+                {
+                    "name": "Opacity",
+                    "value": 1
+                },
+                {
+                    "name": "background R",
+                    "value": 0
+                },
+                {
+                    "name": "background G",
+                    "value": 0
+                },
+                {
+                    "name": "background B",
+                    "value": 0
+                },
+                {
+                    "name": "background A",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Ratio",
+                    "value": 0.41982864137086906
+                },
+                {
+                    "name": "Aspect",
+                    "value": 2.381924198250729
+                },
+                {
+                    "name": "Num Lines",
+                    "value": 1
+                }
+            ],
+            "objName": "Ops.Gl.Textures.TextTexture_v6"
+        },
+        {
+            "id": "qi2feopd7",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "labels"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "Draw Mesh",
+                            "portOut": "Value",
+                            "objIn": "utitmm18i",
+                            "objOut": "qi2feopd7"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "jv1yq65ro",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Draw",
+                    "value": 1,
+                    "title": "Render mesh"
+                },
+                {
+                    "name": "segments",
+                    "value": 10
+                },
+                {
+                    "name": "stacks",
+                    "value": 3
+                },
+                {
+                    "name": "length",
+                    "value": 0.4
+                },
+                {
+                    "name": "outer radius",
+                    "value": 0.08
+                },
+                {
+                    "name": "inner radius",
+                    "value": 0
+                },
+                {
+                    "name": "UV mode index",
+                    "value": 0
+                },
+                {
+                    "name": "UV mode",
+                    "value": "simple"
+                },
+                {
+                    "name": "Flip Mapping",
+                    "value": 0
+                },
+                {
+                    "name": "Caps",
+                    "value": 1
+                },
+                {
+                    "name": "Flat Normals",
+                    "value": 0
+                }
+            ],
+            "objName": "Ops.Gl.Meshes.Cylinder_v2"
+        },
+        {
+            "id": "hf7ynqr0w",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "posX",
+                    "value": 0
+                },
+                {
+                    "name": "posY",
+                    "value": 0.31
+                },
+                {
+                    "name": "posZ",
+                    "value": 0
+                },
+                {
+                    "name": "scale",
+                    "value": 1
+                },
+                {
+                    "name": "rotX",
+                    "value": 90
+                },
+                {
+                    "name": "rotY",
+                    "value": 0
+                },
+                {
+                    "name": "rotZ",
+                    "value": 0
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "trigger",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "trigger",
+                            "objIn": "jv1yq65ro",
+                            "objOut": "hf7ynqr0w"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Graphics.Transform"
+        },
+        {
+            "id": "wd3n9waq7",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "enable depth testing",
+                    "value": 1
+                },
+                {
+                    "name": "width",
+                    "value": 1
+                },
+                {
+                    "name": "AntiAlias",
+                    "value": 0.95
+                },
+                {
+                    "name": "diffuse r",
+                    "value": 1
+                },
+                {
+                    "name": "diffuse g",
+                    "value": 1
+                },
+                {
+                    "name": "diffuse b",
+                    "value": 1
+                },
+                {
+                    "name": "diffuse A",
+                    "value": 1
+                },
+                {
+                    "name": "fill",
+                    "value": 0
+                },
+                {
+                    "name": "Fill R",
+                    "value": 0.5
+                },
+                {
+                    "name": "Fill G",
+                    "value": 0.5
+                },
+                {
+                    "name": "Fill B",
+                    "value": 0.5
+                },
+                {
+                    "name": "Fill A",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "trigger",
+                    "links": [
+                        {
+                            "portIn": "render",
+                            "portOut": "trigger",
+                            "objIn": "hf7ynqr0w",
+                            "objOut": "wd3n9waq7"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Gl.Shader.WireframeMaterial_v2"
+        },
+        {
+            "id": "60xgcqodl",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "value",
+                    "value": 1.21
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "posY",
+                            "portOut": "result",
+                            "objIn": "gqmzi8imh",
+                            "objOut": "60xgcqodl"
+                        },
+                        {
+                            "portIn": "Y",
+                            "portOut": "result",
+                            "objIn": "qci3bdmec",
+                            "objOut": "60xgcqodl"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Number.Number"
+        },
+        {
+            "id": "t1c0vgy0a",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "A",
+                    "value": 0.9882352941176471,
+                    "useVariable": "Spot4R"
+                },
+                {
+                    "name": "B",
+                    "value": 0.9254901960784314,
+                    "useVariable": "Spot4G"
+                },
+                {
+                    "name": "C",
+                    "value": 0.7725490196078432,
+                    "useVariable": "Spot4B"
+                },
+                {
+                    "name": "D",
+                    "value": 0
+                },
+                {
+                    "name": "Expression",
+                    "value": "((a+b+c)/3)*0.05"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Result",
+                    "value": 0.04477124183006537
+                },
+                {
+                    "name": "Expression Valid",
+                    "value": true
+                }
+            ],
+            "objName": "Ops.Math.MathExpression"
+        },
+        {
+            "id": "jv5d1bacq",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": -60
+                },
+                {
+                    "name": "new max",
+                    "value": 60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotZ",
+                            "portOut": "result",
+                            "objIn": "7naopkvki",
+                            "objOut": "jv5d1bacq"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "1nje661pp",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleX"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "jg63v8r9v",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number2",
+                            "portOut": "Value",
+                            "objIn": "q90ll1t8m",
+                            "objOut": "jg63v8r9v"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "r7yq32qxc",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "jv5d1bacq",
+                            "objOut": "r7yq32qxc"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "4c63qnuv6",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleZ"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "n98conak2",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number2",
+                            "portOut": "Value",
+                            "objIn": "02siapfro",
+                            "objOut": "n98conak2"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "eda8plf8c",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": 60
+                },
+                {
+                    "name": "new max",
+                    "value": -60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotX",
+                            "portOut": "result",
+                            "objIn": "7naopkvki",
+                            "objOut": "eda8plf8c"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "dnydw5swa",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot1-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "eda8plf8c",
+                            "objOut": "dnydw5swa"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "ezpsryptd",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": -60
+                },
+                {
+                    "name": "new max",
+                    "value": 60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotZ",
+                            "portOut": "result",
+                            "objIn": "4j1dap1dl",
+                            "objOut": "ezpsryptd"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "b4g5cha6i",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "ezpsryptd",
+                            "objOut": "b4g5cha6i"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "et5fs5kq5",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": 60
+                },
+                {
+                    "name": "new max",
+                    "value": -60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotX",
+                            "portOut": "result",
+                            "objIn": "4j1dap1dl",
+                            "objOut": "et5fs5kq5"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "gf1rtg1xe",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "et5fs5kq5",
+                            "objOut": "gf1rtg1xe"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "7f4dh48vj",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleX"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "sn2xwv1rw",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "6qvhohrrf",
+                            "objOut": "sn2xwv1rw"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "t7opx29hn",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleZ"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "nlcng60np",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot2-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "jacak2os6",
+                            "objOut": "nlcng60np"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "55cd78a3j",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": -60
+                },
+                {
+                    "name": "new max",
+                    "value": 60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotZ",
+                            "portOut": "result",
+                            "objIn": "gqmzi8imh",
+                            "objOut": "55cd78a3j"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "jcmn40jg3",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "55cd78a3j",
+                            "objOut": "jcmn40jg3"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "l43jpc5aq",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": 60
+                },
+                {
+                    "name": "new max",
+                    "value": -60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotX",
+                            "portOut": "result",
+                            "objIn": "gqmzi8imh",
+                            "objOut": "l43jpc5aq"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "8eqojxrx0",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "l43jpc5aq",
+                            "objOut": "8eqojxrx0"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "s6hxgyl6k",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": -60
+                },
+                {
+                    "name": "new max",
+                    "value": 60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotZ",
+                            "portOut": "result",
+                            "objIn": "bn0tikpci",
+                            "objOut": "s6hxgyl6k"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "3zl6geeac",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "s6hxgyl6k",
+                            "objOut": "3zl6geeac"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "8v94ugfpf",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "old min",
+                    "value": -2
+                },
+                {
+                    "name": "old max",
+                    "value": 2
+                },
+                {
+                    "name": "new min",
+                    "value": 60
+                },
+                {
+                    "name": "new max",
+                    "value": -60
+                },
+                {
+                    "name": "Easing index",
+                    "value": 0
+                },
+                {
+                    "name": "Easing",
+                    "value": "Linear"
+                },
+                {
+                    "name": "Clamp",
+                    "value": 1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "rotX",
+                            "portOut": "result",
+                            "objIn": "bn0tikpci",
+                            "objOut": "8v94ugfpf"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.MapRange"
+        },
+        {
+            "id": "qyo2ryoum",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "value",
+                            "portOut": "Value",
+                            "objIn": "8v94ugfpf",
+                            "objOut": "qyo2ryoum"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "yqlboi3vf",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleX"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "39wsq8k9v",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "za1dfw3w2",
+                            "objOut": "39wsq8k9v"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "n54g95kj0",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleZ"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "899ifd8os",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot3-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "mff9gfip1",
+                            "objOut": "899ifd8os"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "qetjo61iw",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleX"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "ql6lsf802",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleX"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "c0cyiyn59",
+                            "objOut": "ql6lsf802"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "kpl0cvdng",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleZ"
+                }
+            ],
+            "objName": "Ops.Vars.VarSetNumber_v2"
+        },
+        {
+            "id": "rsynpx3o6",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Variable",
+                    "value": "Spot4-AngleZ"
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "Value",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Value",
+                            "objIn": "01rgx9tvu",
+                            "objOut": "rsynpx3o6"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Vars.VarGetNumber_v2"
         }
     ],
     "export": {
-        "time": "2026-01-06 11:57",
+        "time": "2026-01-06 12:58",
         "service": "html",
-        "exportNumber": 13
+        "exportNumber": 14
     }
 }

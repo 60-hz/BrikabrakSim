@@ -14588,253 +14588,6 @@ CABLES.OPS["a3d3d166-415b-45c7-9ded-e8d1bdd81ff1"]={f:Ops.TimeLine.TimelineConfi
 
 // **************************************************************
 // 
-// Ops.Math.MapRange
-// 
-// **************************************************************
-
-Ops.Math.MapRange= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const
-    v = op.inValueFloat("value", 0),
-    old_min = op.inValueFloat("old min", 0),
-    old_max = op.inValueFloat("old max", 1),
-    new_min = op.inValueFloat("new min", 0),
-    new_max = op.inValueFloat("new max", 1),
-    easing = op.inValueSelect("Easing", ["Linear", "Smoothstep", "Smootherstep"], "Linear"),
-    inClamp = op.inBool("Clamp", true),
-    result = op.outNumber("result", 0);
-
-op.setPortGroup("Input Range", [old_min, old_max]);
-op.setPortGroup("Output Range", [new_min, new_max]);
-
-let doClamp = true;
-let ease = 0;
-let r = 0;
-
-v.onChange =
-    old_min.onChange =
-    old_max.onChange =
-    new_min.onChange =
-    new_max.onChange = exec;
-
-exec();
-
-inClamp.onChange =
-() =>
-{
-    doClamp = inClamp.get();
-    exec();
-};
-
-easing.onChange = function ()
-{
-    if (easing.get() == "Smoothstep") ease = 1;
-    else if (easing.get() == "Smootherstep") ease = 2;
-    else ease = 0;
-};
-
-function exec()
-{
-    const nMin = new_min.get();
-    const nMax = new_max.get();
-    const oMin = old_min.get();
-    const oMax = old_max.get();
-    let x = v.get();
-
-    if (doClamp)
-    {
-        if (x >= Math.max(oMax, oMin))
-        {
-            result.set(nMax);
-            return;
-        }
-        else
-        if (x <= Math.min(oMax, oMin))
-        {
-            result.set(nMin);
-            return;
-        }
-    }
-
-    let reverseInput = false;
-    const oldMin = Math.min(oMin, oMax);
-    const oldMax = Math.max(oMin, oMax);
-    if (oldMin != oMin) reverseInput = true;
-
-    let reverseOutput = false;
-    const newMin = Math.min(nMin, nMax);
-    const newMax = Math.max(nMin, nMax);
-    if (newMin != nMin) reverseOutput = true;
-
-    let portion = 0;
-
-    if (reverseInput) portion = (oldMax - x) * (newMax - newMin) / (oldMax - oldMin);
-    else portion = (x - oldMin) * (newMax - newMin) / (oldMax - oldMin);
-
-    if (reverseOutput) r = newMax - portion;
-    else r = portion + newMin;
-
-    if (ease === 0)
-    {
-        result.set(r);
-    }
-    else
-    if (ease == 1)
-    {
-        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
-        result.set(nMin + x * x * (3 - 2 * x) * (nMax - nMin)); // smoothstep
-    }
-    else
-    if (ease == 2)
-    {
-        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
-        result.set(nMin + x * x * x * (x * (x * 6 - 15) + 10) * (nMax - nMin)); // smootherstep
-    }
-}
-
-}
-};
-
-CABLES.OPS["2617b407-60a0-4ff6-b4a7-18136cfa7817"]={f:Ops.Math.MapRange,objName:"Ops.Math.MapRange"};
-
-
-
-
-// **************************************************************
-// 
-// Ops.Gl.Meshes.FloorGrid
-// 
-// **************************************************************
-
-Ops.Gl.Meshes.FloorGrid= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={"grid_frag":"IN vec4 posColor;\nIN vec3 posFrag;\n\nvoid main()\n{\n    outColor=posColor;\n    outColor.a*=clamp(1.0-(length(posFrag)/30.0),0.0,1.0);\n}","grid_vert":"IN vec3 vPosition;\nIN vec3 attrVertNormal;\nIN vec2 attrTexCoord;\n\nUNI mat4 projMatrix;\nUNI mat4 modelMatrix;\nUNI mat4 viewMatrix;\n\nOUT vec4 posColor;\nOUT vec3 posFrag;\n\nvoid main()\n{\n    vec4 pos = vec4( vPosition, 1. );\n    mat4 mMatrix=modelMatrix;\n\n    mat4 mvMatrix=viewMatrix*mMatrix;\n    posFrag=vPosition;\n    posColor=vec4(0.6,0.6,0.6,0.4);\n\n    if(pos.x==0.0) posColor=vec4(0.3,0.3,1.0,1.0);\n    else if(pos.y==0.0 && pos.z==0.0) posColor=vec4(1.0,0.3,0.3,1.0);\n    else if(mod(pos.z,10.0)==0.0 && mod(pos.x,10.0)==0.0 ) posColor.a=1.0;\n\n    if(pos.y>0.0 && pos.x==0.0) posColor=vec4(0.3,1.0,0.3,1.0);\n\n    gl_Position = projMatrix * mvMatrix * pos;\n}\n",};
-const
-    render = op.inTrigger("Render"),
-    inActive = op.inBool("Active", true),
-    next = op.outTrigger("Next");
-
-const num = 100;
-
-const cgl = op.patch.cgl;
-let mesh = null;
-
-const shader = new CGL.Shader(cgl, "gridMaterial", this);
-shader.setSource(attachments.grid_vert, attachments.grid_frag);
-
-function init()
-{
-    let geomVertical = new CGL.Geometry(op.name);
-
-    const space = 1.0;
-    let l = space * num / 2;
-
-    let tc = [];
-
-    for (var i = -num / 2; i < num / 2 + 1; i++)
-    {
-        geomVertical.vertices.push(-l);
-        geomVertical.vertices.push(0);
-        geomVertical.vertices.push(i * space);
-
-        geomVertical.vertices.push(l);
-        geomVertical.vertices.push(0);
-        geomVertical.vertices.push(i * space);
-
-        geomVertical.vertices.push(i * space);
-        geomVertical.vertices.push(0);
-        geomVertical.vertices.push(-l);
-
-        geomVertical.vertices.push(i * space);
-        geomVertical.vertices.push(0);
-        geomVertical.vertices.push(l);
-
-        if (i == 0)
-        {
-            tc.push(0, 1);
-            tc.push(0, 1);
-            tc.push(0, 0.5);
-            tc.push(0, 0.5);
-        }
-        else
-        {
-            tc.push(0, 0);
-            tc.push(0, 0);
-            tc.push(0, 0);
-            tc.push(0, 0);
-        }
-    }
-
-    geomVertical.vertices.push(0);
-    geomVertical.vertices.push(0.001);
-    geomVertical.vertices.push(0);
-
-    geomVertical.vertices.push(0);
-    geomVertical.vertices.push(10);
-    geomVertical.vertices.push(0);
-
-    tc.push(0, 0, 0, 0);
-
-    for (var i = 0; i <= 10; i++)
-    {
-        geomVertical.vertices.push(-0.25);
-        geomVertical.vertices.push(i);
-        geomVertical.vertices.push(0);
-
-        geomVertical.vertices.push(0.25);
-        geomVertical.vertices.push(i);
-        geomVertical.vertices.push(0);
-
-        tc.push(0, 0, 0, 0);
-    }
-
-    geomVertical.setTexCoords(tc);
-    geomVertical.calculateNormals();
-
-    if (!mesh) mesh = new CGL.Mesh(cgl, geomVertical);
-    else mesh.setGeom(geomVertical);
-}
-
-render.onTriggered = function ()
-{
-    if (!mesh)init();
-
-    if (cgl.tempData.shadowPass) return next.trigger();
-
-    cgl.pushShader(shader);
-    if (!shader) return;
-
-    let oldPrim = shader.glPrimitive;
-
-    shader.glPrimitive = cgl.gl.LINES;
-
-    if (inActive.get()) mesh.render(shader);
-    cgl.popShader();
-
-    shader.glPrimitive = oldPrim;
-
-    next.trigger();
-};
-
-}
-};
-
-CABLES.OPS["645b3877-4fdd-42e5-a369-d9506a65e2f0"]={f:Ops.Gl.Meshes.FloorGrid,objName:"Ops.Gl.Meshes.FloorGrid"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Gl.Meshes.Grid
 // 
 // **************************************************************
@@ -14970,6 +14723,462 @@ exe.onTriggered = function()
 };
 
 CABLES.OPS["65e8b8a2-ba13-485f-883a-2bcf377989da"]={f:Ops.Trigger.GateTrigger,objName:"Ops.Trigger.GateTrigger"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Meshes.Cylinder_v2
+// 
+// **************************************************************
+
+Ops.Gl.Meshes.Cylinder_v2= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    inRender = op.inTrigger("render"),
+    inDraw = op.inValueBool("Draw", true),
+    inSegments = op.inValueInt("segments", 40),
+    inStacks = op.inValueInt("stacks", 1),
+    inLength = op.inValueFloat("length", 1),
+    inOuterRadius = op.inValueFloat("outer radius", 0.5),
+    inInnerRadius = op.inValueFloat("inner radius", 0),
+    inUVMode = op.inValueSelect("UV mode", ["simple", "atlas"], "simple"),
+    flipSideMapping = op.inValueBool("Flip Mapping", false),
+    inCaps = op.inValueBool("Caps", true),
+    inFlat = op.inValueBool("Flat Normals", false),
+    outTrigger = op.outTrigger("next"),
+    outGeometry = op.outObject("geometry"),
+    geom = new CGL.Geometry("cylinder");
+
+inDraw.setUiAttribs({ "title": "Render mesh" });
+
+const
+    TAU = Math.PI * 2,
+    cgl = op.patch.cgl;
+
+let needsRebuild = true;
+let mesh = null;
+
+inUVMode.setUiAttribs({ "hidePort": true });
+op.onDelete = function () { if (mesh)mesh.dispose(); };
+
+op.preRender = buildMesh;
+
+function buildMesh()
+{
+    const flipTex = flipSideMapping.get();
+
+    const
+        segments = Math.max(inSegments.get(), 3) | 0,
+        innerRadius = Math.max(inInnerRadius.get(), 0),
+        outerRadius = Math.max(inOuterRadius.get(), innerRadius),
+        stacks = Math.max(inStacks.get(), inStacks.defaultValue) | 0,
+        length = inLength.get(),
+        stackLength = length / stacks,
+        segmentRadians = TAU / segments,
+        uvMode = inUVMode.get();
+    let
+        positions = [],
+        normals = [],
+        tangents = [],
+        biTangents = [],
+        texcoords = [],
+        indices = [],
+        x, y, z, i, j,
+        a, d, o;
+    if (uvMode == "atlas") o = 0.5;
+    else o = 1;
+
+    // for each stack
+    for (
+        i = 0, z = -length / 2;
+        i <= stacks;
+        i++, z += stackLength
+    )
+    {
+        // for each segment
+        for (
+            j = a = 0;
+            j <= segments;
+            j++, a += segmentRadians
+        )
+        {
+            positions.push(
+                (x = Math.sin(a)) * outerRadius,
+                (y = Math.cos(a)) * outerRadius,
+                z
+            );
+            d = Math.sqrt(x * x + y * y);
+            x /= d;
+            y /= d;
+            normals.push(x, y, 0);
+            tangents.push(-y, x, 0);
+            biTangents.push(0, 0, 1);
+
+            if (flipTex)
+                texcoords.push(
+                    j / segments,
+                    1.0 - ((z / length + 0.5) * o)
+                );
+
+            else
+                texcoords.push(
+                    (z / length + 0.5) * o,
+                    j / segments
+                );
+        }
+    }
+
+    // create indices
+    for (j = 0; j < stacks; j++)
+    {
+        for (
+            i = 0, d = j * (segments + 1);
+            i < segments;
+            i++, d++
+        )
+        {
+            a = d + 1;
+            indices.push(
+                d + (segments + 1), a, d, d + (segments + 1), a + (segments + 1), a
+            );
+        }
+    }
+
+    // create inner shell
+    if (innerRadius)
+    {
+        d = positions.length;
+        for (i = j = 0; i < d; i += 3, j += 2)
+        {
+            positions.push(
+                (positions[i] / outerRadius) * innerRadius,
+                (positions[i + 1] / outerRadius) * innerRadius,
+                positions[i + 2]
+            );
+            normals.push(
+                -normals[i],
+                -normals[i + 1],
+                0
+            );
+            tangents.push(
+                -tangents[i],
+                -tangents[i + 1],
+                0
+            );
+            biTangents.push(
+                0,
+                -biTangents[i + 1],
+                -biTangents[i + 2]
+            );
+            texcoords.push(
+                texcoords[j],
+                1 - texcoords[j + 1]
+            );
+        }
+        a = d / 3;
+        d = indices.length;
+        for (i = 0; i < d; i += 6)
+        {
+            indices.push(
+                a + indices[i],
+                a + indices[i + 2],
+                a + indices[i + 1],
+                a + indices[i + 3],
+                a + indices[i + 5],
+                a + indices[i + 4]
+            );
+        }
+
+        if (inCaps.get())
+        {
+            // create caps
+            a = positions.length;
+            o = a / 2;
+            d = segments * 3;
+
+            // cap positions
+            Array.prototype.push.apply(positions, positions.slice(0, d));
+            Array.prototype.push.apply(positions, positions.slice(o, o + d));
+            Array.prototype.push.apply(positions, positions.slice(o - d, o));
+            Array.prototype.push.apply(positions, positions.slice(a - d, a));
+
+            // cap normals
+            d = segments * 2;
+            for (i = 0; i < d; i++) normals.push(0, 0, -1), tangents.push(-1, 0, 0), biTangents.push(0, -1, 0);
+            for (i = 0; i < d; i++) normals.push(0, 0, 1), tangents.push(1, 0, 0), biTangents.push(0, 1, 0);
+
+            // cap uvs
+            if (uvMode == "atlas")
+            {
+                d = (innerRadius / outerRadius) * 0.5;
+                for (i = o = 0; i < segments; i++, o += segmentRadians)
+                    texcoords.push(
+                        Math.sin(o) * 0.25 + 0.75,
+                        Math.cos(o) * 0.25 + 0.25
+                    );
+                for (i = o = 0; i < segments; i++, o += segmentRadians)
+                    texcoords.push(
+                        (Math.sin(o) * d + 0.5) * 0.5 + 0.5,
+                        (Math.cos(o) * d + 0.5) * 0.5
+                    );
+                for (i = o = 0; i < segments; i++, o += segmentRadians)
+                    texcoords.push(
+                        Math.sin(o) * 0.25 + 0.75,
+                        Math.cos(o) * 0.25 + 0.75
+                    );
+                for (i = o = 0; i < segments; i++, o += segmentRadians)
+                    texcoords.push(
+                        (Math.sin(o) * d + 0.5) * 0.5 + 0.5,
+                        (Math.cos(o) * d + 0.5) * 0.5 + 0.5
+                    );
+            }
+            else
+            {
+                for (i = 0; i < d; i++) texcoords.push(0, 0);
+                for (i = 0; i < d; i++) texcoords.push(1, 1);
+            }
+
+            // cap indices
+            for (
+                i = 0, o = a / 3 + x;
+                i < segments - 1;
+                i++, o++
+            )
+            {
+                indices.push(
+                    o + 1, o + segments, o, o + segments + 1, o + segments, o + 1
+                );
+            }
+            indices.push(
+                o + segments, a / 3 + x, a / 3 + segments + x, o + segments, o, a / 3 + x
+            );
+            x += segments * 2;
+            for (
+                i = 0, o = a / 3 + x;
+                i < segments - 1;
+                i++, o++
+            )
+            {
+                indices.push(
+                    o, o + segments, o + 1, o + 1, o + segments, o + segments + 1
+                );
+            }
+            indices.push(
+                a / 3 + segments + x, a / 3 + x, o + segments, a / 3 + x, o, o + segments
+            );
+        }
+    }
+    else
+    {
+        a = positions.length;
+        d = a / 3;
+
+        positions.push(0, 0, -length / 2);
+        Array.prototype.push.apply(positions, positions.slice(0, segments * 3));
+        for (i = 0; i <= segments; i++) normals.push(0, 0, -1), tangents.push(-1, 0, 0), biTangents.push(0, -1, 0);
+
+        if (inCaps.get())
+        {
+            positions.push(0, 0, length / 2);
+            Array.prototype.push.apply(positions, positions.slice(a - segments * 3, a));
+            for (i = 0; i <= segments; i++) normals.push(0, 0, 1), tangents.push(1, 0, 0), biTangents.push(0, 1, 0);
+            if (uvMode == "atlas")
+            {
+                texcoords.push(0.75, 0.25);
+                for (i = a = 0; i < segments; i++, a += segmentRadians)
+                    texcoords.push(Math.sin(a) * 0.25 + 0.75, Math.cos(a) * 0.25 + 0.25);
+                texcoords.push(0.75, 0.75);
+                for (i = a = 0; i < segments; i++, a += segmentRadians)
+                    texcoords.push(Math.sin(a) * 0.25 + 0.75, Math.cos(a) * 0.25 + 0.75);
+            }
+            else
+            {
+                for (i = 0; i <= segments; i++) texcoords.push(0, 0);
+                for (i = 0; i <= segments; i++) texcoords.push(1, 1);
+            }
+            indices.push(d + 1, d, d + segments);
+            for (i = 1; i < segments; i++)
+                indices.push(d, d + i, d + i + 1);
+            d += segments + 1;
+            indices.push(d, d + 1, d + segments);
+            for (i = 1; i < segments; i++)
+                indices.push(d, d + i + 1, d + i);
+            d += segments + 1;
+        }
+    }
+
+    // set geometry
+    geom.clear();
+    geom.vertices = positions;
+    geom.texCoords = texcoords;
+    geom.vertexNormals = normals;
+    geom.tangents = tangents;
+    geom.biTangents = biTangents;
+    geom.verticesIndices = indices;
+
+    if (inFlat.get()) geom.unIndex();
+
+    outGeometry.setRef(geom);
+
+    if (op.patch.cg)
+        if (!mesh) mesh = op.patch.cg.createMesh(geom, { "opId": op.id });
+        else mesh.setGeom(geom);
+
+    needsRebuild = false;
+}
+
+// set event handlers
+inRender.onTriggered = function ()
+{
+    if (needsRebuild) buildMesh();
+    if (inDraw.get() && mesh) mesh.render();
+    outTrigger.trigger();
+};
+
+inSegments.onChange =
+inOuterRadius.onChange =
+inInnerRadius.onChange =
+inCaps.onChange =
+inLength.onChange =
+flipSideMapping.onChange =
+inStacks.onChange =
+inFlat.onChange =
+inUVMode.onChange = function ()
+{
+    // only calculate once, even after multiple settings could were changed
+    needsRebuild = true;
+};
+
+}
+};
+
+CABLES.OPS["2899ad67-1e64-4692-af2a-c3b9078f1b5f"]={f:Ops.Gl.Meshes.Cylinder_v2,objName:"Ops.Gl.Meshes.Cylinder_v2"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.MapRange
+// 
+// **************************************************************
+
+Ops.Math.MapRange= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    v = op.inValueFloat("value", 0),
+    old_min = op.inValueFloat("old min", 0),
+    old_max = op.inValueFloat("old max", 1),
+    new_min = op.inValueFloat("new min", 0),
+    new_max = op.inValueFloat("new max", 1),
+    easing = op.inValueSelect("Easing", ["Linear", "Smoothstep", "Smootherstep"], "Linear"),
+    inClamp = op.inBool("Clamp", true),
+    result = op.outNumber("result", 0);
+
+op.setPortGroup("Input Range", [old_min, old_max]);
+op.setPortGroup("Output Range", [new_min, new_max]);
+
+let doClamp = true;
+let ease = 0;
+let r = 0;
+
+v.onChange =
+    old_min.onChange =
+    old_max.onChange =
+    new_min.onChange =
+    new_max.onChange = exec;
+
+exec();
+
+inClamp.onChange =
+() =>
+{
+    doClamp = inClamp.get();
+    exec();
+};
+
+easing.onChange = function ()
+{
+    if (easing.get() == "Smoothstep") ease = 1;
+    else if (easing.get() == "Smootherstep") ease = 2;
+    else ease = 0;
+};
+
+function exec()
+{
+    const nMin = new_min.get();
+    const nMax = new_max.get();
+    const oMin = old_min.get();
+    const oMax = old_max.get();
+    let x = v.get();
+
+    if (doClamp)
+    {
+        if (x >= Math.max(oMax, oMin))
+        {
+            result.set(nMax);
+            return;
+        }
+        else
+        if (x <= Math.min(oMax, oMin))
+        {
+            result.set(nMin);
+            return;
+        }
+    }
+
+    let reverseInput = false;
+    const oldMin = Math.min(oMin, oMax);
+    const oldMax = Math.max(oMin, oMax);
+    if (oldMin != oMin) reverseInput = true;
+
+    let reverseOutput = false;
+    const newMin = Math.min(nMin, nMax);
+    const newMax = Math.max(nMin, nMax);
+    if (newMin != nMin) reverseOutput = true;
+
+    let portion = 0;
+
+    if (reverseInput) portion = (oldMax - x) * (newMax - newMin) / (oldMax - oldMin);
+    else portion = (x - oldMin) * (newMax - newMin) / (oldMax - oldMin);
+
+    if (reverseOutput) r = newMax - portion;
+    else r = portion + newMin;
+
+    if (ease === 0)
+    {
+        result.set(r);
+    }
+    else
+    if (ease == 1)
+    {
+        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
+        result.set(nMin + x * x * (3 - 2 * x) * (nMax - nMin)); // smoothstep
+    }
+    else
+    if (ease == 2)
+    {
+        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
+        result.set(nMin + x * x * x * (x * (x * 6 - 15) + 10) * (nMax - nMin)); // smootherstep
+    }
+}
+
+}
+};
+
+CABLES.OPS["2617b407-60a0-4ff6-b4a7-18136cfa7817"]={f:Ops.Math.MapRange,objName:"Ops.Math.MapRange"};
 
 
 
