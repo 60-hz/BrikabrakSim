@@ -61,11 +61,11 @@
                 },
                 {
                     "name": "width",
-                    "value": 1658
+                    "value": 1768
                 },
                 {
                     "name": "height",
-                    "value": 1254
+                    "value": 1424
                 },
                 {
                     "name": "Pixel Density",
@@ -367,15 +367,15 @@
                 },
                 {
                     "name": "radius",
-                    "value": 4.343999999999999
+                    "value": 2.4
                 },
                 {
                     "name": "Rot X",
-                    "value": 78.69102170696655
+                    "value": 90.00000000000006
                 },
                 {
                     "name": "Rot Y",
-                    "value": 102.9121875
+                    "value": 90
                 }
             ],
             "objName": "Ops.Graphics.OrbitControls_v3"
@@ -428,11 +428,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.9461512364294331
+                    "value": -0.6844333286199096
                 },
                 {
                     "name": "y",
-                    "value": -0.25884669059011167
+                    "value": 0.042178721910112404
                 },
                 {
                     "name": "click right",
@@ -455,11 +455,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -27
+                    "value": -122
                 },
                 {
                     "name": "Movement Y",
-                    "value": 15.5
+                    "value": 51
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -3578,17 +3578,17 @@
                 },
                 {
                     "name": "R",
-                    "value": 1,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1R"
                 },
                 {
                     "name": "G",
-                    "value": 0.9176470588235294,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1G"
                 },
                 {
                     "name": "B",
-                    "value": 0.6196078431372549,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1B"
                 },
                 {
@@ -3878,7 +3878,7 @@
                 },
                 {
                     "name": "World Position X",
-                    "value": -0.2958900034427643
+                    "value": -0.3883900046348572
                 },
                 {
                     "name": "World Position Y",
@@ -3886,7 +3886,7 @@
                 },
                 {
                     "name": "World Position Z",
-                    "value": -0.18429000675678253
+                    "value": -0.11570999771356583
                 }
             ],
             "objName": "Ops.Gl.Phong.SpotLight_v5"
@@ -5303,7 +5303,7 @@
                 },
                 {
                     "name": "Width",
-                    "value": 3.077218191964286
+                    "value": 2.8785923549107144
                 },
                 {
                     "name": "Font Available",
@@ -6538,11 +6538,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.18429
+                    "value": -0.11571
                 },
                 {
                     "name": "Default",
-                    "value": -0.18429
+                    "value": -0.11571
                 }
             ],
             "portsOut": [
@@ -6600,11 +6600,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -0.29589
+                    "value": -0.38839
                 },
                 {
                     "name": "Default",
-                    "value": -0.29589
+                    "value": -0.44321
                 }
             ],
             "portsOut": [
@@ -8675,6 +8675,12 @@
                             "portOut": "Triggered",
                             "objIn": "gcpt66v7a",
                             "objOut": "wbpsupmja"
+                        },
+                        {
+                            "portIn": "Set Default",
+                            "portOut": "Triggered",
+                            "objIn": "ucwq1fqnn",
+                            "objOut": "wbpsupmja"
                         }
                     ]
                 }
@@ -9454,17 +9460,17 @@
                 },
                 {
                     "name": "R",
-                    "value": 0.9882352941176471,
+                    "value": 0.9529411764705882,
                     "useVariable": "Spot4R"
                 },
                 {
                     "name": "G",
-                    "value": 0.9254901960784314,
+                    "value": 0.8549019607843137,
                     "useVariable": "Spot4G"
                 },
                 {
                     "name": "B",
-                    "value": 0.7725490196078432,
+                    "value": 0.6235294117647059,
                     "useVariable": "Spot4B"
                 },
                 {
@@ -9600,17 +9606,17 @@
             "portsIn": [
                 {
                     "name": "A",
-                    "value": 0.9882352941176471,
+                    "value": 0.9529411764705882,
                     "useVariable": "Spot4R"
                 },
                 {
                     "name": "B",
-                    "value": 0.9254901960784314,
+                    "value": 0.8549019607843137,
                     "useVariable": "Spot4G"
                 },
                 {
                     "name": "C",
-                    "value": 0.7725490196078432,
+                    "value": 0.6235294117647059,
                     "useVariable": "Spot4B"
                 },
                 {
@@ -9833,17 +9839,17 @@
             "portsIn": [
                 {
                     "name": "A",
-                    "value": 1,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1R"
                 },
                 {
                     "name": "B",
-                    "value": 0.9176470588235294,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1G"
                 },
                 {
                     "name": "C",
-                    "value": 0.6196078431372549,
+                    "value": 0.5450980392156862,
                     "useVariable": "Spot1B"
                 },
                 {
@@ -10311,19 +10317,19 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Couleur spot 4"
+                    "value": "Couleur spot 3"
                 },
                 {
                     "name": "Input Red",
-                    "value": 0.9882352941176471
+                    "value": 0.9529411764705882
                 },
                 {
                     "name": "Input Green",
-                    "value": 0.9254901960784314
+                    "value": 0.8549019607843137
                 },
                 {
                     "name": "Input Blue",
-                    "value": 0.7725490196078432
+                    "value": 0.6235294117647059
                 },
                 {
                     "name": "Input Opacity",
@@ -10331,7 +10337,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": "#c2bbf8"
+                    "value": "#f3da9f"
                 },
                 {
                     "name": "Show Opacity",
@@ -10389,7 +10395,7 @@
                 },
                 {
                     "name": "Hex",
-                    "value": "#fcecc5"
+                    "value": "#f3da9f"
                 }
             ],
             "objName": "Ops.Sidebar.ColorPicker_v3"
@@ -10453,7 +10459,7 @@
             "portsIn": [
                 {
                     "name": "Text",
-                    "value": "Couleur spot 3"
+                    "value": "Couleur spot 4"
                 },
                 {
                     "name": "Input Red",
@@ -10605,7 +10611,7 @@
                 },
                 {
                     "name": "FPS",
-                    "value": 42
+                    "value": 33
                 }
             ],
             "objName": "Ops.Gl.Performance"
@@ -11329,7 +11335,7 @@
                 },
                 {
                     "name": "Default",
-                    "value": false
+                    "value": 0
                 },
                 {
                     "name": "Grey Out",
@@ -16106,7 +16112,7 @@
             "portsOut": [
                 {
                     "name": "Value",
-                    "value": -0.29589
+                    "value": -0.38839
                 }
             ],
             "objName": "Ops.Vars.VarGetNumber_v2"
@@ -16461,7 +16467,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": true
+                    "value": 1
                 },
                 {
                     "name": "Default",
@@ -16547,7 +16553,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": true
+                    "value": 1
                 },
                 {
                     "name": "Default",
@@ -17899,298 +17905,6 @@
             "objName": "Ops.Graphics.Meshes.Rectangle_v4"
         },
         {
-            "id": "t3un9hx1y",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "r",
-                    "value": 0.33505194821756135
-                },
-                {
-                    "name": "g",
-                    "value": 0.5945181643525279
-                },
-                {
-                    "name": "b",
-                    "value": 0.1814367638533294
-                },
-                {
-                    "name": "a",
-                    "value": 1
-                },
-                {
-                    "name": "colorizeTexture",
-                    "value": 0
-                },
-                {
-                    "name": "Vertex Colors",
-                    "value": 0
-                },
-                {
-                    "name": "Alpha Mask Source index",
-                    "value": 0
-                },
-                {
-                    "name": "Alpha Mask Source",
-                    "value": "Luminance"
-                },
-                {
-                    "name": "Opacity TexCoords Transform",
-                    "value": 0
-                },
-                {
-                    "name": "Discard Transparent Pixels",
-                    "value": 1
-                },
-                {
-                    "name": "diffuseRepeatX",
-                    "value": 0.9
-                },
-                {
-                    "name": "diffuseRepeatY",
-                    "value": 1
-                },
-                {
-                    "name": "Tex Offset X",
-                    "value": 0
-                },
-                {
-                    "name": "Tex Offset Y",
-                    "value": 0
-                },
-                {
-                    "name": "Crop TexCoords",
-                    "value": 0
-                },
-                {
-                    "name": "billboard",
-                    "value": 0
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "trigger",
-                    "links": [
-                        {
-                            "portIn": "Trigger In",
-                            "portOut": "trigger",
-                            "objIn": "jwzvup8ju",
-                            "objOut": "t3un9hx1y"
-                        }
-                    ]
-                }
-            ],
-            "objName": "Ops.Gl.Shader.BasicMaterial_v3"
-        },
-        {
-            "id": "9zut84m0o",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "File",
-                    "value": "assets/ruler.png",
-                    "display": "file"
-                },
-                {
-                    "name": "Filter index",
-                    "value": 2
-                },
-                {
-                    "name": "Filter",
-                    "value": "mipmap"
-                },
-                {
-                    "name": "Wrap index",
-                    "value": 0
-                },
-                {
-                    "name": "Wrap",
-                    "value": "repeat"
-                },
-                {
-                    "name": "Anisotropic index",
-                    "value": 0
-                },
-                {
-                    "name": "Anisotropic",
-                    "value": "0"
-                },
-                {
-                    "name": "Data Format index",
-                    "value": 3
-                },
-                {
-                    "name": "Data Format",
-                    "value": "RGBA"
-                },
-                {
-                    "name": "Flip",
-                    "value": 0
-                },
-                {
-                    "name": "Pre Multiplied Alpha",
-                    "value": 0
-                },
-                {
-                    "name": "Active",
-                    "value": 1
-                },
-                {
-                    "name": "Save Memory",
-                    "value": 1
-                },
-                {
-                    "name": "Add Cachebuster",
-                    "value": 0
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "Texture",
-                    "links": [
-                        {
-                            "portIn": "texture",
-                            "portOut": "Texture",
-                            "objIn": "t3un9hx1y",
-                            "objOut": "9zut84m0o"
-                        }
-                    ]
-                },
-                {
-                    "name": "Width",
-                    "value": 920
-                },
-                {
-                    "name": "Height",
-                    "value": 66
-                },
-                {
-                    "name": "Aspect Ratio",
-                    "value": 13.93939393939394
-                },
-                {
-                    "name": "Loaded",
-                    "value": 1
-                },
-                {
-                    "name": "Loading",
-                    "value": 0
-                }
-            ],
-            "objName": "Ops.Gl.Texture_v2"
-        },
-        {
-            "id": "7qpxd1l2f",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "posX",
-                    "value": -1.23
-                },
-                {
-                    "name": "posY",
-                    "value": 0.02
-                },
-                {
-                    "name": "posZ",
-                    "value": 0.42
-                },
-                {
-                    "name": "scale",
-                    "value": 1
-                },
-                {
-                    "name": "rotX",
-                    "value": -90
-                },
-                {
-                    "name": "rotY",
-                    "value": 90
-                },
-                {
-                    "name": "rotZ",
-                    "value": 180
-                }
-            ],
-            "portsOut": [
-                {
-                    "name": "trigger",
-                    "links": [
-                        {
-                            "portIn": "render",
-                            "portOut": "trigger",
-                            "objIn": "t3un9hx1y",
-                            "objOut": "7qpxd1l2f"
-                        }
-                    ]
-                }
-            ],
-            "objName": "Ops.Graphics.Transform"
-        },
-        {
-            "id": "jwzvup8ju",
-            "uiAttribs": {},
-            "portsIn": [
-                {
-                    "name": "Cast Shadow",
-                    "value": 0
-                },
-                {
-                    "name": "Receive Shadow",
-                    "value": 0
-                },
-                {
-                    "name": "Algorithm index",
-                    "value": 0
-                },
-                {
-                    "name": "Algorithm",
-                    "value": "Default"
-                },
-                {
-                    "name": "Samples index",
-                    "value": 2
-                },
-                {
-                    "name": "Samples",
-                    "value": 4
-                },
-                {
-                    "name": "Sample Distribution",
-                    "value": 250
-                },
-                {
-                    "name": "R",
-                    "value": 0
-                },
-                {
-                    "name": "G",
-                    "value": 0
-                },
-                {
-                    "name": "B",
-                    "value": 0
-                },
-                {
-                    "name": "Discard Transparent",
-                    "value": 0
-                },
-                {
-                    "name": "Opacity Threshold",
-                    "value": 0.5
-                },
-                {
-                    "name": "Alpha Mask Source index",
-                    "value": 0
-                },
-                {
-                    "name": "Alpha Mask Source",
-                    "value": "Luminance"
-                }
-            ],
-            "objName": "Ops.Gl.ShaderEffects.Shadow_v2"
-        },
-        {
             "id": "ah7yw2jpb",
             "uiAttribs": {},
             "portsIn": [
@@ -18549,11 +18263,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": true
+                    "value": 1
                 },
                 {
                     "name": "Default",
-                    "value": true
+                    "value": 1
                 },
                 {
                     "name": "Grey Out",
@@ -19744,17 +19458,17 @@
             "portsIn": [
                 {
                     "name": "A",
-                    "value": 0.9882352941176471,
+                    "value": 0.9529411764705882,
                     "useVariable": "Spot4R"
                 },
                 {
                     "name": "B",
-                    "value": 0.9254901960784314,
+                    "value": 0.8549019607843137,
                     "useVariable": "Spot4G"
                 },
                 {
                     "name": "C",
-                    "value": 0.7725490196078432,
+                    "value": 0.6235294117647059,
                     "useVariable": "Spot4B"
                 },
                 {
@@ -19769,7 +19483,7 @@
             "portsOut": [
                 {
                     "name": "Result",
-                    "value": 0.04477124183006537
+                    "value": 0.04052287581699346
                 },
                 {
                     "name": "Expression Valid",
@@ -20735,11 +20449,11 @@
                 },
                 {
                     "name": "Input",
-                    "value": -1
+                    "value": -0.5
                 },
                 {
                     "name": "Default",
-                    "value": -1
+                    "value": -0.5
                 }
             ],
             "portsOut": [
@@ -20794,8 +20508,8 @@
         }
     ],
     "export": {
-        "time": "2026-01-06 13:11",
+        "time": "2026-01-06 15:36",
         "service": "html",
-        "exportNumber": 15
+        "exportNumber": 16
     }
 }
