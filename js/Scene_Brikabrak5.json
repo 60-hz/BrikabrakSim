@@ -367,15 +367,15 @@
                 },
                 {
                     "name": "radius",
-                    "value": 2.4
+                    "value": 4.343999999999999
                 },
                 {
                     "name": "Rot X",
-                    "value": 90.00000000000006
+                    "value": 78.69102170696655
                 },
                 {
                     "name": "Rot Y",
-                    "value": 90
+                    "value": 102.9121875
                 }
             ],
             "objName": "Ops.Graphics.OrbitControls_v3"
@@ -428,11 +428,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.8959495627261761
+                    "value": -0.9461512364294331
                 },
                 {
                     "name": "y",
-                    "value": -0.06465560207336518
+                    "value": -0.25884669059011167
                 },
                 {
                     "name": "click right",
@@ -455,11 +455,11 @@
                 },
                 {
                     "name": "Movement X",
-                    "value": -42
+                    "value": -27
                 },
                 {
                     "name": "Movement Y",
-                    "value": -10.5
+                    "value": 15.5
                 }
             ],
             "objName": "Ops.Devices.Mouse.Mouse_v4"
@@ -10605,7 +10605,7 @@
                 },
                 {
                     "name": "FPS",
-                    "value": 39
+                    "value": 42
                 }
             ],
             "objName": "Ops.Gl.Performance"
@@ -10808,7 +10808,7 @@
                 },
                 {
                     "name": "width",
-                    "value": 2.5
+                    "value": 2.45
                 },
                 {
                     "name": "height",
@@ -11111,16 +11111,8 @@
             "uiAttribs": {},
             "portsIn": [
                 {
-                    "name": "posX",
-                    "value": 0
-                },
-                {
                     "name": "posY",
                     "value": -1.23
-                },
-                {
-                    "name": "posZ",
-                    "value": 1.11
                 },
                 {
                     "name": "scale",
@@ -18579,7 +18571,7 @@
                         {
                             "portIn": "link",
                             "portOut": "childs",
-                            "objIn": "4lxwr95zy",
+                            "objIn": "loo8m5voe",
                             "objOut": "wdl26oiqq"
                         }
                     ]
@@ -20641,11 +20633,169 @@
                 }
             ],
             "objName": "Ops.Vars.VarGetNumber_v2"
+        },
+        {
+            "id": "loo8m5voe",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Text",
+                    "value": "Règle X"
+                },
+                {
+                    "name": "Min",
+                    "value": 0
+                },
+                {
+                    "name": "Max",
+                    "value": 2.5
+                },
+                {
+                    "name": "Step",
+                    "value": 0.00001
+                },
+                {
+                    "name": "Suffix",
+                    "value": ""
+                },
+                {
+                    "name": "Grey Out",
+                    "value": 0
+                },
+                {
+                    "name": "Visible",
+                    "value": 1
+                },
+                {
+                    "name": "Input",
+                    "value": 0
+                },
+                {
+                    "name": "Default",
+                    "value": 0
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "childs",
+                    "links": [
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "eio0an67v",
+                            "objOut": "loo8m5voe"
+                        }
+                    ]
+                },
+                {
+                    "name": "Result",
+                    "links": [
+                        {
+                            "portIn": "posX",
+                            "portOut": "Result",
+                            "objIn": "iv7neheqa",
+                            "objOut": "loo8m5voe"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Sidebar.Slider_v3"
+        },
+        {
+            "id": "eio0an67v",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "Text",
+                    "value": "Règle Y"
+                },
+                {
+                    "name": "Min",
+                    "value": -1
+                },
+                {
+                    "name": "Max",
+                    "value": 1
+                },
+                {
+                    "name": "Step",
+                    "value": 0.00001
+                },
+                {
+                    "name": "Suffix",
+                    "value": ""
+                },
+                {
+                    "name": "Grey Out",
+                    "value": 0
+                },
+                {
+                    "name": "Visible",
+                    "value": 1
+                },
+                {
+                    "name": "Input",
+                    "value": -1
+                },
+                {
+                    "name": "Default",
+                    "value": -1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "childs",
+                    "links": [
+                        {
+                            "portIn": "link",
+                            "portOut": "childs",
+                            "objIn": "4lxwr95zy",
+                            "objOut": "eio0an67v"
+                        }
+                    ]
+                },
+                {
+                    "name": "Result",
+                    "links": [
+                        {
+                            "portIn": "number1",
+                            "portOut": "Result",
+                            "objIn": "ot8is10pb",
+                            "objOut": "eio0an67v"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Sidebar.Slider_v3"
+        },
+        {
+            "id": "ot8is10pb",
+            "uiAttribs": {},
+            "portsIn": [
+                {
+                    "name": "number2",
+                    "value": -1
+                }
+            ],
+            "portsOut": [
+                {
+                    "name": "result",
+                    "links": [
+                        {
+                            "portIn": "posZ",
+                            "portOut": "result",
+                            "objIn": "iv7neheqa",
+                            "objOut": "ot8is10pb"
+                        }
+                    ]
+                }
+            ],
+            "objName": "Ops.Math.Multiply"
         }
     ],
     "export": {
-        "time": "2026-01-06 12:58",
+        "time": "2026-01-06 13:11",
         "service": "html",
-        "exportNumber": 14
+        "exportNumber": 15
     }
 }
