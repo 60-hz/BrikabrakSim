@@ -10196,85 +10196,6 @@ CABLES.OPS["86ea2333-b51c-48ed-94c2-8b7b6e9ff34c"]={f:Ops.Sidebar.Group,objName:
 
 // **************************************************************
 // 
-// Ops.Trigger.TriggerReceive
-// 
-// **************************************************************
-
-Ops.Trigger.TriggerReceive= class extends CABLES.Op 
-{
-constructor()
-{
-super(...arguments);
-const op=this;
-const attachments=op.attachments={};
-const next = op.outTrigger("Triggered");
-op.varName = op.inValueSelect("Named Trigger", [], "", true);
-
-op.varName.setUiAttribs({ "_triggerSelect": true });
-
-updateVarNamesDropdown();
-op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
-
-let oldName = null;
-
-function doTrigger()
-{
-    next.trigger();
-}
-
-function updateVarNamesDropdown()
-{
-    if (CABLES.UI)
-    {
-        let varnames = [];
-        let vars = op.patch.namedTriggers;
-
-        for (let i in vars) varnames.push(i);
-        varnames = varnames.sort();
-        op.varName.uiAttribs.values = varnames;
-    }
-}
-
-op.varName.onChange = function ()
-{
-    if (oldName)
-    {
-        let oldCbs = op.patch.namedTriggers[oldName];
-        let a = oldCbs.indexOf(doTrigger);
-        if (a != -1) oldCbs.splice(a, 1);
-    }
-
-    op.setTitle(">" + op.varName.get());
-    op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
-    let cbs = op.patch.namedTriggers[op.varName.get()];
-
-    cbs.push(doTrigger);
-    oldName = op.varName.get();
-    updateError();
-    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
-};
-
-op.on("uiParamPanel", updateError);
-
-function updateError()
-{
-    if (!op.varName.get())
-    {
-        op.setUiError("unknowntrigger", "unknown trigger");
-    }
-    else op.setUiError("unknowntrigger", null);
-}
-
-}
-};
-
-CABLES.OPS["0816c999-f2db-466b-9777-2814573574c5"]={f:Ops.Trigger.TriggerReceive,objName:"Ops.Trigger.TriggerReceive"};
-
-
-
-
-// **************************************************************
-// 
 // Ops.Sidebar.Slider_v3
 // 
 // **************************************************************
@@ -10599,6 +10520,85 @@ function removeElementFromDOM(el)
 };
 
 CABLES.OPS["74730122-5cba-4d0d-b610-df334ec6220a"]={f:Ops.Sidebar.Slider_v3,objName:"Ops.Sidebar.Slider_v3"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Trigger.TriggerReceive
+// 
+// **************************************************************
+
+Ops.Trigger.TriggerReceive= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const next = op.outTrigger("Triggered");
+op.varName = op.inValueSelect("Named Trigger", [], "", true);
+
+op.varName.setUiAttribs({ "_triggerSelect": true });
+
+updateVarNamesDropdown();
+op.patch.addEventListener("namedTriggersChanged", updateVarNamesDropdown);
+
+let oldName = null;
+
+function doTrigger()
+{
+    next.trigger();
+}
+
+function updateVarNamesDropdown()
+{
+    if (CABLES.UI)
+    {
+        let varnames = [];
+        let vars = op.patch.namedTriggers;
+
+        for (let i in vars) varnames.push(i);
+        varnames = varnames.sort();
+        op.varName.uiAttribs.values = varnames;
+    }
+}
+
+op.varName.onChange = function ()
+{
+    if (oldName)
+    {
+        let oldCbs = op.patch.namedTriggers[oldName];
+        let a = oldCbs.indexOf(doTrigger);
+        if (a != -1) oldCbs.splice(a, 1);
+    }
+
+    op.setTitle(">" + op.varName.get());
+    op.patch.namedTriggers[op.varName.get()] = op.patch.namedTriggers[op.varName.get()] || [];
+    let cbs = op.patch.namedTriggers[op.varName.get()];
+
+    cbs.push(doTrigger);
+    oldName = op.varName.get();
+    updateError();
+    op.patch.emitEvent("opTriggerNameChanged", op, op.varName.get());
+};
+
+op.on("uiParamPanel", updateError);
+
+function updateError()
+{
+    if (!op.varName.get())
+    {
+        op.setUiError("unknowntrigger", "unknown trigger");
+    }
+    else op.setUiError("unknowntrigger", null);
+}
+
+}
+};
+
+CABLES.OPS["0816c999-f2db-466b-9777-2814573574c5"]={f:Ops.Trigger.TriggerReceive,objName:"Ops.Trigger.TriggerReceive"};
 
 
 
@@ -14582,6 +14582,394 @@ function update()
 };
 
 CABLES.OPS["a3d3d166-415b-45c7-9ded-e8d1bdd81ff1"]={f:Ops.TimeLine.TimelineConfig,objName:"Ops.TimeLine.TimelineConfig"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Math.MapRange
+// 
+// **************************************************************
+
+Ops.Math.MapRange= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    v = op.inValueFloat("value", 0),
+    old_min = op.inValueFloat("old min", 0),
+    old_max = op.inValueFloat("old max", 1),
+    new_min = op.inValueFloat("new min", 0),
+    new_max = op.inValueFloat("new max", 1),
+    easing = op.inValueSelect("Easing", ["Linear", "Smoothstep", "Smootherstep"], "Linear"),
+    inClamp = op.inBool("Clamp", true),
+    result = op.outNumber("result", 0);
+
+op.setPortGroup("Input Range", [old_min, old_max]);
+op.setPortGroup("Output Range", [new_min, new_max]);
+
+let doClamp = true;
+let ease = 0;
+let r = 0;
+
+v.onChange =
+    old_min.onChange =
+    old_max.onChange =
+    new_min.onChange =
+    new_max.onChange = exec;
+
+exec();
+
+inClamp.onChange =
+() =>
+{
+    doClamp = inClamp.get();
+    exec();
+};
+
+easing.onChange = function ()
+{
+    if (easing.get() == "Smoothstep") ease = 1;
+    else if (easing.get() == "Smootherstep") ease = 2;
+    else ease = 0;
+};
+
+function exec()
+{
+    const nMin = new_min.get();
+    const nMax = new_max.get();
+    const oMin = old_min.get();
+    const oMax = old_max.get();
+    let x = v.get();
+
+    if (doClamp)
+    {
+        if (x >= Math.max(oMax, oMin))
+        {
+            result.set(nMax);
+            return;
+        }
+        else
+        if (x <= Math.min(oMax, oMin))
+        {
+            result.set(nMin);
+            return;
+        }
+    }
+
+    let reverseInput = false;
+    const oldMin = Math.min(oMin, oMax);
+    const oldMax = Math.max(oMin, oMax);
+    if (oldMin != oMin) reverseInput = true;
+
+    let reverseOutput = false;
+    const newMin = Math.min(nMin, nMax);
+    const newMax = Math.max(nMin, nMax);
+    if (newMin != nMin) reverseOutput = true;
+
+    let portion = 0;
+
+    if (reverseInput) portion = (oldMax - x) * (newMax - newMin) / (oldMax - oldMin);
+    else portion = (x - oldMin) * (newMax - newMin) / (oldMax - oldMin);
+
+    if (reverseOutput) r = newMax - portion;
+    else r = portion + newMin;
+
+    if (ease === 0)
+    {
+        result.set(r);
+    }
+    else
+    if (ease == 1)
+    {
+        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
+        result.set(nMin + x * x * (3 - 2 * x) * (nMax - nMin)); // smoothstep
+    }
+    else
+    if (ease == 2)
+    {
+        x = Math.max(0, Math.min(1, (r - nMin) / (nMax - nMin)));
+        result.set(nMin + x * x * x * (x * (x * 6 - 15) + 10) * (nMax - nMin)); // smootherstep
+    }
+}
+
+}
+};
+
+CABLES.OPS["2617b407-60a0-4ff6-b4a7-18136cfa7817"]={f:Ops.Math.MapRange,objName:"Ops.Math.MapRange"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Meshes.FloorGrid
+// 
+// **************************************************************
+
+Ops.Gl.Meshes.FloorGrid= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={"grid_frag":"IN vec4 posColor;\nIN vec3 posFrag;\n\nvoid main()\n{\n    outColor=posColor;\n    outColor.a*=clamp(1.0-(length(posFrag)/30.0),0.0,1.0);\n}","grid_vert":"IN vec3 vPosition;\nIN vec3 attrVertNormal;\nIN vec2 attrTexCoord;\n\nUNI mat4 projMatrix;\nUNI mat4 modelMatrix;\nUNI mat4 viewMatrix;\n\nOUT vec4 posColor;\nOUT vec3 posFrag;\n\nvoid main()\n{\n    vec4 pos = vec4( vPosition, 1. );\n    mat4 mMatrix=modelMatrix;\n\n    mat4 mvMatrix=viewMatrix*mMatrix;\n    posFrag=vPosition;\n    posColor=vec4(0.6,0.6,0.6,0.4);\n\n    if(pos.x==0.0) posColor=vec4(0.3,0.3,1.0,1.0);\n    else if(pos.y==0.0 && pos.z==0.0) posColor=vec4(1.0,0.3,0.3,1.0);\n    else if(mod(pos.z,10.0)==0.0 && mod(pos.x,10.0)==0.0 ) posColor.a=1.0;\n\n    if(pos.y>0.0 && pos.x==0.0) posColor=vec4(0.3,1.0,0.3,1.0);\n\n    gl_Position = projMatrix * mvMatrix * pos;\n}\n",};
+const
+    render = op.inTrigger("Render"),
+    inActive = op.inBool("Active", true),
+    next = op.outTrigger("Next");
+
+const num = 100;
+
+const cgl = op.patch.cgl;
+let mesh = null;
+
+const shader = new CGL.Shader(cgl, "gridMaterial", this);
+shader.setSource(attachments.grid_vert, attachments.grid_frag);
+
+function init()
+{
+    let geomVertical = new CGL.Geometry(op.name);
+
+    const space = 1.0;
+    let l = space * num / 2;
+
+    let tc = [];
+
+    for (var i = -num / 2; i < num / 2 + 1; i++)
+    {
+        geomVertical.vertices.push(-l);
+        geomVertical.vertices.push(0);
+        geomVertical.vertices.push(i * space);
+
+        geomVertical.vertices.push(l);
+        geomVertical.vertices.push(0);
+        geomVertical.vertices.push(i * space);
+
+        geomVertical.vertices.push(i * space);
+        geomVertical.vertices.push(0);
+        geomVertical.vertices.push(-l);
+
+        geomVertical.vertices.push(i * space);
+        geomVertical.vertices.push(0);
+        geomVertical.vertices.push(l);
+
+        if (i == 0)
+        {
+            tc.push(0, 1);
+            tc.push(0, 1);
+            tc.push(0, 0.5);
+            tc.push(0, 0.5);
+        }
+        else
+        {
+            tc.push(0, 0);
+            tc.push(0, 0);
+            tc.push(0, 0);
+            tc.push(0, 0);
+        }
+    }
+
+    geomVertical.vertices.push(0);
+    geomVertical.vertices.push(0.001);
+    geomVertical.vertices.push(0);
+
+    geomVertical.vertices.push(0);
+    geomVertical.vertices.push(10);
+    geomVertical.vertices.push(0);
+
+    tc.push(0, 0, 0, 0);
+
+    for (var i = 0; i <= 10; i++)
+    {
+        geomVertical.vertices.push(-0.25);
+        geomVertical.vertices.push(i);
+        geomVertical.vertices.push(0);
+
+        geomVertical.vertices.push(0.25);
+        geomVertical.vertices.push(i);
+        geomVertical.vertices.push(0);
+
+        tc.push(0, 0, 0, 0);
+    }
+
+    geomVertical.setTexCoords(tc);
+    geomVertical.calculateNormals();
+
+    if (!mesh) mesh = new CGL.Mesh(cgl, geomVertical);
+    else mesh.setGeom(geomVertical);
+}
+
+render.onTriggered = function ()
+{
+    if (!mesh)init();
+
+    if (cgl.tempData.shadowPass) return next.trigger();
+
+    cgl.pushShader(shader);
+    if (!shader) return;
+
+    let oldPrim = shader.glPrimitive;
+
+    shader.glPrimitive = cgl.gl.LINES;
+
+    if (inActive.get()) mesh.render(shader);
+    cgl.popShader();
+
+    shader.glPrimitive = oldPrim;
+
+    next.trigger();
+};
+
+}
+};
+
+CABLES.OPS["645b3877-4fdd-42e5-a369-d9506a65e2f0"]={f:Ops.Gl.Meshes.FloorGrid,objName:"Ops.Gl.Meshes.FloorGrid"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Gl.Meshes.Grid
+// 
+// **************************************************************
+
+Ops.Gl.Meshes.Grid= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    render = op.inTrigger("Render"),
+    inNum = op.inInt("Num", 10),
+    inSpacing = op.inValue("Spacing", 1),
+    inCenter = op.inBool("Center", true),
+    axis = op.inSwitch("Axis", ["XY", "XZ"], "XY"),
+    next = op.outTrigger("Next");
+
+const cgl = op.patch.cgl;
+let mesh = null;
+
+axis.onChange =
+    inCenter.onChange =
+    inNum.onChange =
+    inSpacing.onChange = function ()
+    {
+        if (mesh)mesh.dispose();
+        mesh = null;
+    };
+
+function init()
+{
+    const geomStepsOne = new CGL.Geometry(op.name);
+    const geomX = new CGL.Geometry(op.name);
+
+    const space = inSpacing.get();
+    const num = Math.floor(inNum.get());
+    const l = space * num / 2;
+
+    const tc = [];
+
+    let start = -num / 2;
+    let end = num / 2 + 1;
+
+    if (axis.get() == "XY")
+        for (let i = start; i < end; i++)
+        {
+            geomStepsOne.vertices.push(-l, i * space, 0);
+            geomStepsOne.vertices.push(l, i * space, 0);
+            geomStepsOne.vertices.push(i * space, -l, 0);
+            geomStepsOne.vertices.push(i * space, l, 0);
+
+            tc.push(0, 0, 0, 0, 0, 0, 0, 0);
+        }
+    else
+        for (let i = start; i < end; i++)
+        {
+            geomStepsOne.vertices.push(-l, 0, i * space);
+            geomStepsOne.vertices.push(l, 0, i * space);
+            geomStepsOne.vertices.push(i * space, 0, -l);
+            geomStepsOne.vertices.push(i * space, 0, l);
+
+            tc.push(0, 0, 0, 0, 0, 0, 0, 0);
+        }
+
+    if (!inCenter.get())
+    {
+        for (let i = 0; i < geomStepsOne.vertices.length; i += 3)
+        {
+            geomStepsOne.vertices[i + 0] += l;
+            geomStepsOne.vertices[i + 1] += l;
+        }
+    }
+
+    geomStepsOne.setTexCoords(tc);
+    geomStepsOne.calculateNormals();
+
+    if (!mesh) mesh = new CGL.Mesh(cgl, geomStepsOne);
+    else mesh.setGeom(geomStepsOne);
+}
+
+render.onTriggered = function ()
+{
+    if (!mesh)init();
+    let shader = cgl.getShader();
+    if (!shader) return;
+
+    let oldPrim = shader.glPrimitive;
+
+    shader.glPrimitive = cgl.gl.LINES;
+
+    mesh.render(shader);
+
+    shader.glPrimitive = oldPrim;
+
+    next.trigger();
+};
+
+}
+};
+
+CABLES.OPS["677a7c03-6885-46b4-8a64-e4ea54ee5d7f"]={f:Ops.Gl.Meshes.Grid,objName:"Ops.Gl.Meshes.Grid"};
+
+
+
+
+// **************************************************************
+// 
+// Ops.Trigger.GateTrigger
+// 
+// **************************************************************
+
+Ops.Trigger.GateTrigger= class extends CABLES.Op 
+{
+constructor()
+{
+super(...arguments);
+const op=this;
+const attachments=op.attachments={};
+const
+    exe = op.inTrigger('Execute'),
+    passThrough = op.inValueBool('Pass Through',true),
+    triggerOut = op.outTrigger('Trigger out');
+
+exe.onTriggered = function()
+{
+    if(passThrough.get())
+        triggerOut.trigger();
+}
+
+}
+};
+
+CABLES.OPS["65e8b8a2-ba13-485f-883a-2bcf377989da"]={f:Ops.Trigger.GateTrigger,objName:"Ops.Trigger.GateTrigger"};
 
 
 
