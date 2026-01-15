@@ -365,11 +365,11 @@
                 },
                 {
                     "name": "Rot X",
-                    "value": 90.00000000000571
+                    "value": 90
                 },
                 {
                     "name": "Rot Y",
-                    "value": 90.00000000001037
+                    "value": 90
                 }
             ],
             "objName": "Ops.Graphics.OrbitControls_v3"
@@ -422,11 +422,11 @@
             "portsOut": [
                 {
                     "name": "x",
-                    "value": -0.8113874027237354
+                    "value": 0
                 },
                 {
                     "name": "y",
-                    "value": -0.6523284713168187
+                    "value": 0
                 },
                 {
                     "name": "click right",
@@ -5297,7 +5297,7 @@
                 },
                 {
                     "name": "Width",
-                    "value": 3.077218191964286
+                    "value": 2.8785923549107144
                 },
                 {
                     "name": "Font Available",
@@ -8166,7 +8166,7 @@
                 },
                 {
                     "name": "Input",
-                    "value": 0.39491
+                    "value": 0.38978
                 },
                 {
                     "name": "Default",
@@ -10605,7 +10605,7 @@
                 },
                 {
                     "name": "FPS",
-                    "value": 56
+                    "value": 61
                 }
             ],
             "objName": "Ops.Gl.Performance"
@@ -21726,7 +21726,7 @@
         }
     ],
     "export": {
-        "time": "2026-01-15 13:00",
+        "time": "2026-01-15 13:16",
         "service": "html",
         "exportNumber": 16
     }
